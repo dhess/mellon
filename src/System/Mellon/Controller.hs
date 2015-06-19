@@ -28,15 +28,15 @@ data ControllerState
 
 -- | The pure controller eDSL.
 data ControllerF next where
-  Lock :: (ControllerState -> next) -> ControllerF next
-  Unlock :: UTCTime -> (ControllerState -> next) -> ControllerF next
+  Lock :: next -> ControllerF next
+  Unlock :: next -> ControllerF next
   ScheduleLock :: UTCTime -> next -> ControllerF next
   UnscheduleLock :: next -> ControllerF next
 
 -- | This Functor instance cannot yet be derived automatically by GHC.
 instance Functor ControllerF where
-  fmap f (Lock g) = Lock (f . g)
-  fmap f (Unlock d g)  = Unlock d (f . g)
+  fmap f (Lock x) = Lock (f x)
+  fmap f (Unlock x)  = Unlock (f x)
   fmap f (ScheduleLock d x) = ScheduleLock d (f x)
   fmap f (UnscheduleLock x) = UnscheduleLock (f x)
 
@@ -55,16 +55,21 @@ data Cmd
 
 -- | The pure state machine interpreter.
 runCmd :: Cmd -> ControllerState -> Controller (ControllerState)
-runCmd LockCmd Locked = lock
+runCmd LockCmd Locked =
+  do lock
+     return Locked
 runCmd LockCmd (Unlocked _) =
   do unscheduleLock
      lock
+     return Locked
 runCmd (UnlockCmd untilDate) Locked =
   do scheduleLock untilDate
-     unlock untilDate
+     unlock
+     return $ Unlocked untilDate
 runCmd (UnlockCmd untilDate) (Unlocked scheduledDate) =
   if untilDate > scheduledDate
      then
        do scheduleLock untilDate
-          unlock untilDate
-     else unlock scheduledDate
+          unlock
+          return $ Unlocked untilDate
+     else return $ Unlocked scheduledDate
