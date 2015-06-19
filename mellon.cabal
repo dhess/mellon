@@ -14,8 +14,10 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      System.Mellon
+                      , System.Mellon.Controller
                       , System.Mellon.StateMachine
   Build-Depends:        base >= 4 && < 5
+                      , free
                       , time
 
 Executable mellon-cmd
@@ -25,6 +27,7 @@ Executable mellon-cmd
                       , src
   GHC-Options:          -Wall
   Build-Depends:        base >= 4 && < 5
+                      , free
                       , optparse-applicative >= 0.11.0
                       , time
   Other-Modules:        System.Mellon
@@ -37,6 +40,7 @@ Test-Suite spec
   Ghc-Options:          -Wall
   Main-Is:              Spec.hs
   Build-Depends:        base
+                      , free
                       , hspec
                       , time
   Other-Modules:        System.Mellon
