@@ -55,7 +55,7 @@ data Cmd
   deriving (Eq)
 
 -- | The pure state machine interpreter.
-runCmd :: Cmd -> ControllerState -> Controller (ControllerState)
+runCmd :: Cmd -> ControllerState -> Controller ControllerState
 runCmd LockCmd Locked =
   do lock
      return Locked
@@ -63,14 +63,14 @@ runCmd LockCmd (Unlocked _) =
   do unscheduleLock
      lock
      return Locked
-runCmd (UnlockCmd untilDate) Locked =
+runCmd (UnlockCmd untilDate) Locked = unlockUntil untilDate
+runCmd (UnlockCmd untilDate) (Unlocked scheduledDate) =
+  if untilDate > scheduledDate
+     then unlockUntil untilDate
+     else return $ Unlocked scheduledDate
+
+unlockUntil :: UTCTime -> Controller ControllerState
+unlockUntil untilDate =
   do scheduleLock untilDate
      unlock
      return $ Unlocked untilDate
-runCmd (UnlockCmd untilDate) (Unlocked scheduledDate) =
-  if untilDate > scheduledDate
-     then
-       do scheduleLock untilDate
-          unlock
-          return $ Unlocked untilDate
-     else return $ Unlocked scheduledDate
