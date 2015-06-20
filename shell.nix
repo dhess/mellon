@@ -1,7 +1,7 @@
 with (import <nixpkgs> {}).pkgs;
 let pkg = haskellngPackages.callPackage
             ({ mkDerivation, base, free, hspec, optparse-applicative, stdenv
-             , time
+             , text, time, transformers
              }:
              mkDerivation {
                pname = "mellon";
@@ -9,8 +9,10 @@ let pkg = haskellngPackages.callPackage
                src = ./.;
                isLibrary = true;
                isExecutable = true;
-               buildDepends = [ base free optparse-applicative time ];
-               testDepends = [ base free hspec time ];
+               buildDepends = [
+                 base free optparse-applicative text time transformers
+               ];
+               testDepends = [ base free hspec text time transformers ];
                license = stdenv.lib.licenses.bsd3;
              }) {};
 in

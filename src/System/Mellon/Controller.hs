@@ -4,9 +4,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module System.Mellon.Controller
-         ( Cmd
+         ( Cmd(..)
          , Controller
          , ControllerF(..)
+         , ControllerState(..)
          , lock
          , unlock
          , scheduleLock
@@ -16,7 +17,7 @@ module System.Mellon.Controller
 
 import Control.Monad.Free (liftF, Free, MonadFree)
 import Control.Monad.Free.TH (makeFreeCon)
-import Data.Time.Clock (UTCTime(..))
+import Data.Time (UTCTime)
 
 -- | The pure controller's visible state. Note that any bookkeeping
 -- needed to implement the controller's state (e.g., scheduling future

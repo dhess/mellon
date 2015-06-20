@@ -15,12 +15,16 @@ Library
   GHC-Options:          -Wall
   Exposed-Modules:      System.Mellon
                       , System.Mellon.Controller
+                      , System.Mellon.Impl
+                      , System.Mellon.Impl.MockController
                       , System.Mellon.StateMachine
   Build-Depends:        base >= 4 && < 5
                       , free
+                      , text
                       , time
+                      , transformers
 
-Executable mellon-cmd
+Executable mellon
   Main-Is:              MainCmd.hs
   Default-Language:     Haskell2010
   HS-Source-Dirs:       mellon
@@ -29,7 +33,9 @@ Executable mellon-cmd
   Build-Depends:        base >= 4 && < 5
                       , free
                       , optparse-applicative >= 0.11.0
+                      , text
                       , time
+                      , transformers
   Other-Modules:        System.Mellon
 
 Test-Suite spec
@@ -42,7 +48,9 @@ Test-Suite spec
   Build-Depends:        base
                       , free
                       , hspec
+                      , text
                       , time
+                      , transformers
   Other-Modules:        System.Mellon
 
 Source-Repository head

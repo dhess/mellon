@@ -1,6 +1,8 @@
 module Main where
 
+import Data.Time (getCurrentTime)
 import Options.Applicative
+import System.Mellon (Cmd(..), ControllerState(..), runCmd, runMockController)
 
 data Verbosity
   = Normal
@@ -12,24 +14,17 @@ data GlobalOptions =
                 ,cmd :: Command}
 
 data Command
-  = Hello HelloOptions
+  = Mock MockOptions
 
-data HelloOptions =
-  HelloOptions {greeting :: String
-               ,target :: String}
+data MockOptions = MockOptions {unused :: Maybe String}
 
-helloCmd :: Parser Command
-helloCmd = Hello <$> helloOptions
+mockCmd :: Parser Command
+mockCmd = Mock <$> mockOptions
 
-helloOptions :: Parser HelloOptions
-helloOptions =
-  HelloOptions <$>
-  strOption (long "greeting" <>
-             short 'g' <>
-             value "Hello" <>
-             metavar "GREETING" <>
-             help "The greeting") <*>
-  argument str (metavar "TARGET")
+mockOptions :: Parser MockOptions
+mockOptions =
+  MockOptions <$>
+  optional (strOption (help "unused"))
 
 cmds :: Parser GlobalOptions
 cmds =
@@ -43,10 +38,14 @@ cmds =
         short 'v' <>
         help "Enable verbose mode") <*>
   hsubparser
-    (command "hello" (info helloCmd (progDesc "Say hello")))
+    (command "mock" (info mockCmd (progDesc "Run the mock controller")))
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions False _ (Hello (HelloOptions g t))) = putStrLn (g ++ ", " ++ t)
+run (GlobalOptions False _ (Mock _)) =
+  do now <- getCurrentTime
+     _ <- runMockController (do state <- runCmd LockCmd Locked
+                                runCmd (UnlockCmd now) state)
+     return ()
 run _ = return ()
 
 main :: IO ()
@@ -54,5 +53,5 @@ main = execParser opts >>= run
   where opts =
           info (helper <*> cmds)
                (fullDesc <>
-                progDesc "Say hello and goodbye" <>
-                header "mellon-cmd - a command-based CLI for mellon")
+                progDesc "Mellon electric strike controller" <>
+                header "mellon - a command-based CLI for mellon")
