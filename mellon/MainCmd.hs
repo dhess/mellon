@@ -2,7 +2,7 @@ module Main where
 
 import Data.Time (getCurrentTime)
 import Options.Applicative
-import System.Mellon (Cmd(..), ControllerState(..), initMockLock, runCmd, runMockController)
+import System.Mellon (initMockController, lockMockController, unlockMockController)
 
 data Verbosity
   = Normal
@@ -43,9 +43,9 @@ cmds =
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Mock _)) =
   do now <- getCurrentTime
-     mockLock <- initMockLock
-     _ <- runMockController mockLock (do state <- runCmd LockCmd Locked
-                                         runCmd (UnlockCmd now) state)
+     mc <- initMockController
+     lockMockController mc
+     unlockMockController mc now
      return ()
 run _ = return ()
 

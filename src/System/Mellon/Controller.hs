@@ -45,15 +45,15 @@ data ControllerState
 -- implementation other than what is provided by the eDSL interface.
 data ControllerF next where
   Lock :: next -> ControllerF next
-  Unlock :: next -> ControllerF next
   ScheduleLock :: UTCTime -> next -> ControllerF next
+  Unlock :: next -> ControllerF next
   UnscheduleLock :: next -> ControllerF next
 
 -- | This Functor instance cannot yet be derived automatically by GHC.
 instance Functor ControllerF where
   fmap f (Lock x) = Lock (f x)
-  fmap f (Unlock x)  = Unlock (f x)
   fmap f (ScheduleLock d x) = ScheduleLock d (f x)
+  fmap f (Unlock x)  = Unlock (f x)
   fmap f (UnscheduleLock x) = UnscheduleLock (f x)
 
 -- | 'Controller' expressed as a 'Free' monad.
@@ -68,7 +68,8 @@ makeFreeCon 'UnscheduleLock
 -- the current state, to 'runCmd' in order to operate the Mellon state
 -- machine.
 data Cmd
-  = LockCmd
+  = GetStateCmd
+  | LockCmd
   | UnlockCmd UTCTime
   deriving (Eq)
 
@@ -82,6 +83,7 @@ data Cmd
 -- eDSL language. 'runCmd' is parameterized on the 'Controller' 'Free'
 -- monad, hence it works with any implementation of that monad.
 runCmd :: Cmd -> ControllerState -> Controller ControllerState
+runCmd GetStateCmd state = return state
 runCmd LockCmd Locked =
   do lock
      return Locked
