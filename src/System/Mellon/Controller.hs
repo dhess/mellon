@@ -19,15 +19,15 @@ import Control.Monad.Free (liftF, Free, MonadFree)
 import Control.Monad.Free.TH (makeFreeCon)
 import Data.Time (UTCTime)
 
--- | The pure controller's visible state. Note that any bookkeeping
+-- | 'Controller' visible state. Note that any bookkeeping
 -- needed to implement the controller's state (e.g., scheduling future
--- locks) is specific to the implementation.
+-- locks) is specific to the concrete implementation.
 data ControllerState
   = Locked
   | Unlocked UTCTime
   deriving (Eq)
 
--- | The pure controller eDSL.
+-- | The 'Controller' eDSL.
 data ControllerF next where
   Lock :: next -> ControllerF next
   Unlock :: next -> ControllerF next
@@ -41,6 +41,7 @@ instance Functor ControllerF where
   fmap f (ScheduleLock d x) = ScheduleLock d (f x)
   fmap f (UnscheduleLock x) = UnscheduleLock (f x)
 
+-- | 'Controller' expressed as a 'Free' monad.
 type Controller = Free ControllerF
 
 makeFreeCon 'Lock
@@ -48,13 +49,23 @@ makeFreeCon 'Unlock
 makeFreeCon 'ScheduleLock
 makeFreeCon 'UnscheduleLock
 
--- | The pure state machine commands.
+-- | The pure state machine commands. Commands are passed, along with
+-- the current state, to 'runCmd' in order to operate the Mellon state
+-- machine.
 data Cmd
   = LockCmd
   | UnlockCmd UTCTime
   deriving (Eq)
 
 -- | The pure state machine interpreter.
+--
+-- 'runCmd' provides an abstract, pure model of the core Mellon state
+-- machine. The state machine is the same for all implementations;
+-- what changes from one implementation to the next is the specific
+-- machinery for locking and scheduling. Each kind of scheduler/lock
+-- implementation provides its own implementation of the 'Controller'
+-- eDSL language. 'runCmd' is parameterized on the 'Controller' 'Free'
+-- monad, hence it works with any implementation of that monad.
 runCmd :: Cmd -> ControllerState -> Controller ControllerState
 runCmd LockCmd Locked =
   do lock
