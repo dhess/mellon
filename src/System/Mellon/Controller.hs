@@ -28,6 +28,21 @@ data ControllerState
   deriving (Eq)
 
 -- | The 'Controller' eDSL.
+--
+-- Generally speaking, a 'Controller' implementation will combine a
+-- 'Lock' implementation with a scheduler of some kind, and send
+-- 'Lock.lock' and 'Lock.unlock' commands to the 'Lock' either in
+-- response to an asynchronous external event (e.g., an unlock request
+-- from a user), or when a previously scheduled event occurs. The
+-- 'Controller' implementation will also manage the currently
+-- scheduled event in response to state machine requests via
+-- 'scheduleLock' and 'unscheduleLock'.
+--
+-- The interface between the 'Controller' implementation and the
+-- Mellon state machine is provided by the eDSL. The Mellon state
+-- machine, manifested by the 'runCmd' function and the current
+-- 'ControllerState', knows nothing about the 'Controller'
+-- implementation other than what is provided by the eDSL interface.
 data ControllerF next where
   Lock :: next -> ControllerF next
   Unlock :: next -> ControllerF next
