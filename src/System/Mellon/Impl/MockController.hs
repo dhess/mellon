@@ -25,19 +25,12 @@ default (Text)
 data MockController =
   MockController (MVar Cmd)
 
--- | Internal bookkeeping.
-data MockControllerState =
-  MockControllerState (MVar Cmd)
-                      MockLock
-                      State
-
 -- | Create a new 'MockController'.
 initMockController :: IO MockController
 initMockController = do
   m <- newEmptyMVar
   l <- initMockLock
-  let c = MockControllerState m l Locked
-  _ <- forkIO (mockController c)
+  _ <- forkIO (mockController m l Locked)
   return (MockController m)
 
 -- | Send commands to a 'MockController'.
@@ -47,8 +40,8 @@ lockMockController (MockController m) = putMVar m LockCmd
 unlockMockController :: MockController -> UTCTime -> IO ()
 unlockMockController (MockController m) t = putMVar m (UnlockCmd t)
 
-mockController :: MockControllerState -> IO ()
-mockController (MockControllerState m mockLock initialState) = loop initialState
+mockController :: (MVar Cmd) -> MockLock -> State -> IO ()
+mockController m mockLock initialState = loop initialState
   where loop state =
           do cmd <- takeMVar m
              newState <- runMockControllerCmd mockLock (runStateMachine cmd state)
