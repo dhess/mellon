@@ -40,8 +40,8 @@ lockMockController (MockController m) = putMVar m LockCmd
 unlockMockController :: MockController -> UTCTime -> IO ()
 unlockMockController (MockController m) t = putMVar m (UnlockCmd t)
 
-mockController :: (MVar Cmd) -> MockLock -> State -> IO ()
-mockController m mockLock initialState = loop initialState
+mockController :: MVar Cmd -> MockLock -> State -> IO ()
+mockController m mockLock = loop
   where loop state =
           do cmd <- takeMVar m
              newState <- runMockControllerCmd mockLock (runStateMachine cmd state)
