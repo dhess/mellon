@@ -8,7 +8,7 @@ module System.Mellon.Controller
          , Controller
          , ControllerF(..)
          , ControllerState(..)
-         , runCmd
+         , runStateMachine
          ) where
 
 import Control.Monad.Free (liftF, Free, MonadFree)
@@ -36,7 +36,7 @@ data ControllerState
 --
 -- The interface between the 'Controller' implementation and the
 -- Mellon state machine is provided by the eDSL. The Mellon state
--- machine, manifested by the 'runCmd' function and the current
+-- machine, manifested by the 'runStateMachine' function and the current
 -- 'ControllerState', knows nothing about the 'Controller'
 -- implementation other than what is provided by the eDSL interface.
 data ControllerF next where
@@ -61,7 +61,7 @@ makeFreeCon 'ScheduleLock
 makeFreeCon 'UnscheduleLock
 
 -- | The pure state machine commands. Commands are passed, along with
--- the current state, to 'runCmd' in order to operate the Mellon state
+-- the current state, to 'runStateMachine' in order to operate the Mellon state
 -- machine.
 data Cmd
   = LockCmd
@@ -70,23 +70,23 @@ data Cmd
 
 -- | The pure state machine interpreter.
 --
--- 'runCmd' provides an abstract, pure model of the core Mellon state
+-- 'runStateMachine' provides an abstract, pure model of the core Mellon state
 -- machine. The state machine is the same for all implementations;
 -- what changes from one implementation to the next is the specific
 -- machinery for locking and scheduling. Each kind of scheduler/lock
 -- implementation provides its own implementation of the 'Controller'
--- eDSL language. 'runCmd' is parameterized on the 'Controller' 'Free'
+-- eDSL language. 'runStateMachine' is parameterized on the 'Controller' 'Free'
 -- monad, hence it works with any implementation of that monad.
-runCmd :: Cmd -> ControllerState -> Controller ControllerState
-runCmd LockCmd Locked =
+runStateMachine :: Cmd -> ControllerState -> Controller ControllerState
+runStateMachine LockCmd Locked =
   do lock
      return Locked
-runCmd LockCmd (Unlocked _) =
+runStateMachine LockCmd (Unlocked _) =
   do unscheduleLock
      lock
      return Locked
-runCmd (UnlockCmd untilDate) Locked = unlockUntil untilDate
-runCmd (UnlockCmd untilDate) (Unlocked scheduledDate) =
+runStateMachine (UnlockCmd untilDate) Locked = unlockUntil untilDate
+runStateMachine (UnlockCmd untilDate) (Unlocked scheduledDate) =
   if untilDate > scheduledDate
      then unlockUntil untilDate
      else return $ Unlocked scheduledDate

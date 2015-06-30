@@ -16,7 +16,7 @@ import qualified Data.Text as T (concat)
 import qualified Data.Text.IO as T (putStrLn)
 import System.Mellon.Impl.MockLock (MockLock, initMockLock)
 import qualified System.Mellon.Lock as Lock (Lock(..))
-import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), ControllerState(..), runCmd)
+import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), ControllerState(..), runStateMachine)
 
 default (Text)
 
@@ -51,7 +51,7 @@ mockController :: MockControllerState -> IO ()
 mockController (MockControllerState m mockLock initialState) = loop initialState
   where loop state =
           do cmd <- takeMVar m
-             newState <- runMockControllerCmd mockLock (runCmd cmd state)
+             newState <- runMockControllerCmd mockLock (runStateMachine cmd state)
              loop newState
 
 runMockControllerCmd :: MonadIO m => MockLock -> Controller a -> m a
