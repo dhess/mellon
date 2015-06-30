@@ -68,8 +68,7 @@ makeFreeCon 'UnscheduleLock
 -- the current state, to 'runCmd' in order to operate the Mellon state
 -- machine.
 data Cmd
-  = GetStateCmd
-  | LockCmd
+  = LockCmd
   | UnlockCmd UTCTime
   deriving (Eq)
 
@@ -83,7 +82,6 @@ data Cmd
 -- eDSL language. 'runCmd' is parameterized on the 'Controller' 'Free'
 -- monad, hence it works with any implementation of that monad.
 runCmd :: Cmd -> ControllerState -> Controller ControllerState
-runCmd GetStateCmd state = return state
 runCmd LockCmd Locked =
   do lock
      return Locked
