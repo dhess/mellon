@@ -1,4 +1,3 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module System.Mellon.Impl.MockLock
@@ -6,6 +5,7 @@ module System.Mellon.Impl.MockLock
     , initMockLock
     ) where
 
+import Control.Monad.IO.Class
 import Data.Text (Text)
 import qualified Data.Text.IO as T (putStrLn)
 import System.Mellon.Lock (Lock(..))
@@ -17,8 +17,8 @@ data MockLock = MockLock
 initMockLock :: IO MockLock
 initMockLock = return MockLock
 
-instance Lock IO MockLock where
-  lock = const $ T.putStrLn "Locked"
-  unlock = const $ T.putStrLn "Unlocked"
+instance Lock MockLock where
+  lock = const $ liftIO $ T.putStrLn "Locked"
+  unlock = const $ liftIO $ T.putStrLn "Unlocked"
 
 
