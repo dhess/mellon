@@ -15,7 +15,7 @@ import Data.Time (UTCTime)
 import qualified Data.Text as T (concat)
 import qualified Data.Text.IO as T (putStrLn)
 import System.Mellon.Impl.MockLock (MockLock, initMockLock)
-import qualified System.Mellon.Lock as Lock (Lock(..))
+import System.Mellon.Lock (Lock(..))
 import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), State(..), runStateMachine)
 
 default (Text)
@@ -52,11 +52,11 @@ runMockControllerCmd l = iterM runMC
   where runMC :: MonadIO m => ControllerF (m a) -> m a
 
         runMC (Lock next) =
-          do liftIO $ Lock.lock l
+          do liftIO $ lock l
              next
 
         runMC (Unlock next) =
-          do liftIO $ Lock.unlock l
+          do liftIO $ unlock l
              next
 
         runMC (ScheduleLock atDate next) =
