@@ -7,7 +7,7 @@ module System.Mellon.Controller
          ( Cmd(..)
          , Controller
          , ControllerF(..)
-         , ControllerState(..)
+         , State(..)
          , runStateMachine
          ) where
 
@@ -18,7 +18,7 @@ import Data.Time (UTCTime)
 -- | 'Controller' visible state. Note that any bookkeeping
 -- needed to implement the controller's state (e.g., scheduling future
 -- locks) is specific to the concrete implementation.
-data ControllerState
+data State
   = Locked
   | Unlocked UTCTime
   deriving (Eq)
@@ -37,7 +37,7 @@ data ControllerState
 -- The interface between the 'Controller' implementation and the
 -- Mellon state machine is provided by the eDSL. The Mellon state
 -- machine, manifested by the 'runStateMachine' function and the current
--- 'ControllerState', knows nothing about the 'Controller'
+-- 'State', knows nothing about the 'Controller'
 -- implementation other than what is provided by the eDSL interface.
 data ControllerF next where
   Lock :: next -> ControllerF next
@@ -77,7 +77,7 @@ data Cmd
 -- implementation provides its own implementation of the 'Controller'
 -- eDSL language. 'runStateMachine' is parameterized on the 'Controller' 'Free'
 -- monad, hence it works with any implementation of that monad.
-runStateMachine :: Cmd -> ControllerState -> Controller ControllerState
+runStateMachine :: Cmd -> State -> Controller State
 runStateMachine LockCmd Locked =
   do lock
      return Locked
@@ -91,7 +91,7 @@ runStateMachine (UnlockCmd untilDate) (Unlocked scheduledDate) =
      then unlockUntil untilDate
      else return $ Unlocked scheduledDate
 
-unlockUntil :: UTCTime -> Controller ControllerState
+unlockUntil :: UTCTime -> Controller State
 unlockUntil untilDate =
   do scheduleLock untilDate
      unlock

@@ -16,7 +16,7 @@ import qualified Data.Text as T (concat)
 import qualified Data.Text.IO as T (putStrLn)
 import System.Mellon.Impl.MockLock (MockLock, initMockLock)
 import qualified System.Mellon.Lock as Lock (Lock(..))
-import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), ControllerState(..), runStateMachine)
+import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), State(..), runStateMachine)
 
 default (Text)
 
@@ -29,7 +29,7 @@ data MockController =
 data MockControllerState =
   MockControllerState (MVar Cmd)
                       MockLock
-                      ControllerState
+                      State
 
 -- | Create a new 'MockController'.
 initMockController :: IO MockController
