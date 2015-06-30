@@ -8,10 +8,6 @@ module System.Mellon.Controller
          , Controller
          , ControllerF(..)
          , ControllerState(..)
-         , lock
-         , unlock
-         , scheduleLock
-         , unscheduleLock
          , runCmd
          ) where
 
