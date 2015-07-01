@@ -34,10 +34,10 @@ initThreadedController lck = do
 
 -- | Send commands to a 'ThreadedController'.
 lock :: ThreadedController -> IO ()
-lock (ThreadedController m) = putMVar m LockCmd
+lock (ThreadedController mvar) = putMVar mvar LockCmd
 
 unlock :: ThreadedController -> UTCTime -> IO ()
-unlock (ThreadedController m) t = putMVar m (UnlockCmd t)
+unlock (ThreadedController mvar) t = putMVar mvar (UnlockCmd t)
 
 threadedController :: Lock.Lock l => MVar Cmd -> l -> State -> IO ()
 threadedController mvar lck = loop
