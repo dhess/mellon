@@ -64,7 +64,8 @@ makeFreeCon 'UnscheduleLock
 -- the current state, to 'runStateMachine' in order to operate the Mellon state
 -- machine.
 data Cmd
-  = LockCmd
+  = LockNowCmd
+  | LockCmd UTCTime
   | UnlockCmd UTCTime
   deriving (Eq)
 
@@ -78,13 +79,23 @@ data Cmd
 -- eDSL language. 'runStateMachine' is parameterized on the 'Controller' 'Free'
 -- monad, hence it works with any implementation of that monad.
 runStateMachine :: Cmd -> State -> Controller State
-runStateMachine LockCmd Locked =
+
+runStateMachine LockNowCmd Locked =
   do lock
      return Locked
-runStateMachine LockCmd (Unlocked _) =
+runStateMachine LockNowCmd (Unlocked _) =
   do unscheduleLock
      lock
      return Locked
+
+runStateMachine (LockCmd _) (Locked) =
+  do lock
+     return Locked
+runStateMachine (LockCmd lockDate) (Unlocked untilDate) =
+  if lockDate >= untilDate
+     then lock >> return Locked
+     else return (Unlocked untilDate)
+
 runStateMachine (UnlockCmd untilDate) Locked = unlockUntil untilDate
 runStateMachine (UnlockCmd untilDate) (Unlocked scheduledDate) =
   if untilDate > scheduledDate
@@ -92,7 +103,7 @@ runStateMachine (UnlockCmd untilDate) (Unlocked scheduledDate) =
      else return $ Unlocked scheduledDate
 
 unlockUntil :: UTCTime -> Controller State
-unlockUntil untilDate =
-  do scheduleLock untilDate
+unlockUntil date =
+  do scheduleLock date
      unlock
-     return $ Unlocked untilDate
+     return $ Unlocked date

@@ -4,6 +4,7 @@ module System.Mellon.Impl.ThreadedController
          ( ThreadedController
          , initThreadedController
          , lock
+         , lockAt
          , unlock
          ) where
 
@@ -34,7 +35,10 @@ initThreadedController lck = do
 
 -- | Send commands to a 'ThreadedController'.
 lock :: ThreadedController -> IO ()
-lock (ThreadedController mvar) = putMVar mvar LockCmd
+lock (ThreadedController mvar) = putMVar mvar LockNowCmd
+
+lockAt :: ThreadedController -> UTCTime -> IO ()
+lockAt (ThreadedController mvar) t = putMVar mvar (LockCmd t)
 
 unlock :: ThreadedController -> UTCTime -> IO ()
 unlock (ThreadedController mvar) t = putMVar mvar (UnlockCmd t)

@@ -8,21 +8,29 @@ import Data.Time.Clock (UTCTime(..))
 
 data LockState
   = Locked
-  | Unlocked UTCTime
+  | UnlockedUntil UTCTime
   deriving (Eq)
 
 data Command
   = Lock
-  | Unlock UTCTime
+  | LockAt UTCTime
+  | UnlockUntil UTCTime
   deriving (Eq)
 
 runCommand :: Command -> LockState -> LockState
 
 runCommand Lock _ = Locked
 
-runCommand (Unlock untilDate) Locked = Unlocked untilDate
+runCommand (LockAt _) Locked = Locked
 
-runCommand (Unlock untilDate) (Unlocked scheduledDate) =
-  if untilDate > scheduledDate
-     then (Unlocked untilDate)
-     else (Unlocked scheduledDate)
+runCommand (LockAt date) (UnlockedUntil scheduledDate) =
+  if date >= scheduledDate
+     then Locked
+     else (UnlockedUntil scheduledDate)
+
+runCommand (UnlockUntil date) Locked = UnlockedUntil date
+
+runCommand (UnlockUntil date) (UnlockedUntil scheduledDate) =
+  if date > scheduledDate
+     then (UnlockedUntil date)
+     else (UnlockedUntil scheduledDate)
