@@ -4,7 +4,6 @@ module System.Mellon.Impl.ThreadedController
          ( ThreadedController
          , initThreadedController
          , lock
-         , lockAt
          , unlock
          ) where
 
@@ -37,11 +36,13 @@ initThreadedController lck = do
 lock :: ThreadedController -> IO ()
 lock (ThreadedController mvar) = putMVar mvar LockNowCmd
 
-lockAt :: ThreadedController -> UTCTime -> IO ()
-lockAt (ThreadedController mvar) t = putMVar mvar (LockCmd t)
-
 unlock :: ThreadedController -> UTCTime -> IO ()
 unlock (ThreadedController mvar) t = putMVar mvar (UnlockCmd t)
+
+-- | Note: don't expose this to the user of the controller. It's only
+-- used for scheduled locks in response to unlock commands.
+lockAt :: ThreadedController -> UTCTime -> IO ()
+lockAt (ThreadedController mvar) t = putMVar mvar (LockCmd t)
 
 threadedController :: Lock.Lock l => MVar Cmd -> l -> State -> IO ()
 threadedController mvar lck = loop
