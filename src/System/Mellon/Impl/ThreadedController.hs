@@ -67,7 +67,7 @@ runTC l = iterM runCmd
           do liftIO $ T.putStrLn $ T.concat ["Lock at ", pack $ show atDate]
              next
 
-        runCmd (UnscheduleLock next) =
-          do liftIO $ T.putStrLn "Unschedule lock"
-             next
-
+        -- | For this particular implentation, it's safe to simply
+        -- ignore this command. (When the "unscheduled" lock fires,
+        -- the state machine will simply ignore it.)
+        runCmd (UnscheduleLock next) = next
