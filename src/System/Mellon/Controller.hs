@@ -92,7 +92,40 @@ runStateMachine (LockCmd _) (Locked) =
   do lock
      return Locked
 runStateMachine (LockCmd lockDate) (Unlocked untilDate) =
-  if lockDate >= untilDate
+  -- | Only execute the lock command if its date matches the current
+  -- outstanding unlock request's expiration date, i.e., if the lock
+  -- command is the one that was scheduled by the current outstanding
+  -- unlock request.
+  --
+  -- If the lock command's date does not match the current outstanding
+  -- lock request's date, there are 2 possible cases:
+  --
+  -- 1. The lock command's date is earlier than the current
+  -- outstanding unlock's expiration date. This means that the lock
+  -- command's corresponding unlock command was overridden by a
+  -- subsequent unlock with a later expiration date before the lock
+  -- command fired, hence the state machine should ignore this lock
+  -- command.
+  --
+  -- 2. The lock command's date is later than the current outstanding
+  -- unlock's expiration date. You might think this should never
+  -- happen, and indeed for a controller implementation that does
+  -- strict bookkeeping and actually bothers to "unschedule" scheduled
+  -- locks when a "lock now" command is received, it is extremely
+  -- unlikely to occur... but I believe that for certain threaded
+  -- controller implementations, it probably could, theoretically.
+  -- Regardless, there's no harm in simply ignoring the request, as
+  -- whatever unlock command is currently in progress, eventually it
+  -- will be either canceled, or its own scheduled lock command will
+  -- fire, in which case the dates will match exactly and everything
+  -- will behave as expected.
+  --
+  -- In either case (1 or 2), the right thing to do is to ignore the
+  -- lock command. The only question that remains is whether to treat
+  -- case 2 as an error. For some very strict implementations, it's
+  -- possible that it could be, but I suspect that for most, it's a
+  -- very unlikely but probably harmless occurrence.
+  if lockDate == untilDate
      then lock >> return Locked
      else return (Unlocked untilDate)
 
