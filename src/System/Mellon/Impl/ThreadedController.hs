@@ -27,40 +27,40 @@ data ThreadedController =
 -- | Create a new 'ThreadedController'. This launches a new thread.
 -- Communication is achived with the controller via its 'MVar'.
 initThreadedController :: Lock.Lock l => l -> IO ThreadedController
-initThreadedController lck = do
-  mvar <- newEmptyMVar
-  _ <- forkIO (threadedController mvar lck Locked)
-  return (ThreadedController mvar)
+initThreadedController l = do
+  m <- newEmptyMVar
+  _ <- forkIO (threadedController m l Locked)
+  return (ThreadedController m)
 
 -- | Send commands to a 'ThreadedController'.
 lock :: ThreadedController -> IO ()
-lock (ThreadedController mvar) = putMVar mvar LockNowCmd
+lock (ThreadedController m) = putMVar m LockNowCmd
 
 unlock :: ThreadedController -> UTCTime -> IO ()
-unlock (ThreadedController mvar) t = putMVar mvar (UnlockCmd t)
+unlock (ThreadedController m) t = putMVar m (UnlockCmd t)
 
 -- | Note: don't expose this to the user of the controller. It's only
 -- used for scheduled locks in response to unlock commands.
 lockAt :: ThreadedController -> UTCTime -> IO ()
-lockAt (ThreadedController mvar) t = putMVar mvar (LockCmd t)
+lockAt (ThreadedController m) t = putMVar m (LockCmd t)
 
 threadedController :: Lock.Lock l => MVar Cmd -> l -> State -> IO ()
-threadedController mvar lck = loop
+threadedController m l = loop
   where loop state =
-          do cmd <- takeMVar mvar
-             newState <- runTC lck (runStateMachine cmd state)
+          do cmd <- takeMVar m
+             newState <- runTC l (runStateMachine cmd state)
              loop newState
 
 runTC :: (MonadIO m, Lock.Lock l) => l -> Controller a -> m a
-runTC lck = iterM runCmd
+runTC l = iterM runCmd
   where runCmd :: MonadIO m => ControllerF (m a) -> m a
 
         runCmd (Lock next) =
-          do liftIO $ Lock.lock lck
+          do liftIO $ Lock.lock l
              next
 
         runCmd (Unlock next) =
-          do liftIO $ Lock.unlock lck
+          do liftIO $ Lock.unlock l
              next
 
         runCmd (ScheduleLock atDate next) =
