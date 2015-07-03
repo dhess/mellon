@@ -1,8 +1,3 @@
-* Implement minimum wait period for locks.
-
-Some lock devices will have a minimum delay between state changes, to
-prevent hardware damage.
-
 * Move mock cmd to tests.
 
 * Should there be a generic controller interface, like the one presented by ThreadedController but abstracted?
