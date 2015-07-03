@@ -18,7 +18,7 @@ import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), State(..)
 -- | The controller's commands.
 data ThreadedControllerCmd
   = ControllerCmd Cmd
-  | Quit
+  | Quit (MVar ())
 
 -- | 'ThreadedController' combines a 'Lock' with a thread-based scheduling and
 -- concurrency mechanism.
@@ -40,8 +40,12 @@ lock (ThreadedController m) = putMVar m (ControllerCmd LockNowCmd)
 unlock :: ThreadedController -> UTCTime -> IO ()
 unlock (ThreadedController m) t = putMVar m (ControllerCmd (UnlockCmd t))
 
+-- | Blocks until the controller has actually quit.
 quit :: ThreadedController -> IO ()
-quit (ThreadedController m) = putMVar m Quit
+quit (ThreadedController m) =
+  do s <- newEmptyMVar
+     putMVar m (Quit s)
+     takeMVar s
 
 -- | Note: don't expose this to the user of the controller. It's only
 -- used for scheduled locks in response to unlock commands.
@@ -53,9 +57,9 @@ threadedController m l = loop
   where loop state =
           do cmd <- takeMVar m
              case cmd of
-               Quit ->
+               Quit s ->
                  do Lock.quit l
-                    return ()
+                    putMVar s ()
                ControllerCmd cc ->
                  do newState <-
                       runTC m l (runStateMachine cc state)
