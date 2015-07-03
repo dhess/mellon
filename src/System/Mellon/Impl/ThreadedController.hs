@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module System.Mellon.Impl.ThreadedController
          ( ThreadedController
@@ -7,17 +7,12 @@ module System.Mellon.Impl.ThreadedController
          , unlock
          ) where
 
-import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar)
+import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
 import Control.Monad.Free (iterM)
 import Control.Monad.IO.Class
-import Data.Text (Text, pack)
-import Data.Time (UTCTime)
-import qualified Data.Text as T (concat)
-import qualified Data.Text.IO as T (putStrLn)
+import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import qualified System.Mellon.Lock as Lock (Lock(..))
 import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), State(..), runStateMachine)
-
-default (Text)
 
 -- | 'ThreadedController' combines a 'Lock' with a thread-based scheduling and
 -- concurrency mechanism.
@@ -41,18 +36,18 @@ unlock (ThreadedController m) t = putMVar m (UnlockCmd t)
 
 -- | Note: don't expose this to the user of the controller. It's only
 -- used for scheduled locks in response to unlock commands.
-lockAt :: ThreadedController -> UTCTime -> IO ()
-lockAt (ThreadedController m) t = putMVar m (LockCmd t)
+lockAt :: MVar Cmd -> UTCTime -> IO ()
+lockAt m t = putMVar m (LockCmd t)
 
 threadedController :: Lock.Lock l => MVar Cmd -> l -> State -> IO ()
 threadedController m l = loop
   where loop state =
           do cmd <- takeMVar m
-             newState <- runTC l (runStateMachine cmd state)
+             newState <- runTC m l (runStateMachine cmd state)
              loop newState
 
-runTC :: (MonadIO m, Lock.Lock l) => l -> Controller a -> m a
-runTC l = iterM runCmd
+runTC :: (MonadIO m, Lock.Lock l) => MVar Cmd -> l -> Controller a -> m a
+runTC mvar l = iterM runCmd
   where runCmd :: MonadIO m => ControllerF (m a) -> m a
 
         runCmd (Lock next) =
@@ -64,10 +59,38 @@ runTC l = iterM runCmd
              next
 
         runCmd (ScheduleLock atDate next) =
-          do liftIO $ T.putStrLn $ T.concat ["Lock at ", pack $ show atDate]
+          do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt mvar atDate)
              next
 
         -- | For this particular implentation, it's safe to simply
         -- ignore this command. (When the "unscheduled" lock fires,
         -- the state machine will simply ignore it.)
         runCmd (UnscheduleLock next) = next
+
+-- | 'threadDelay' takes an 'Int' argument which is measured in
+-- microseconds, so on 32-bit platforms, 'threadDelay' might not be
+-- able to delay long enough to accommodate even a day's sleep.
+-- Therefore, we need this mess.
+--
+-- Does not account for leap seconds and is only precise to about 1
+-- second, but I think that's probably OK.
+threadSleepUntil :: UTCTime -> IO ()
+threadSleepUntil t =
+  do now <- getCurrentTime
+     let timeRemaining = diffUTCTime t now
+     sleep timeRemaining
+       where sleep :: NominalDiffTime -> IO ()
+             sleep r
+               | r <= 0                       = return ()
+               | r > maxThreadDelayInDiffTime = threadDelay maxThreadDelay >> threadSleepUntil t
+               | otherwise                    = threadDelay $ nominalDiffTimeToMicroseconds r
+
+             maxThreadDelay :: Int
+             maxThreadDelay = maxBound
+
+             maxThreadDelayInDiffTime :: NominalDiffTime
+             maxThreadDelayInDiffTime = diffTimeToNominalDiffTime $ picosecondsToDiffTime $ toInteger maxThreadDelay * 1000000
+               where diffTimeToNominalDiffTime = realToFrac
+
+             nominalDiffTimeToMicroseconds :: NominalDiffTime -> Int
+             nominalDiffTimeToMicroseconds d = truncate $ d * 1000000
