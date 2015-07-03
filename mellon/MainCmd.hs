@@ -3,7 +3,7 @@ module Main where
 import Control.Concurrent (threadDelay)
 import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, getCurrentTime, getCurrentTimeZone, utcToLocalTime)
 import Options.Applicative
-import System.Mellon (initThreadedController, initMockLock, lock, unlock)
+import System.Mellon (initThreadedController, initMockLock, lock, quit, unlock)
 
 data Verbosity
   = Normal
@@ -47,7 +47,6 @@ putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Mock _)) =
   do lck <- initMockLock
-     c <- initThreadedController lck
      tz <- getCurrentTimeZone
      now <- getCurrentTime
      putStrLn "The test to be run (times may vary a slight bit due to thread scheduling vagaries):"
@@ -61,7 +60,9 @@ run (GlobalOptions False _ (Mock _)) =
      putStrLnWithTime ((43 :: NominalDiffTime) `addUTCTime` now) tz "Lock immediately; this should unschedule the previous lock"
      putStrLnWithTime ((55 :: NominalDiffTime) `addUTCTime` now) tz "Quit"
 
-     lock c
+     putStrLn ""
+     putStrLn "Test begins now."
+     c <- initThreadedController lck
      threadDelay (2 * 1000000)
      tPlus2 <- getCurrentTime
      unlock c $ (5 :: NominalDiffTime) `addUTCTime` tPlus2
@@ -83,7 +84,8 @@ run (GlobalOptions False _ (Mock _)) =
      threadDelay (3 * 1000000)
      lock c
      threadDelay (12 * 1000000)
-     return ()
+     quit c
+     threadDelay (1 * 1000000)
 
 run _ = return ()
 
