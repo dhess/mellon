@@ -3,6 +3,7 @@ module Main where
 import Control.Concurrent (threadDelay)
 import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, getCurrentTime, getCurrentTimeZone, utcToLocalTime)
 import Options.Applicative
+import System.Exit (exitSuccess)
 import System.Mellon (initThreadedController, initMockLock, lock, quit, unlock)
 
 data Verbosity
@@ -85,7 +86,7 @@ run (GlobalOptions False _ (Mock _)) =
      lock c
      threadDelay (12 * 1000000)
      quit c
-     threadDelay (1 * 1000000)
+     exitSuccess
 
 run _ = return ()
 
