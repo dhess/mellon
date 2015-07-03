@@ -19,16 +19,19 @@ data MockLock = MockLock
 initMockLock :: IO MockLock
 initMockLock = return MockLock
 
-instance Lock MockLock where
-  lock = const $
-    do now <- liftIO $ currentLocalTimeAsText
-       liftIO $ T.putStrLn $ T.concat ["Locked at ", now]
-  unlock = const $
-    do now <- liftIO $ currentLocalTimeAsText
-       liftIO $ T.putStrLn $ T.concat ["Unlocked at ", now]
+mockMsg :: Text -> IO ()
+mockMsg actionText =
+  do now <- currentLocalTimeAsText
+     T.putStrLn $ T.concat [actionText, " at ", now]
+  where
+    currentLocalTimeAsText :: IO Text
+    currentLocalTimeAsText =
+      do now <- getCurrentTime
+         tz <- getCurrentTimeZone
+         return $ pack $ formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz now)
 
-currentLocalTimeAsText :: IO Text
-currentLocalTimeAsText =
-  do now <- getCurrentTime
-     tz <- getCurrentTimeZone
-     return $ pack $ formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz now)
+instance Lock MockLock where
+  lock = const $ liftIO $ mockMsg "Locked"
+  unlock = const $ liftIO $ mockMsg "Unlocked"
+  quit = const $ liftIO $ mockMsg "Quit"
+
