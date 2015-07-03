@@ -80,17 +80,13 @@ data Cmd
 -- monad, hence it works with any implementation of that monad.
 runStateMachine :: Cmd -> State -> Controller State
 
-runStateMachine LockNowCmd Locked =
-  do lock
-     return Locked
+runStateMachine LockNowCmd Locked = return Locked
 runStateMachine LockNowCmd (Unlocked _) =
   do unscheduleLock
      lock
      return Locked
 
-runStateMachine (LockCmd _) (Locked) =
-  do lock
-     return Locked
+runStateMachine (LockCmd _) (Locked) = return Locked
 runStateMachine (LockCmd lockDate) (Unlocked untilDate) =
   -- | Only execute the lock command if its date matches the current
   -- outstanding unlock request's expiration date, i.e., if the lock
