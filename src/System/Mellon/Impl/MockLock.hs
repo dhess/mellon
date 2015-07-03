@@ -6,8 +6,10 @@ module System.Mellon.Impl.MockLock
     ) where
 
 import Control.Monad.IO.Class
-import Data.Text (Text)
+import Data.Text (Text, pack)
+import qualified Data.Text as T (concat)
 import qualified Data.Text.IO as T (putStrLn)
+import Data.Time (defaultTimeLocale, formatTime, getCurrentTime, getCurrentTimeZone, utcToLocalTime)
 import System.Mellon.Lock (Lock(..))
 
 default (Text)
@@ -18,7 +20,15 @@ initMockLock :: IO MockLock
 initMockLock = return MockLock
 
 instance Lock MockLock where
-  lock = const $ liftIO $ T.putStrLn "Locked"
-  unlock = const $ liftIO $ T.putStrLn "Unlocked"
+  lock = const $
+    do now <- liftIO $ currentLocalTimeAsText
+       liftIO $ T.putStrLn $ T.concat ["Locked at ", now]
+  unlock = const $
+    do now <- liftIO $ currentLocalTimeAsText
+       liftIO $ T.putStrLn $ T.concat ["Unlocked at ", now]
 
-
+currentLocalTimeAsText :: IO Text
+currentLocalTimeAsText =
+  do now <- getCurrentTime
+     tz <- getCurrentTimeZone
+     return $ pack $ formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz now)
