@@ -1,6 +1,7 @@
 module Main where
 
-import Data.Time (getCurrentTime)
+import Control.Concurrent (threadDelay)
+import Data.Time (NominalDiffTime, addUTCTime, getCurrentTime)
 import Options.Applicative
 import System.Mellon (initThreadedController, initMockLock, lock, unlock)
 
@@ -42,11 +43,14 @@ cmds =
 
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Mock _)) =
-  do now <- getCurrentTime
-     lck <- initMockLock
+  do lck <- initMockLock
      c <- initThreadedController lck
+     putStrLn "Lock, wait 2 seconds, unlock for 5 seconds, quit about 3 seconds later."
      lock c
-     unlock c now
+     threadDelay (2 * 1000000)
+     now <- getCurrentTime
+     unlock c $ (5 :: NominalDiffTime) `addUTCTime` now
+     threadDelay (8 * 1000000)
      return ()
 run _ = return ()
 
