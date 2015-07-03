@@ -112,15 +112,16 @@ runStateMachine (LockCmd lockDate) (Unlocked untilDate) =
   -- controller implementations, it probably could, theoretically.
   -- Regardless, there's no harm in simply ignoring the request, as
   -- whatever unlock command is currently in progress, eventually it
-  -- will be either canceled, or its own scheduled lock command will
+  -- will either be canceled, or its own scheduled lock command will
   -- fire, in which case the dates will match exactly and everything
   -- will behave as expected.
   --
   -- In either case (1 or 2), the right thing to do is to ignore the
   -- lock command. The only question that remains is whether to treat
   -- case 2 as an error. For some very strict implementations, it's
-  -- possible that it could be, but I suspect that for most, it's a
-  -- very unlikely but probably harmless occurrence.
+  -- possible that it could be a real error, but I suspect that for
+  -- most implementations, it's a very unlikely but probably harmless
+  -- occurrence. That's how we treat it here.
   if lockDate == untilDate
      then lock >> return Locked
      else return (Unlocked untilDate)
