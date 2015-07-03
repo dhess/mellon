@@ -1,7 +1,3 @@
-* initThreadedController should lock the lock device
-
-Ensure the device starts off in the same state as the state machine.
-
 * Implement minimum wait period for locks.
 
 Some lock devices will have a minimum delay between state changes, to

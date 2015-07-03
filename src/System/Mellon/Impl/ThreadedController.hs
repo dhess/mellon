@@ -29,6 +29,7 @@ data ThreadedController =
 -- Communication is achived with the controller via its 'MVar'.
 initThreadedController :: Lock.Lock l => l -> IO ThreadedController
 initThreadedController l = do
+  Lock.lock l
   m <- newEmptyMVar
   _ <- forkIO (threadedController m l Locked)
   return (ThreadedController m)
