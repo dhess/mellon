@@ -4,6 +4,7 @@ module System.Mellon.Impl.ThreadedController
          ( ThreadedController
          , initThreadedController
          , lock
+         , quit
          , unlock
          ) where
 
@@ -14,10 +15,15 @@ import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosec
 import qualified System.Mellon.Lock as Lock (Lock(..))
 import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), State(..), runStateMachine)
 
+-- | The controller's commands.
+data ThreadedControllerCmd
+  = ControllerCmd Cmd
+  | Quit
+
 -- | 'ThreadedController' combines a 'Lock' with a thread-based scheduling and
 -- concurrency mechanism.
 data ThreadedController =
-  ThreadedController (MVar Cmd)
+  ThreadedController (MVar ThreadedControllerCmd)
 
 -- | Create a new 'ThreadedController'. This launches a new thread.
 -- Communication is achived with the controller via its 'MVar'.
@@ -29,24 +35,33 @@ initThreadedController l = do
 
 -- | Send commands to a 'ThreadedController'.
 lock :: ThreadedController -> IO ()
-lock (ThreadedController m) = putMVar m LockNowCmd
+lock (ThreadedController m) = putMVar m (ControllerCmd LockNowCmd)
 
 unlock :: ThreadedController -> UTCTime -> IO ()
-unlock (ThreadedController m) t = putMVar m (UnlockCmd t)
+unlock (ThreadedController m) t = putMVar m (ControllerCmd (UnlockCmd t))
+
+quit :: ThreadedController -> IO ()
+quit (ThreadedController m) = putMVar m Quit
 
 -- | Note: don't expose this to the user of the controller. It's only
 -- used for scheduled locks in response to unlock commands.
-lockAt :: MVar Cmd -> UTCTime -> IO ()
-lockAt m t = putMVar m (LockCmd t)
+lockAt :: MVar ThreadedControllerCmd -> UTCTime -> IO ()
+lockAt m t = putMVar m (ControllerCmd (LockCmd t))
 
-threadedController :: Lock.Lock l => MVar Cmd -> l -> State -> IO ()
+threadedController :: Lock.Lock l => MVar ThreadedControllerCmd -> l -> State -> IO ()
 threadedController m l = loop
   where loop state =
           do cmd <- takeMVar m
-             newState <- runTC m l (runStateMachine cmd state)
-             loop newState
+             case cmd of
+               Quit ->
+                 do Lock.quit l
+                    return ()
+               ControllerCmd cc ->
+                 do newState <-
+                      runTC m l (runStateMachine cc state)
+                    loop newState
 
-runTC :: (MonadIO m, Lock.Lock l) => MVar Cmd -> l -> Controller a -> m a
+runTC :: (MonadIO m, Lock.Lock l) => MVar ThreadedControllerCmd  -> l -> Controller a -> m a
 runTC mvar l = iterM runCmd
   where runCmd :: MonadIO m => ControllerF (m a) -> m a
 
