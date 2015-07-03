@@ -1,7 +1,7 @@
 module Main where
 
 import Control.Concurrent (threadDelay)
-import Data.Time (NominalDiffTime, addUTCTime, getCurrentTime)
+import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, getCurrentTime, getCurrentTimeZone, utcToLocalTime)
 import Options.Applicative
 import System.Mellon (initThreadedController, initMockLock, lock, unlock)
 
@@ -41,17 +41,50 @@ cmds =
   hsubparser
     (command "mock" (info mockCmd (progDesc "Run the mock controller")))
 
+putStrLnWithTime :: UTCTime -> TimeZone -> String -> IO ()
+putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
+
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Mock _)) =
   do lck <- initMockLock
      c <- initThreadedController lck
-     putStrLn "Lock, wait 2 seconds, unlock for 5 seconds, quit about 3 seconds later."
+     tz <- getCurrentTimeZone
+     now <- getCurrentTime
+     putStrLn "The test to be run (times may vary a slight bit due to thread scheduling vagaries):"
+     putStrLnWithTime now tz "Lock"
+     putStrLnWithTime ((2 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 5 seconds"
+     putStrLnWithTime ((10 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 3 seconds"
+     putStrLnWithTime ((11 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 10 seconds; this unlock should override the previous one"
+     putStrLnWithTime ((25 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 8 seconds"
+     putStrLnWithTime ((27 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 1 second; this unlock should be ignored"
+     putStrLnWithTime ((40 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 8 seconds"
+     putStrLnWithTime ((43 :: NominalDiffTime) `addUTCTime` now) tz "Lock immediately; this should unschedule the previous lock"
+     putStrLnWithTime ((55 :: NominalDiffTime) `addUTCTime` now) tz "Quit"
+
      lock c
      threadDelay (2 * 1000000)
-     now <- getCurrentTime
-     unlock c $ (5 :: NominalDiffTime) `addUTCTime` now
+     tPlus2 <- getCurrentTime
+     unlock c $ (5 :: NominalDiffTime) `addUTCTime` tPlus2
      threadDelay (8 * 1000000)
+     tPlus10 <- getCurrentTime
+     unlock c $ (3 :: NominalDiffTime) `addUTCTime` tPlus10
+     threadDelay (1 * 1000000)
+     tPlus11 <- getCurrentTime
+     unlock c $ (10 :: NominalDiffTime) `addUTCTime` tPlus11
+     threadDelay (14 * 1000000)
+     tPlus25 <- getCurrentTime
+     unlock c $ (8 :: NominalDiffTime) `addUTCTime` tPlus25
+     threadDelay (2 * 1000000)
+     tPlus27 <- getCurrentTime
+     unlock c $ (1 :: NominalDiffTime) `addUTCTime` tPlus27
+     threadDelay (13 * 1000000)
+     tPlus40 <- getCurrentTime
+     unlock c $ (8 :: NominalDiffTime) `addUTCTime` tPlus40
+     threadDelay (3 * 1000000)
+     lock c
+     threadDelay (12 * 1000000)
      return ()
+
 run _ = return ()
 
 main :: IO ()
