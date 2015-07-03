@@ -13,7 +13,7 @@ import Control.Monad.Free (iterM)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import qualified System.Mellon.Lock as Lock (Lock(..))
-import System.Mellon.Controller (Cmd(..), Controller, ControllerF(..), State(..), runStateMachine)
+import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
 
 -- | The controller's commands.
 data ThreadedControllerCmd
@@ -66,9 +66,9 @@ threadedController m l = loop
                       runTC m l (runStateMachine cc state)
                     loop newState
 
-runTC :: (MonadIO m, Lock.Lock l) => MVar ThreadedControllerCmd  -> l -> Controller a -> m a
+runTC :: (MonadIO m, Lock.Lock l) => MVar ThreadedControllerCmd  -> l -> StateMachine a -> m a
 runTC mvar l = iterM runCmd
-  where runCmd :: MonadIO m => ControllerF (m a) -> m a
+  where runCmd :: MonadIO m => StateMachineF (m a) -> m a
 
         runCmd (Lock next) =
           do liftIO $ Lock.lock l
