@@ -1,3 +1,1 @@
 * Move mock cmd to tests.
-
-* Implement a timer-based controller that runs with constant resource requirements (i.e., does not spawn threads).
