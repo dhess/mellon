@@ -1,11 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module System.Mellon.Impl.ThreadedController
-         ( ThreadedController
+         ( ThreadedController(..)
          , initThreadedController
-         , lock
-         , quit
-         , unlock
          ) where
 
 import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
@@ -13,17 +10,26 @@ import Control.Monad.Free (iterM)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import qualified System.Mellon.Lock as Lock (Lock(..))
+import System.Mellon.Controller (Controller(..))
 import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
-
--- | The controller's commands.
-data ThreadedControllerCmd
-  = ControllerCmd Cmd
-  | Quit (MVar ())
 
 -- | 'ThreadedController' combines a 'Lock' with a thread-based scheduling and
 -- concurrency mechanism.
 data ThreadedController =
   ThreadedController (MVar ThreadedControllerCmd)
+
+instance Controller ThreadedController where
+  lock (ThreadedController m) =
+    liftIO $
+    putMVar m (ControllerCmd LockNowCmd)
+  unlock (ThreadedController m) t =
+    liftIO $
+    putMVar m (ControllerCmd (UnlockCmd t))
+  quit (ThreadedController m) =
+    liftIO $
+    do s <- newEmptyMVar
+       putMVar m (Quit s)
+       takeMVar s
 
 -- | Create a new 'ThreadedController'. This launches a new thread.
 -- Communication is achived with the controller via its 'MVar'.
@@ -34,19 +40,10 @@ initThreadedController l = do
   _ <- forkIO (threadedController m l Locked)
   return (ThreadedController m)
 
--- | Send commands to a 'ThreadedController'.
-lock :: ThreadedController -> IO ()
-lock (ThreadedController m) = putMVar m (ControllerCmd LockNowCmd)
-
-unlock :: ThreadedController -> UTCTime -> IO ()
-unlock (ThreadedController m) t = putMVar m (ControllerCmd (UnlockCmd t))
-
--- | Blocks until the controller has actually quit.
-quit :: ThreadedController -> IO ()
-quit (ThreadedController m) =
-  do s <- newEmptyMVar
-     putMVar m (Quit s)
-     takeMVar s
+-- | The controller's commands.
+data ThreadedControllerCmd
+  = ControllerCmd Cmd
+  | Quit (MVar ())
 
 -- | Note: don't expose this to the user of the controller. It's only
 -- used for scheduled locks in response to unlock commands.
