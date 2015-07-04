@@ -17,6 +17,7 @@ Library
                       , System.Mellon.Controller
                       , System.Mellon.Impl
                       , System.Mellon.Impl.MockLock
+                      , System.Mellon.Impl.TimedController
                       , System.Mellon.Impl.ThreadedController
                       , System.Mellon.Lock
                       , System.Mellon.StateMachine

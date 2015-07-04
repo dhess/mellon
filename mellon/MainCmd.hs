@@ -4,7 +4,7 @@ import Control.Concurrent (threadDelay)
 import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, getCurrentTime, getCurrentTimeZone, utcToLocalTime)
 import Options.Applicative
 import System.Exit (exitSuccess)
-import System.Mellon (initThreadedController, initMockLock, lock, quit, unlock)
+import System.Mellon (Controller, initThreadedController, initTimedController, initMockLock, lock, quit, unlock)
 
 data Verbosity
   = Normal
@@ -16,16 +16,27 @@ data GlobalOptions =
                 ,cmd :: Command}
 
 data Command
-  = Mock MockOptions
+  = Threaded ThreadedOptions
+  | Timed TimedOptions
 
-data MockOptions = MockOptions {unused :: Maybe String}
+data ThreadedOptions = ThreadedOptions {unusedThreaded :: Maybe String}
 
-mockCmd :: Parser Command
-mockCmd = Mock <$> mockOptions
+threadedCmd :: Parser Command
+threadedCmd = Threaded <$> threadedOptions
 
-mockOptions :: Parser MockOptions
-mockOptions =
-  MockOptions <$>
+threadedOptions :: Parser ThreadedOptions
+threadedOptions =
+  ThreadedOptions <$>
+  optional (strOption (help "unused"))
+
+data TimedOptions = TimedOptions {unusedTimed :: Maybe String}
+
+timedCmd :: Parser Command
+timedCmd = Timed <$> timedOptions
+
+timedOptions :: Parser TimedOptions
+timedOptions =
+  TimedOptions <$>
   optional (strOption (help "unused"))
 
 cmds :: Parser GlobalOptions
@@ -40,18 +51,17 @@ cmds =
         short 'v' <>
         help "Enable verbose mode") <*>
   hsubparser
-    (command "mock" (info mockCmd (progDesc "Run the mock controller")))
+    (command "threaded" (info threadedCmd (progDesc "Run the threaded controller test")) <>
+     command "timed" (info timedCmd (progDesc "Run the timed controller test")))
 
 putStrLnWithTime :: UTCTime -> TimeZone -> String -> IO ()
 putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
 
-run :: GlobalOptions -> IO ()
-run (GlobalOptions False _ (Mock _)) =
-  do lck <- initMockLock
-     tz <- getCurrentTimeZone
+test :: Controller c => c -> IO ()
+test c =
+  do tz <- getCurrentTimeZone
      now <- getCurrentTime
      putStrLn "The test to be run (times may vary a slight bit due to thread scheduling vagaries):"
-     putStrLnWithTime now tz "Lock"
      putStrLnWithTime ((2 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 5 seconds"
      putStrLnWithTime ((10 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 3 seconds"
      putStrLnWithTime ((11 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 10 seconds; this unlock should override the previous one"
@@ -60,10 +70,9 @@ run (GlobalOptions False _ (Mock _)) =
      putStrLnWithTime ((40 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 8 seconds"
      putStrLnWithTime ((43 :: NominalDiffTime) `addUTCTime` now) tz "Lock immediately; this should unschedule the previous lock"
      putStrLnWithTime ((55 :: NominalDiffTime) `addUTCTime` now) tz "Quit"
-
      putStrLn ""
+
      putStrLn "Test begins now."
-     c <- initThreadedController lck
      threadDelay (2 * 1000000)
      tPlus2 <- getCurrentTime
      unlock c $ (5 :: NominalDiffTime) `addUTCTime` tPlus2
@@ -88,6 +97,15 @@ run (GlobalOptions False _ (Mock _)) =
      quit c
      exitSuccess
 
+run :: GlobalOptions -> IO ()
+run (GlobalOptions False _ (Threaded _)) =
+  do lck <- initMockLock
+     c <- initThreadedController lck
+     test c
+run (GlobalOptions False _ (Timed _)) =
+  do lck <- initMockLock
+     c <- initTimedController lck
+     test c
 run _ = return ()
 
 main :: IO ()
