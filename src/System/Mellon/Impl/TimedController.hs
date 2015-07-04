@@ -18,10 +18,9 @@ import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), Sta
 -- When a 'TimedController' is created via 'initTimedController', only
 -- a single thread is created. This thread handles all user commands
 -- and all scheduled locking. No other threads are created by that
--- 'TimedController' instance; and, after initialization, the
--- 'TimedController' runs in constant space. In severely
--- resource-constrained environments, this can be an advantage over
--- the 'ThreadedController' implementation.
+-- 'TimedController' instance. In severely resource-constrained
+-- environments, this can be an advantage over the
+-- 'ThreadedController' implementation.
 --
 -- The downside to 'TimedController' is that it only sleeps for
 -- approximately 1 second before waking up again to check the for
