@@ -1,5 +1,3 @@
 * Move mock cmd to tests.
 
-* Should there be a generic controller interface, like the one presented by ThreadedController but abstracted?
-
 * Implement a timer-based controller that runs with constant resource requirements (i.e., does not spawn threads).
