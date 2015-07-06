@@ -1,5 +1,19 @@
+-- | 'TimedController' combines a 'Lock.Lock' with a periodic timer-based
+-- scheduling system. A 'TimedController' wakes up approximately once
+-- a second to check for incoming commands or expired unlocks. If
+-- there's nothing to do, the controller goes back to sleep.
+--
+-- Due to its sleep/wake-based design, a 'TimedController' has a
+-- resolution of about 1 second.
+--
+-- In most cases, you'll probably want to use a
+-- 'System.Mellon.Impl.ThreadedController.ThreadedController';
+-- however, if for some reason you want to minimize the number of
+-- threads created by the controller and aren't particularly
+-- power-sensitive, use 'TimedController'.
+
 module System.Mellon.Impl.TimedController
-         ( TimedController(..)
+         ( TimedController
          , initTimedController
          ) where
 
@@ -12,25 +26,6 @@ import qualified System.Mellon.Lock as Lock (Lock(..))
 import System.Mellon.Controller (Controller(..))
 import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
 
--- | 'TimedController' combines a 'Lock' with a periodic timer-based
--- scheduling system.
---
--- When a 'TimedController' is created via 'initTimedController', only
--- a single thread is created. This thread handles all user commands
--- and all scheduled locking. No other threads are created by that
--- 'TimedController' instance. In severely resource-constrained
--- environments, this can be an advantage over the
--- 'ThreadedController' implementation.
---
--- The downside to 'TimedController' is that it only sleeps for
--- approximately 1 second before waking up again to check the for
--- incoming user commands or expiring unlocks. This wakeup occurs even
--- if there's nothing to do, in which case the controller immediately
--- goes back to sleep. In any case, this behavior will probably
--- prevent most platforms from entering a low-power state, which may
--- increase power usage compared to implementations that use
--- 'ThreadedController'; that controller implementation only runs when
--- it receives a command, or when an unlock has expired.
 data TimedController =
   TimedController (MVar TimedControllerCmd)
 
@@ -47,12 +42,8 @@ instance Controller TimedController where
        putMVar m (Quit s)
        takeMVar s
 
--- | Create a new 'TimedController'. This launches a new thread.
--- Communication is achived with the controller via its 'MVar'.
---
--- The newly-created controller will wake up once per second to check
--- for new commands or expired unlocks. This means that
--- 'TimedController's have a precision of approximately 1 second.
+-- | Create a new 'TimedController' using the given 'Lock.Lock' instance.
+-- This will lock the 'Lock.Lock'.
 initTimedController :: Lock.Lock l => l -> IO TimedController
 initTimedController l = do
   Lock.lock l
@@ -60,7 +51,6 @@ initTimedController l = do
   _ <- forkIO (timedController m l Locked)
   return (TimedController m)
 
--- | The controller's commands.
 data TimedControllerCmd
   = ControllerCmd Cmd
   | Quit (MVar ())

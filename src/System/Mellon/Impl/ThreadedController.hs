@@ -1,7 +1,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
+-- | 'ThreadedController' combines a 'Lock.Lock' with a thread-based
+-- scheduling and concurrency mechanism.
+
 module System.Mellon.Impl.ThreadedController
-         ( ThreadedController(..)
+         ( ThreadedController
          , initThreadedController
          ) where
 
@@ -13,8 +16,6 @@ import qualified System.Mellon.Lock as Lock (Lock(..))
 import System.Mellon.Controller (Controller(..))
 import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
 
--- | 'ThreadedController' combines a 'Lock' with a thread-based scheduling and
--- concurrency mechanism.
 data ThreadedController =
   ThreadedController (MVar ThreadedControllerCmd)
 
@@ -31,8 +32,8 @@ instance Controller ThreadedController where
        putMVar m (Quit s)
        takeMVar s
 
--- | Create a new 'ThreadedController'. This launches a new thread.
--- Communication is achived with the controller via its 'MVar'.
+-- | Create a new 'ThreadedController' using the given 'Lock.Lock'
+-- instance. This will lock the 'Lock.Lock'.
 initThreadedController :: Lock.Lock l => l -> IO ThreadedController
 initThreadedController l = do
   Lock.lock l
@@ -40,7 +41,6 @@ initThreadedController l = do
   _ <- forkIO (threadedController m l Locked)
   return (ThreadedController m)
 
--- | The controller's commands.
 data ThreadedControllerCmd
   = ControllerCmd Cmd
   | Quit (MVar ())

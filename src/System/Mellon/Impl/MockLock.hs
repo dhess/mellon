@@ -1,5 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | 'MockLock' is a dummy 'Lock' implementation that simply prints a
+-- timestampped string to stdout upon receiving a command. It's useful
+-- for testing, and not much else.
+
 module System.Mellon.Impl.MockLock
     ( MockLock
     , initMockLock

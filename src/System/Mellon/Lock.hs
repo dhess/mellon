@@ -1,15 +1,18 @@
+-- | 'Lock' abstracts the machinery which manipulates an actual
+-- lock device.
+
 module System.Mellon.Lock
          ( Lock(..)
          ) where
 
 import Control.Monad.IO.Class
 
--- | 'Lock' abstracts the machinery which manipulates the actual lock.
--- The protocol is the simplest one possible: 'lock' and 'unlock',
--- plus a 'quit' function for releasing resources when the controller
--- relinquishes control of the device.
+-- | A simple protocol for lock devices.
 class Lock l where
   lock :: MonadIO m => l -> m ()
   unlock :: MonadIO m => l -> m ()
-  quit :: MonadIO m => l -> m ()
 
+  -- | Perform cleanup and release any exclusive state.
+  --
+  -- After invoking this function, the 'Lock' is no longer valid.
+  quit :: MonadIO m => l -> m ()

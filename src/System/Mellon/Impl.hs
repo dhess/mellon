@@ -1,3 +1,6 @@
+-- | This module re-exports the
+-- 'ThreadedController' and 'TimedController' instances.
+
 module System.Mellon.Impl
   ( module System.Mellon.Impl.MockLock
   , module System.Mellon.Impl.ThreadedController
