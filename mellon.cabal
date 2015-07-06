@@ -4,6 +4,8 @@ Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
 Maintainer:             Drew Hess <src@drewhess.com>
+Homepage:               https://github.com/dhess/mellon/
+Bug-Reports:            https://github.com/dhess/mellon/issues/
 Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
@@ -94,4 +96,4 @@ Test-Suite spec
 
 Source-Repository head
   Type:                 git
---  Location:             
+  Location:             git://github.com/dhess/mellon.git
