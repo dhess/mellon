@@ -17,7 +17,9 @@ Description:
   devices, e.g., electric strikes. It provides a simple abstract state
   machine for locking and unlocking such devices.
   .
-  <mellon-state-diagram.png (local copy of @mellon@ state diagram)>
+  <<http://mellon.s3-website-us-west-2.amazonaws.com/mellon-state-diagram.svg>>
+  .
+  <images/mellon-state-diagram.svg (local copy of mellon state diagram)>
   .
 
   @System.Mellon@ is a low-level package that provides:
@@ -41,7 +43,7 @@ Description:
   network services; that is the domain of higher-level packages which
   use the base @System.Mellon@ package.
 
-Extra-Source-Files:   images/*.png
+Extra-Doc-Files:   images/*.svg
 
 Library
   Default-Language:     Haskell2010
