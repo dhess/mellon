@@ -4,8 +4,11 @@ Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
 Maintainer:             Drew Hess <src@drewhess.com>
+Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
+Copyright:              Copyright (c) 2015, Drew Hess
+Tested-With:            GHC == 7.10.1
 Synopsis:               Control physical access devices
 Description:
   "Speak, friend, and enter."
