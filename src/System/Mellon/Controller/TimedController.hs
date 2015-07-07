@@ -13,55 +13,27 @@
 -- power-sensitive, use 'TimedController'.
 
 module System.Mellon.Controller.TimedController
-         ( TimedController
-         , initTimedController
+         ( initTimedController
          ) where
 
-import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay, tryTakeMVar)
+import Control.Concurrent (MVar, putMVar, threadDelay, tryTakeMVar)
 import Control.Monad (when)
 import Control.Monad.Free (iterM)
 import Control.Monad.IO.Class
-import Data.Time (UTCTime, addUTCTime, diffUTCTime, getCurrentTime)
+import Data.Time (addUTCTime, diffUTCTime, getCurrentTime)
 import qualified System.Mellon.Lock as Lock (Lock(..))
-import System.Mellon.Controller.Controller (Controller(..))
-import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
+import System.Mellon.Controller.Concurrent
+import System.Mellon.StateMachine (StateMachine, StateMachineF(..), State(..), runStateMachine)
 
-data TimedController =
-  TimedController (MVar TimedControllerCmd)
-
-instance Controller TimedController where
-  lock (TimedController m) =
-    liftIO $
-    putMVar m (ControllerCmd LockNowCmd)
-  unlock (TimedController m) t =
-    liftIO $
-    putMVar m (ControllerCmd (UnlockCmd t))
-  quit (TimedController m) =
-    liftIO $
-    do s <- newEmptyMVar
-       putMVar m (Quit s)
-       takeMVar s
-
--- | Create a new 'TimedController' using the given 'Lock.Lock' instance.
+-- | Create a new 'ConcurrentController' using the given 'Lock.Lock' instance.
 -- This will lock the 'Lock.Lock'.
-initTimedController :: Lock.Lock l => l -> IO TimedController
-initTimedController l = do
-  Lock.lock l
-  m <- newEmptyMVar
-  _ <- forkIO (timedController m l Locked)
-  return (TimedController m)
+initTimedController :: Lock.Lock l => l -> IO ConcurrentController
+initTimedController l =
+  do Lock.lock l
+     forkCC (timedController l)
 
-data TimedControllerCmd
-  = ControllerCmd Cmd
-  | Quit (MVar ())
-
--- | Note: don't expose this to the user of the controller. It's only
--- used for scheduled locks in response to unlock commands.
-lockAt :: MVar TimedControllerCmd -> UTCTime -> IO ()
-lockAt m t = putMVar m (ControllerCmd (LockCmd t))
-
-timedController :: Lock.Lock l => MVar TimedControllerCmd -> l -> State -> IO ()
-timedController m l = loop
+timedController :: Lock.Lock l => l -> MVar ConcurrentControllerCmd -> State -> IO ()
+timedController l m = loop
   where loop state =
           do loopStartTime <- getCurrentTime
              maybeCmd <- tryTakeMVar m

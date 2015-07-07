@@ -53,6 +53,7 @@ Library
   GHC-Options:          -Wall
   Exposed-Modules:      System.Mellon
                       , System.Mellon.Controller
+                      , System.Mellon.Controller.Concurrent
                       , System.Mellon.Controller.Controller
                       , System.Mellon.Controller.TimedController
                       , System.Mellon.Controller.ThreadedController

@@ -4,54 +4,26 @@
 -- scheduling and concurrency mechanism.
 
 module System.Mellon.Controller.ThreadedController
-         ( ThreadedController
-         , initThreadedController
+         ( initThreadedController
          ) where
 
-import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
+import Control.Concurrent (MVar, forkIO, putMVar, takeMVar, threadDelay)
 import Control.Monad.Free (iterM)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import qualified System.Mellon.Lock as Lock (Lock(..))
-import System.Mellon.Controller.Controller (Controller(..))
-import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
+import System.Mellon.Controller.Concurrent
+import System.Mellon.StateMachine (StateMachine, StateMachineF(..), State(..), runStateMachine)
 
-data ThreadedController =
-  ThreadedController (MVar ThreadedControllerCmd)
-
-instance Controller ThreadedController where
-  lock (ThreadedController m) =
-    liftIO $
-    putMVar m (ControllerCmd LockNowCmd)
-  unlock (ThreadedController m) t =
-    liftIO $
-    putMVar m (ControllerCmd (UnlockCmd t))
-  quit (ThreadedController m) =
-    liftIO $
-    do s <- newEmptyMVar
-       putMVar m (Quit s)
-       takeMVar s
-
--- | Create a new 'ThreadedController' using the given 'Lock.Lock'
+-- | Create a new 'ConcurrentController' using the given 'Lock.Lock'
 -- instance. This will lock the 'Lock.Lock'.
-initThreadedController :: Lock.Lock l => l -> IO ThreadedController
+initThreadedController :: Lock.Lock l => l -> IO ConcurrentController
 initThreadedController l = do
   Lock.lock l
-  m <- newEmptyMVar
-  _ <- forkIO (threadedController m l Locked)
-  return (ThreadedController m)
+  forkCC (threadedController l)
 
-data ThreadedControllerCmd
-  = ControllerCmd Cmd
-  | Quit (MVar ())
-
--- | Note: don't expose this to the user of the controller. It's only
--- used for scheduled locks in response to unlock commands.
-lockAt :: MVar ThreadedControllerCmd -> UTCTime -> IO ()
-lockAt m t = putMVar m (ControllerCmd (LockCmd t))
-
-threadedController :: Lock.Lock l => MVar ThreadedControllerCmd -> l -> State -> IO ()
-threadedController m l = loop
+threadedController :: Lock.Lock l => l -> MVar ConcurrentControllerCmd -> State -> IO ()
+threadedController l m = loop
   where loop state =
           do cmd <- takeMVar m
              case cmd of
@@ -63,7 +35,7 @@ threadedController m l = loop
                       runTC m l (runStateMachine cc state)
                     loop newState
 
-runTC :: (MonadIO m, Lock.Lock l) => MVar ThreadedControllerCmd  -> l -> StateMachine a -> m a
+runTC :: (MonadIO m, Lock.Lock l) => MVar ConcurrentControllerCmd  -> l -> StateMachine a -> m a
 runTC mvar l = iterM runCmd
   where runCmd :: MonadIO m => StateMachineF (m a) -> m a
 
