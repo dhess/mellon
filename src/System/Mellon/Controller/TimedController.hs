@@ -7,12 +7,12 @@
 -- resolution of about 1 second.
 --
 -- In most cases, you'll probably want to use a
--- 'System.Mellon.Impl.ThreadedController.ThreadedController';
+-- 'System.Mellon.Conroller.ThreadedController.ThreadedController';
 -- however, if for some reason you want to minimize the number of
 -- threads created by the controller and aren't particularly
 -- power-sensitive, use 'TimedController'.
 
-module System.Mellon.Impl.TimedController
+module System.Mellon.Controller.TimedController
          ( TimedController
          , initTimedController
          ) where
@@ -23,7 +23,7 @@ import Control.Monad.Free (iterM)
 import Control.Monad.IO.Class
 import Data.Time (UTCTime, addUTCTime, diffUTCTime, getCurrentTime)
 import qualified System.Mellon.Lock as Lock (Lock(..))
-import System.Mellon.Controller (Controller(..))
+import System.Mellon.Controller.Controller (Controller(..))
 import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
 
 data TimedController =

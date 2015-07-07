@@ -3,7 +3,7 @@
 -- | 'ThreadedController' combines a 'Lock.Lock' with a thread-based
 -- scheduling and concurrency mechanism.
 
-module System.Mellon.Impl.ThreadedController
+module System.Mellon.Controller.ThreadedController
          ( ThreadedController
          , initThreadedController
          ) where
@@ -13,7 +13,7 @@ import Control.Monad.Free (iterM)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import qualified System.Mellon.Lock as Lock (Lock(..))
-import System.Mellon.Controller (Controller(..))
+import System.Mellon.Controller.Controller (Controller(..))
 import System.Mellon.StateMachine (Cmd(..), StateMachine, StateMachineF(..), State(..), runStateMachine)
 
 data ThreadedController =

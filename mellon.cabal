@@ -53,10 +53,11 @@ Library
   GHC-Options:          -Wall
   Exposed-Modules:      System.Mellon
                       , System.Mellon.Controller
+                      , System.Mellon.Controller.Controller
+                      , System.Mellon.Controller.TimedController
+                      , System.Mellon.Controller.ThreadedController
                       , System.Mellon.Impl
                       , System.Mellon.Impl.MockLock
-                      , System.Mellon.Impl.TimedController
-                      , System.Mellon.Impl.ThreadedController
                       , System.Mellon.Lock
                       , System.Mellon.StateMachine
   Build-Depends:        base >= 4 && < 5

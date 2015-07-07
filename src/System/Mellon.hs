@@ -6,9 +6,7 @@
 -- provide one.
 
 module System.Mellon
-  ( -- * The generic controller interface.
-    module System.Mellon.Controller
-    -- * Several 'System.Mellon.Controller.Controller' implementations.
+  ( module System.Mellon.Controller
   , module System.Mellon.Impl
   ) where
 

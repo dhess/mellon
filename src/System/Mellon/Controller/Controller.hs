@@ -5,7 +5,7 @@
 -- 'Controller' instance, and the 'Controller' interacts with
 -- 'System.Mellon.StateMachine.StateMachine' to execute the commands.
 
-module System.Mellon.Controller
+module System.Mellon.Controller.Controller
        ( Controller(..)
        ) where
 
