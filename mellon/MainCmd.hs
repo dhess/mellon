@@ -5,6 +5,8 @@ import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLoc
 import Options.Applicative
 import System.Exit (exitSuccess)
 import System.Mellon (Controller, initThreadedController, initTimedController, initMockLock, lock, quit, unlock)
+import qualified System.Mellon.Controller.NewController as New (Controller, unlockUntil, lockNow)
+import System.Mellon.Controller.NewConcurrent
 
 data Verbosity
   = Normal
@@ -18,6 +20,7 @@ data GlobalOptions =
 data Command
   = Threaded ThreadedOptions
   | Timed TimedOptions
+  | New NewOptions
 
 data ThreadedOptions = ThreadedOptions {unusedThreaded :: Maybe String}
 
@@ -39,6 +42,16 @@ timedOptions =
   TimedOptions <$>
   optional (strOption (help "unused"))
 
+data NewOptions = NewOptions {unusedNew :: Maybe String}
+
+newCmd :: Parser Command
+newCmd = New <$> newOptions
+
+newOptions :: Parser NewOptions
+newOptions =
+  NewOptions <$>
+  optional (strOption (help "unused"))
+
 cmds :: Parser GlobalOptions
 cmds =
   GlobalOptions <$>
@@ -52,7 +65,8 @@ cmds =
         help "Enable verbose mode") <*>
   hsubparser
     (command "threaded" (info threadedCmd (progDesc "Run the threaded controller test")) <>
-     command "timed" (info timedCmd (progDesc "Run the timed controller test")))
+     command "timed" (info timedCmd (progDesc "Run the timed controller test")) <>
+     command "new" (info newCmd (progDesc "Run the new controller test")))
 
 putStrLnWithTime :: UTCTime -> TimeZone -> String -> IO ()
 putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
@@ -97,6 +111,11 @@ test c =
      quit c
      exitSuccess
 
+testNew :: UTCTime -> New.Controller ()
+testNew start =
+  do New.unlockUntil $ (5 :: NominalDiffTime) `addUTCTime` start
+     New.lockNow
+
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Threaded _)) =
   do lck <- initMockLock
@@ -106,6 +125,9 @@ run (GlobalOptions False _ (Timed _)) =
   do lck <- initMockLock
      c <- initTimedController lck
      test c
+run (GlobalOptions False _ (New _)) =
+  do now <- getCurrentTime
+     runController $ testNew now
 run _ = return ()
 
 main :: IO ()
