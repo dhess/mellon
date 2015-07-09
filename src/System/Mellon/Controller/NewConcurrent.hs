@@ -3,7 +3,7 @@ module System.Mellon.Controller.NewConcurrent
          ) where
 
 import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar)
-import Control.Monad.Free (iterM)
+import Control.Monad.Trans.Free (iterM)
 import Control.Monad.IO.Class
 import System.Mellon.Controller.NewController (Controller, ControllerF(..))
 import System.Mellon.NewStateMachine (Cmd(..), State(..), StateMachine, StateMachineF(..), stateMachine)

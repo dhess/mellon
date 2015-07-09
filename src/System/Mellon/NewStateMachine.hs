@@ -52,7 +52,7 @@ module System.Mellon.NewStateMachine
          , stateMachine
          ) where
 
-import Control.Monad.Free (liftF, Free, MonadFree)
+import Control.Monad.Trans.Free (liftF, Free, MonadFree)
 import Control.Monad.Free.TH (makeFreeCon)
 import Data.Time (UTCTime)
 
