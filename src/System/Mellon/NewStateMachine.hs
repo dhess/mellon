@@ -48,12 +48,14 @@ module System.Mellon.NewStateMachine
          ( Cmd(..)
          , StateMachine
          , StateMachineF(..)
+         , StateMachineT
          , State(..)
          , stateMachine
          ) where
 
-import Control.Monad.Trans.Free (liftF, Free, MonadFree)
+import Control.Monad.Trans.Free (liftF, FreeT, MonadFree)
 import Control.Monad.Free.TH (makeFreeCon)
+import Data.Functor.Identity (Identity)
 import Data.Time (UTCTime)
 
 -- | The states of a @mellon@ 'StateMachine'. Note that a
@@ -104,7 +106,9 @@ instance Functor StateMachineF where
   fmap f (WaitForCmd g) = WaitForCmd (f . g)
 
 -- | 'StateMachine' represented as a 'Free' monad.
-type StateMachine = Free StateMachineF
+type StateMachineT = FreeT StateMachineF
+
+type StateMachine = StateMachineT Identity
 
 makeFreeCon 'Lock
 makeFreeCon 'Unlock

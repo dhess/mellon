@@ -16,8 +16,9 @@ module System.Mellon.Controller.NewController
        , unlockUntil
        ) where
 
-import Control.Monad.Trans.Free (liftF, Free, MonadFree)
+import Control.Monad.Trans.Free (liftF, FreeT, MonadFree)
 import Control.Monad.Free.TH (makeFreeCon)
+import Data.Functor.Identity (Identity)
 import Data.Time (UTCTime)
 
 data ControllerF next where
@@ -28,7 +29,9 @@ instance Functor ControllerF where
   fmap f (LockNow x) = LockNow (f x)
   fmap f (UnlockUntil d x) = UnlockUntil d (f x)
 
-type Controller = Free ControllerF
+type ControllerT = FreeT ControllerF
+
+type Controller = ControllerT Identity
 
 makeFreeCon 'LockNow
 makeFreeCon 'UnlockUntil
