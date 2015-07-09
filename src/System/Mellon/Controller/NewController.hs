@@ -12,6 +12,7 @@
 module System.Mellon.Controller.NewController
        ( Controller
        , ControllerF(..)
+       , ControllerT
        , lockNow
        , unlockUntil
        ) where

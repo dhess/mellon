@@ -1,11 +1,12 @@
 module Main where
 
 import Control.Concurrent (threadDelay)
+import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, getCurrentTime, getCurrentTimeZone, utcToLocalTime)
 import Options.Applicative
 import System.Exit (exitSuccess)
 import System.Mellon (Controller, initThreadedController, initTimedController, initMockLock, lock, quit, unlock)
-import qualified System.Mellon.Controller.NewController as New (Controller, unlockUntil, lockNow)
+import qualified System.Mellon.Controller.NewController as New (Controller, ControllerT, unlockUntil, lockNow)
 import System.Mellon.Controller.NewConcurrent
 
 data Verbosity
@@ -21,6 +22,7 @@ data Command
   = Threaded ThreadedOptions
   | Timed TimedOptions
   | New NewOptions
+  | NewTrans NewTransOptions
 
 data ThreadedOptions = ThreadedOptions {unusedThreaded :: Maybe String}
 
@@ -52,6 +54,16 @@ newOptions =
   NewOptions <$>
   optional (strOption (help "unused"))
 
+data NewTransOptions = NewTransOptions {unusedNewTrans :: Maybe String}
+
+newTransCmd :: Parser Command
+newTransCmd = NewTrans <$> newTransOptions
+
+newTransOptions :: Parser NewTransOptions
+newTransOptions =
+  NewTransOptions <$>
+  optional (strOption (help "unused"))
+
 cmds :: Parser GlobalOptions
 cmds =
   GlobalOptions <$>
@@ -66,7 +78,8 @@ cmds =
   hsubparser
     (command "threaded" (info threadedCmd (progDesc "Run the threaded controller test")) <>
      command "timed" (info timedCmd (progDesc "Run the timed controller test")) <>
-     command "new" (info newCmd (progDesc "Run the new controller test")))
+     command "new" (info newCmd (progDesc "Run the new controller test")) <>
+     command "newtrans" (info newTransCmd (progDesc "Run the new controller test")))
 
 putStrLnWithTime :: UTCTime -> TimeZone -> String -> IO ()
 putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
@@ -116,6 +129,12 @@ testNew start =
   do New.unlockUntil $ (5 :: NominalDiffTime) `addUTCTime` start
      New.lockNow
 
+testNewT :: New.ControllerT IO ()
+testNewT =
+  do start <- liftIO getCurrentTime
+     New.unlockUntil $ (5 :: NominalDiffTime) `addUTCTime` start
+     New.lockNow
+
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Threaded _)) =
   do lck <- initMockLock
@@ -128,6 +147,7 @@ run (GlobalOptions False _ (Timed _)) =
 run (GlobalOptions False _ (New _)) =
   do now <- getCurrentTime
      runController $ testNew now
+run (GlobalOptions False _ (NewTrans _)) = runControllerT testNewT
 run _ = return ()
 
 main :: IO ()
