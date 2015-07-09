@@ -10,13 +10,13 @@ import System.Mellon.NewStateMachine (Cmd(..), State(..), StateMachine, StateMac
 
 runController :: MonadIO m => Controller a -> m a
 runController block =
-  do m <- liftIO $ newEmptyMVar
+  do m <- liftIO newEmptyMVar
      liftIO $ forkStateMachine m
      runController' m block
 
-runController' :: MonadIO m => (MVar Cmd) -> Controller a -> m a
+runController' :: MonadIO m => MVar Cmd -> Controller a -> m a
 runController' m' = iterM $ run m'
-  where run :: MonadIO m => (MVar Cmd) -> ControllerF (m a) -> m a
+  where run :: MonadIO m => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
           do liftIO $ putMVar m LockNowCmd
              next
@@ -24,13 +24,13 @@ runController' m' = iterM $ run m'
           do liftIO $ putMVar m (UnlockCmd untilDate)
              next
 
-forkStateMachine :: (MVar Cmd) -> IO ()
+forkStateMachine :: MVar Cmd -> IO ()
 forkStateMachine m = forkIO (runStateMachine' m (stateMachine Locked)) >> return ()
 
-runStateMachine' :: (MonadIO m) => (MVar Cmd) -> StateMachine a -> m a
+runStateMachine' :: (MonadIO m) => MVar Cmd -> StateMachine a -> m a
 runStateMachine' m' = iterM $ run m'
   where run :: MonadIO m
-            => (MVar Cmd) -> StateMachineF (m a) -> m a
+            => MVar Cmd -> StateMachineF (m a) -> m a
         run _ (Lock next) =
           do liftIO $ putStrLn "Lock"
              next
