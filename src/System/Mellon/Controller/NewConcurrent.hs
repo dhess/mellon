@@ -59,18 +59,18 @@ threadSleepUntil t =
   do now <- getCurrentTime
      let timeRemaining = diffUTCTime t now
      sleep timeRemaining
-       where sleep :: NominalDiffTime -> IO ()
-             sleep r
-               | r <= 0                       = return ()
-               | r > maxThreadDelayInDiffTime = threadDelay maxThreadDelay >> threadSleepUntil t
-               | otherwise                    = threadDelay $ nominalDiffTimeToMicroseconds r
-
-             maxThreadDelay :: Int
-             maxThreadDelay = maxBound
-
-             maxThreadDelayInDiffTime :: NominalDiffTime
-             maxThreadDelayInDiffTime = diffTimeToNominalDiffTime $ picosecondsToDiffTime $ toInteger maxThreadDelay * 1000000
-               where diffTimeToNominalDiffTime = realToFrac
-
-             nominalDiffTimeToMicroseconds :: NominalDiffTime -> Int
-             nominalDiffTimeToMicroseconds d = truncate $ d * 1000000
+  where sleep :: NominalDiffTime -> IO ()
+        sleep r
+          | r <= 0 = return ()
+          | r > maxThreadDelayInDiffTime = threadDelay maxThreadDelay >>
+                                            threadSleepUntil t
+          | otherwise = threadDelay $ nominalDiffTimeToMicroseconds r
+        maxThreadDelay :: Int
+        maxThreadDelay = maxBound
+        maxThreadDelayInDiffTime :: NominalDiffTime
+        maxThreadDelayInDiffTime = diffTimeToNominalDiffTime $ picosecondsToDiffTime $
+                                                               toInteger maxThreadDelay *
+                                                               1000000
+          where diffTimeToNominalDiffTime = realToFrac
+        nominalDiffTimeToMicroseconds :: NominalDiffTime -> Int
+        nominalDiffTimeToMicroseconds d = truncate $ d * 1000000
