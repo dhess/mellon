@@ -12,10 +12,7 @@ runConcurrentControllerT :: MonadIO m => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
      liftIO $ forkStateMachine m
-     runConcurrentControllerT' m block
-
-runConcurrentControllerT' :: MonadIO m => MVar Cmd -> ControllerT m a -> m a
-runConcurrentControllerT' m' = iterT $ run m'
+     iterT (run m) block
   where run :: MonadIO m => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
           do liftIO $ putMVar m LockNowCmd
@@ -25,24 +22,22 @@ runConcurrentControllerT' m' = iterT $ run m'
              next
 
 forkStateMachine :: MVar Cmd -> IO ()
-forkStateMachine m = forkIO (runStateMachine' m (stateMachine Locked)) >> return ()
-
-runStateMachine' :: (MonadIO m) => MVar Cmd -> StateMachine a -> m a
-runStateMachine' m' = iterM $ run m'
-  where run :: MonadIO m
-            => MVar Cmd -> StateMachineF (m a) -> m a
-        run _ (Lock next) =
+forkStateMachine m =
+  do _ <- forkIO (iterM runSM (stateMachine Locked))
+     return ()
+  where runSM :: MonadIO m => StateMachineF (m a) -> m a
+        runSM (Lock next) =
           do liftIO $ putStrLn "Lock"
              next
-        run _ (ScheduleLock atDate next) =
+        runSM (ScheduleLock atDate next) =
           do liftIO $ putStrLn "ScheduleLock"
              next
-        run _ (Unlock next) =
+        runSM (Unlock next) =
           do liftIO $ putStrLn "Unlock"
              next
-        run _ (UnscheduleLock next) =
+        runSM (UnscheduleLock next) =
           do liftIO $ putStrLn "UnscheduleLock"
              next
-        run m (WaitForCmd next) =
+        runSM (WaitForCmd next) =
           do cmd <- liftIO $ takeMVar m
              next cmd
