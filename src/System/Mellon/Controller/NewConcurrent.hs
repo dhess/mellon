@@ -7,12 +7,12 @@ import Control.Monad.Trans.Free (iterM, iterT)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import System.Mellon.Controller.NewController (ControllerF(..), ControllerT)
-import System.Mellon.NewStateMachine (Cmd(..), State(..), StateMachineF(..), stateMachine)
+import System.Mellon.NewStateMachine (Cmd(..), State(..), StateMachine, StateMachineF(..), stateMachine)
 
 runConcurrentControllerT :: MonadIO m => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
-     liftIO $ forkStateMachine m
+     _ <- liftIO $ forkIO (runConcurrentStateMachine m (stateMachine Locked))
      iterT (run m) block
   where run :: MonadIO m => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
@@ -22,10 +22,8 @@ runConcurrentControllerT block =
           do liftIO $ putMVar m (UnlockCmd untilDate)
              next
 
-forkStateMachine :: MVar Cmd -> IO ()
-forkStateMachine m =
-  do _ <- forkIO (iterM runSM (stateMachine Locked))
-     return ()
+runConcurrentStateMachine :: MonadIO m => MVar Cmd -> StateMachine () -> m ()
+runConcurrentStateMachine m = iterM runSM
   where runSM :: MonadIO m => StateMachineF (m a) -> m a
         runSM (Lock next) =
           do liftIO $ putStrLn "Lock"
