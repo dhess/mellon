@@ -1,6 +1,5 @@
 module System.Mellon.Controller.NewConcurrent
-         ( runController
-         , runControllerT
+         ( runConcurrentControllerT
          ) where
 
 import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar)
@@ -9,30 +8,14 @@ import Control.Monad.IO.Class
 import System.Mellon.Controller.NewController (Controller, ControllerF(..), ControllerT)
 import System.Mellon.NewStateMachine (Cmd(..), State(..), StateMachine, StateMachineF(..), stateMachine)
 
-runControllerT :: MonadIO m => ControllerT m a -> m a
-runControllerT block =
+runConcurrentControllerT :: MonadIO m => ControllerT m a -> m a
+runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
      liftIO $ forkStateMachine m
-     runControllerT' m block
+     runConcurrentControllerT' m block
 
-runControllerT' :: MonadIO m => MVar Cmd -> ControllerT m a -> m a
-runControllerT' m' = iterT $ run m'
-  where run :: MonadIO m => MVar Cmd -> ControllerF (m a) -> m a
-        run m (LockNow next) =
-          do liftIO $ putMVar m LockNowCmd
-             next
-        run m (UnlockUntil untilDate next) =
-          do liftIO $ putMVar m (UnlockCmd untilDate)
-             next
-
-runController :: MonadIO m => Controller a -> m a
-runController block =
-  do m <- liftIO newEmptyMVar
-     liftIO $ forkStateMachine m
-     runController' m block
-
-runController' :: MonadIO m => MVar Cmd -> Controller a -> m a
-runController' m' = iterM $ run m'
+runConcurrentControllerT' :: MonadIO m => MVar Cmd -> ControllerT m a -> m a
+runConcurrentControllerT' m' = iterT $ run m'
   where run :: MonadIO m => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
           do liftIO $ putMVar m LockNowCmd

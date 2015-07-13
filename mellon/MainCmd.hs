@@ -21,7 +21,6 @@ data GlobalOptions =
 data Command
   = Threaded ThreadedOptions
   | Timed TimedOptions
-  | New NewOptions
   | NewTrans NewTransOptions
 
 data ThreadedOptions = ThreadedOptions {unusedThreaded :: Maybe String}
@@ -42,16 +41,6 @@ timedCmd = Timed <$> timedOptions
 timedOptions :: Parser TimedOptions
 timedOptions =
   TimedOptions <$>
-  optional (strOption (help "unused"))
-
-data NewOptions = NewOptions {unusedNew :: Maybe String}
-
-newCmd :: Parser Command
-newCmd = New <$> newOptions
-
-newOptions :: Parser NewOptions
-newOptions =
-  NewOptions <$>
   optional (strOption (help "unused"))
 
 data NewTransOptions = NewTransOptions {unusedNewTrans :: Maybe String}
@@ -78,7 +67,6 @@ cmds =
   hsubparser
     (command "threaded" (info threadedCmd (progDesc "Run the threaded controller test")) <>
      command "timed" (info timedCmd (progDesc "Run the timed controller test")) <>
-     command "new" (info newCmd (progDesc "Run the new controller test")) <>
      command "newtrans" (info newTransCmd (progDesc "Run the new controller test")))
 
 putStrLnWithTime :: UTCTime -> TimeZone -> String -> IO ()
@@ -124,11 +112,6 @@ test c =
      quit c
      exitSuccess
 
-testNew :: UTCTime -> New.Controller ()
-testNew start =
-  do New.unlockUntil $ (5 :: NominalDiffTime) `addUTCTime` start
-     New.lockNow
-
 testNewT :: New.ControllerT IO ()
 testNewT =
   do start <- liftIO getCurrentTime
@@ -144,10 +127,7 @@ run (GlobalOptions False _ (Timed _)) =
   do lck <- initMockLock
      c <- initTimedController lck
      test c
-run (GlobalOptions False _ (New _)) =
-  do now <- getCurrentTime
-     runController $ testNew now
-run (GlobalOptions False _ (NewTrans _)) = runControllerT testNewT
+run (GlobalOptions False _ (NewTrans _)) = runConcurrentControllerT testNewT
 run _ = return ()
 
 main :: IO ()
