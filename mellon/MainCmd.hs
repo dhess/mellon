@@ -1,12 +1,13 @@
 module Main where
 
-import Control.Concurrent (threadDelay)
+import qualified Control.Concurrent as CC (threadDelay)
 import Control.Monad.IO.Class
-import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, getCurrentTime, getCurrentTimeZone, utcToLocalTime)
+import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, utcToLocalTime)
+import qualified Data.Time as Time (getCurrentTimeZone, getCurrentTime)
 import Options.Applicative
-import System.Exit (exitSuccess)
-import System.Mellon (Controller, initThreadedController, initTimedController, initMockLock, lock, quit, unlock)
-import qualified System.Mellon.Controller.NewController as New (Controller, ControllerT, unlockUntil, lockNow)
+import Prelude hiding (putStrLn)
+import qualified Prelude as Prelude (putStrLn)
+import System.Mellon.Controller.NewController (ControllerT, unlockUntil, lockNow)
 import System.Mellon.Controller.NewConcurrent
 
 data Verbosity
@@ -19,38 +20,16 @@ data GlobalOptions =
                 ,cmd :: Command}
 
 data Command
-  = Threaded ThreadedOptions
-  | Timed TimedOptions
-  | NewTrans NewTransOptions
+  = Concurrent ConcurrentOptions
 
-data ThreadedOptions = ThreadedOptions {unusedThreaded :: Maybe String}
+data ConcurrentOptions = ConcurrentOptions {unusedConcurrent :: Maybe String}
 
-threadedCmd :: Parser Command
-threadedCmd = Threaded <$> threadedOptions
+concurrentCmd :: Parser Command
+concurrentCmd = Concurrent <$> concurrentOptions
 
-threadedOptions :: Parser ThreadedOptions
-threadedOptions =
-  ThreadedOptions <$>
-  optional (strOption (help "unused"))
-
-data TimedOptions = TimedOptions {unusedTimed :: Maybe String}
-
-timedCmd :: Parser Command
-timedCmd = Timed <$> timedOptions
-
-timedOptions :: Parser TimedOptions
-timedOptions =
-  TimedOptions <$>
-  optional (strOption (help "unused"))
-
-data NewTransOptions = NewTransOptions {unusedNewTrans :: Maybe String}
-
-newTransCmd :: Parser Command
-newTransCmd = NewTrans <$> newTransOptions
-
-newTransOptions :: Parser NewTransOptions
-newTransOptions =
-  NewTransOptions <$>
+concurrentOptions :: Parser ConcurrentOptions
+concurrentOptions =
+  ConcurrentOptions <$>
   optional (strOption (help "unused"))
 
 cmds :: Parser GlobalOptions
@@ -65,17 +44,28 @@ cmds =
         short 'v' <>
         help "Enable verbose mode") <*>
   hsubparser
-    (command "threaded" (info threadedCmd (progDesc "Run the threaded controller test")) <>
-     command "timed" (info timedCmd (progDesc "Run the timed controller test")) <>
-     command "newtrans" (info newTransCmd (progDesc "Run the new controller test")))
+    (command "concurrent" (info concurrentCmd (progDesc "Run the concurrent controller test")))
 
-putStrLnWithTime :: UTCTime -> TimeZone -> String -> IO ()
+threadDelay :: MonadIO m => Int -> m ()
+threadDelay = liftIO . CC.threadDelay
+
+getCurrentTimeZone :: MonadIO m => m TimeZone
+getCurrentTimeZone = liftIO Time.getCurrentTimeZone
+
+getCurrentTime :: MonadIO m => m UTCTime
+getCurrentTime = liftIO Time.getCurrentTime
+
+putStrLn :: MonadIO m => String -> m ()
+putStrLn = liftIO . Prelude.putStrLn
+
+putStrLnWithTime :: MonadIO m => UTCTime -> TimeZone -> String -> m ()
 putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
 
-test :: Controller c => c -> IO ()
-test c =
+testConcurrent :: ControllerT IO ()
+testConcurrent =
   do tz <- getCurrentTimeZone
      now <- getCurrentTime
+
      putStrLn "The test to be run (times may vary a slight bit due to thread scheduling vagaries):"
      putStrLnWithTime ((2 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 5 seconds"
      putStrLnWithTime ((10 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 3 seconds"
@@ -86,48 +76,31 @@ test c =
      putStrLnWithTime ((43 :: NominalDiffTime) `addUTCTime` now) tz "Lock immediately; this should unschedule the previous lock"
      putStrLnWithTime ((55 :: NominalDiffTime) `addUTCTime` now) tz "Quit"
      putStrLn ""
-
      putStrLn "Test begins now."
      threadDelay (2 * 1000000)
      tPlus2 <- getCurrentTime
-     unlock c $ (5 :: NominalDiffTime) `addUTCTime` tPlus2
+     unlockUntil $ (5 :: NominalDiffTime) `addUTCTime` tPlus2
      threadDelay (8 * 1000000)
      tPlus10 <- getCurrentTime
-     unlock c $ (3 :: NominalDiffTime) `addUTCTime` tPlus10
+     unlockUntil $ (3 :: NominalDiffTime) `addUTCTime` tPlus10
      threadDelay (1 * 1000000)
      tPlus11 <- getCurrentTime
-     unlock c $ (10 :: NominalDiffTime) `addUTCTime` tPlus11
+     unlockUntil $ (10 :: NominalDiffTime) `addUTCTime` tPlus11
      threadDelay (14 * 1000000)
      tPlus25 <- getCurrentTime
-     unlock c $ (8 :: NominalDiffTime) `addUTCTime` tPlus25
+     unlockUntil $ (8 :: NominalDiffTime) `addUTCTime` tPlus25
      threadDelay (2 * 1000000)
      tPlus27 <- getCurrentTime
-     unlock c $ (1 :: NominalDiffTime) `addUTCTime` tPlus27
+     unlockUntil $ (1 :: NominalDiffTime) `addUTCTime` tPlus27
      threadDelay (13 * 1000000)
      tPlus40 <- getCurrentTime
-     unlock c $ (8 :: NominalDiffTime) `addUTCTime` tPlus40
+     unlockUntil $ (8 :: NominalDiffTime) `addUTCTime` tPlus40
      threadDelay (3 * 1000000)
-     lock c
+     lockNow
      threadDelay (12 * 1000000)
-     quit c
-     exitSuccess
-
-testNewT :: New.ControllerT IO ()
-testNewT =
-  do start <- liftIO getCurrentTime
-     New.unlockUntil $ (5 :: NominalDiffTime) `addUTCTime` start
-     New.lockNow
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions False _ (Threaded _)) =
-  do lck <- initMockLock
-     c <- initThreadedController lck
-     test c
-run (GlobalOptions False _ (Timed _)) =
-  do lck <- initMockLock
-     c <- initTimedController lck
-     test c
-run (GlobalOptions False _ (NewTrans _)) = runConcurrentControllerT testNewT
+run (GlobalOptions False _ (Concurrent _)) = runConcurrentControllerT testConcurrent
 run _ = return ()
 
 main :: IO ()
