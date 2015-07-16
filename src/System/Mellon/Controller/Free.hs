@@ -9,7 +9,7 @@
 -- 'Controller' instance, and the 'Controller' interacts with
 -- 'System.Mellon.StateMachine.StateMachine' to execute the commands.
 
-module System.Mellon.Controller.NewController
+module System.Mellon.Controller.Free
        ( Controller
        , ControllerF(..)
        , ControllerT

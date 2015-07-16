@@ -54,15 +54,7 @@ Library
   Exposed-Modules:      System.Mellon
                       , System.Mellon.Controller
                       , System.Mellon.Controller.Concurrent
-                      , System.Mellon.Controller.Controller
-                      , System.Mellon.Controller.NewConcurrent
-                      , System.Mellon.Controller.NewController
-                      , System.Mellon.Controller.TimedController
-                      , System.Mellon.Controller.ThreadedController
-                      , System.Mellon.Impl
-                      , System.Mellon.Impl.MockLock
-                      , System.Mellon.Lock
-                      , System.Mellon.NewStateMachine
+                      , System.Mellon.Controller.Free
                       , System.Mellon.StateMachine
   Build-Depends:        base >= 4 && < 5
                       , free

@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TemplateHaskell #-}
 
 -- | A 'MonadFree' implementation of the @mellon@ state machine.
@@ -49,12 +48,14 @@ module System.Mellon.StateMachine
          ( Cmd(..)
          , StateMachine
          , StateMachineF(..)
+         , StateMachineT
          , State(..)
-         , runStateMachine
+         , stateMachine
          ) where
 
-import Control.Monad.Free (liftF, Free, MonadFree)
+import Control.Monad.Trans.Free (liftF, FreeT, MonadFree)
 import Control.Monad.Free.TH (makeFreeCon)
+import Data.Functor.Identity (Identity)
 import Data.Time (UTCTime)
 
 -- | The states of a @mellon@ 'StateMachine'. Note that a
@@ -65,30 +66,6 @@ data State
   = Locked
   | Unlocked UTCTime
   deriving (Eq)
-
--- | The 'StateMachine' eDSL. Each 'System.Mellon.Controller.Controller'
--- instance provides an implementation of the eDSL which turns the
--- `StateMachine`'s pure state transformations into real-world
--- actions.
-data StateMachineF next where
-  Lock :: next -> StateMachineF next
-  ScheduleLock :: UTCTime -> next -> StateMachineF next
-  Unlock :: next -> StateMachineF next
-  UnscheduleLock :: next -> StateMachineF next
-
-instance Functor StateMachineF where
-  fmap f (Lock x) = Lock (f x)
-  fmap f (ScheduleLock d x) = ScheduleLock d (f x)
-  fmap f (Unlock x)  = Unlock (f x)
-  fmap f (UnscheduleLock x) = UnscheduleLock (f x)
-
--- | 'StateMachine' represented as a 'Free' monad.
-type StateMachine = Free StateMachineF
-
-makeFreeCon 'Lock
-makeFreeCon 'Unlock
-makeFreeCon 'ScheduleLock
-makeFreeCon 'UnscheduleLock
 
 -- | The pure 'StateMachine' commands. These represent the transitions
 -- from one state to the next.
@@ -110,6 +87,35 @@ data Cmd
   | UnlockCmd UTCTime
   deriving (Eq)
 
+-- | The 'StateMachine' eDSL. Each 'System.Mellon.Controller.Controller'
+-- instance provides an implementation of the eDSL which turns the
+-- `StateMachine`'s pure state transformations into real-world
+-- actions.
+data StateMachineF next where
+  Lock :: next -> StateMachineF next
+  ScheduleLock :: UTCTime -> next -> StateMachineF next
+  Unlock :: next -> StateMachineF next
+  UnscheduleLock :: next -> StateMachineF next
+  WaitForCmd :: (Cmd -> next) -> StateMachineF next
+
+instance Functor StateMachineF where
+  fmap f (Lock x) = Lock (f x)
+  fmap f (ScheduleLock d x) = ScheduleLock d (f x)
+  fmap f (Unlock x)  = Unlock (f x)
+  fmap f (UnscheduleLock x) = UnscheduleLock (f x)
+  fmap f (WaitForCmd g) = WaitForCmd (f . g)
+
+-- | 'StateMachine' represented as a 'Free' monad.
+type StateMachineT = FreeT StateMachineF
+
+type StateMachine = StateMachineT Identity
+
+makeFreeCon 'Lock
+makeFreeCon 'Unlock
+makeFreeCon 'ScheduleLock
+makeFreeCon 'UnscheduleLock
+makeFreeCon 'WaitForCmd
+
 -- | The pure 'StateMachine' interpreter.
 --
 -- 'runStateMachine' provides an abstract, pure model of the core
@@ -117,16 +123,23 @@ data Cmd
 -- implementations; what changes from one implementation to the next
 -- is the specific machinery for locking and scheduling, which is
 -- provided by a 'System.Mellon.Controller.Controller' instance.
-runStateMachine :: Cmd -> State -> StateMachine State
+stateMachine :: State -> StateMachine ()
+stateMachine = loop
+  where loop state =
+          do cmd <- waitForCmd
+             newState <- execCmd cmd state
+             loop newState
 
-runStateMachine LockNowCmd Locked = return Locked
-runStateMachine LockNowCmd (Unlocked _) =
+execCmd :: Cmd -> State -> StateMachine State
+
+execCmd LockNowCmd Locked = return Locked
+execCmd LockNowCmd (Unlocked _) =
   do unscheduleLock
      lock
      return Locked
 
-runStateMachine (LockCmd _) (Locked) = return Locked
-runStateMachine (LockCmd lockDate) (Unlocked untilDate) =
+execCmd (LockCmd _) (Locked) = return Locked
+execCmd (LockCmd lockDate) (Unlocked untilDate) =
   -- Only execute the lock command if its date matches the current
   -- outstanding unlock request's expiration date, i.e., if the lock
   -- command is the one that was scheduled by the current outstanding
@@ -165,8 +178,8 @@ runStateMachine (LockCmd lockDate) (Unlocked untilDate) =
      then lock >> return Locked
      else return (Unlocked untilDate)
 
-runStateMachine (UnlockCmd untilDate) Locked = unlockUntil untilDate
-runStateMachine (UnlockCmd untilDate) (Unlocked scheduledDate) =
+execCmd (UnlockCmd untilDate) Locked = unlockUntil untilDate
+execCmd (UnlockCmd untilDate) (Unlocked scheduledDate) =
   if untilDate > scheduledDate
      then unlockUntil untilDate
      else return $ Unlocked scheduledDate

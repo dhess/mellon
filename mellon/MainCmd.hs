@@ -7,8 +7,8 @@ import qualified Data.Time as Time (getCurrentTimeZone, getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
-import System.Mellon.Controller.NewController (ControllerT, unlockUntil, lockNow)
-import System.Mellon.Controller.NewConcurrent
+import System.Mellon.Controller.Free (ControllerT, unlockUntil, lockNow)
+import System.Mellon.Controller.Concurrent
 
 data Verbosity
   = Normal
