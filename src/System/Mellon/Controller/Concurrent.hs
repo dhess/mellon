@@ -1,3 +1,11 @@
+-- | A concurrent @mellon@ controller implementation. When run, the
+-- controller forks a separate unbound (i.e., 'forkIO') thread to
+-- control the 'StateMachine', and communicates with it safely using
+-- 'MVar's.
+--
+-- While running in the concurrent controller monad, the program can
+-- execute controller commands without blocking.
+
 module System.Mellon.Controller.Concurrent
          ( runConcurrentControllerT
          ) where
@@ -9,6 +17,10 @@ import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosec
 import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachine, StateMachineF(..), stateMachine)
 
+-- | Run a computation in the 'ControllerT' monad transformer.
+--
+-- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
+-- instance of 'MonadIO'.
 runConcurrentControllerT :: MonadIO m => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
