@@ -7,7 +7,9 @@
 -- execute controller commands without blocking.
 
 module System.Mellon.Controller.Concurrent
-         ( runConcurrentControllerT
+         ( ConcurrentController
+         , runConcurrentController
+         , runConcurrentControllerT
          ) where
 
 import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
@@ -17,11 +19,18 @@ import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosec
 import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachine, StateMachineF(..), stateMachine)
 
+-- | The basic concurrent controller type.
+type ConcurrentController = ControllerT IO ()
+
+-- | Run an 'IO' computation in the 'ConcurrentController' monad.
+runConcurrentController :: ConcurrentController -> IO ()
+runConcurrentController = runConcurrentControllerT
+
 -- | Run a computation in the 'ControllerT' monad transformer.
 --
 -- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
 -- instance of 'MonadIO'.
-runConcurrentControllerT :: MonadIO m => ControllerT m a -> m a
+runConcurrentControllerT :: (MonadIO m) => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
      _ <- liftIO $ forkIO (runConcurrentStateMachine m (stateMachine Locked))

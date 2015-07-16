@@ -7,8 +7,7 @@ import qualified Data.Time as Time (getCurrentTimeZone, getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
-import System.Mellon.Controller.Free (ControllerT, unlockUntil, lockNow)
-import System.Mellon.Controller.Concurrent
+import System.Mellon.Controller (ConcurrentController, runConcurrentController, unlockUntil, lockNow)
 
 data Verbosity
   = Normal
@@ -61,7 +60,7 @@ putStrLn = liftIO . Prelude.putStrLn
 putStrLnWithTime :: MonadIO m => UTCTime -> TimeZone -> String -> m ()
 putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
 
-testConcurrent :: ControllerT IO ()
+testConcurrent :: ConcurrentController
 testConcurrent =
   do tz <- getCurrentTimeZone
      now <- getCurrentTime
@@ -100,7 +99,7 @@ testConcurrent =
      threadDelay (12 * 1000000)
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions False _ (Concurrent _)) = runConcurrentControllerT testConcurrent
+run (GlobalOptions False _ (Concurrent _)) = runConcurrentController testConcurrent
 run _ = return ()
 
 main :: IO ()
