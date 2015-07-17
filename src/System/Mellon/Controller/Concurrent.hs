@@ -18,6 +18,7 @@ import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachine, StateMachineF(..), stateMachine)
+import System.Mellon.Lock.Class
 
 -- | The basic concurrent controller type.
 type ConcurrentController = ControllerT IO ()
@@ -30,12 +31,12 @@ runConcurrentController = runConcurrentControllerT
 --
 -- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
 -- instance of 'MonadIO'.
-runConcurrentControllerT :: (MonadIO m) => ControllerT m a -> m a
+runConcurrentControllerT :: (MonadIO m, MonadLock m) => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
      _ <- liftIO $ forkIO (runConcurrentStateMachine m (stateMachine Locked))
      iterT (run m) block
-  where run :: MonadIO m => MVar Cmd -> ControllerF (m a) -> m a
+  where run :: (MonadIO m, MonadLock m) => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
           do liftIO $ putMVar m LockNowCmd
              next
@@ -43,17 +44,17 @@ runConcurrentControllerT block =
           do liftIO $ putMVar m (UnlockCmd untilDate)
              next
 
-runConcurrentStateMachine :: MonadIO m => MVar Cmd -> StateMachine () -> m ()
+runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> StateMachine () -> m ()
 runConcurrentStateMachine m = iterM runSM
-  where runSM :: MonadIO m => StateMachineF (m a) -> m a
+  where runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
         runSM (Lock next) =
-          do liftIO $ putStrLn "Lock"
+          do lock
              next
         runSM (ScheduleLock atDate next) =
           do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
              next
         runSM (Unlock next) =
-          do liftIO $ putStrLn "Unlock"
+          do unlock
              next
         -- For this particular implementation, it's safe simply to
         -- ignore this command. When the "unscheduled" lock fires, the
