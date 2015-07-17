@@ -3,8 +3,10 @@
 
 module System.Mellon
   ( module System.Mellon.Controller
+  , module System.Mellon.Lock
   , module System.Mellon.StateMachine
   ) where
 
 import System.Mellon.Controller
+import System.Mellon.Lock
 import System.Mellon.StateMachine
