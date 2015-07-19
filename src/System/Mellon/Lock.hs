@@ -5,6 +5,8 @@ module System.Mellon.Lock
        ( module System.Mellon.Lock.Class
        , MockLockT
        , MockLock
+       , evalMockLockT
+       , evalMockLock
        , execMockLock
        , execMockLockT
        , liftMockLock
@@ -28,6 +30,9 @@ liftMockLockT = MockLockT . WriterT
 runMockLockT :: (Monad m) => MockLockT m a -> m (a, [String])
 runMockLockT (MockLockT x) = runWriterT x
 
+evalMockLockT :: (Monad m) => MockLockT m a -> m a
+evalMockLockT (MockLockT x) = liftM fst (runWriterT x)
+
 execMockLockT :: (Monad m) => MockLockT m a -> m [String]
 execMockLockT (MockLockT x) = execWriterT x
 
@@ -38,6 +43,9 @@ liftMockLock = MockLockT . writer
 
 runMockLock :: MockLock a -> (a, [String])
 runMockLock = runIdentity . runMockLockT
+
+evalMockLock :: MockLock a -> a
+evalMockLock = runIdentity . evalMockLockT
 
 execMockLock :: MockLock a -> [String]
 execMockLock = runIdentity . execMockLockT
