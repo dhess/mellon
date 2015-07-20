@@ -47,14 +47,8 @@ runConcurrentControllerT block =
 runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> StateMachineT m () -> m ()
 runConcurrentStateMachine m = iterT runSM
   where runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
-        runSM (Lock next) =
-          do lock
-             next
         runSM (ScheduleLock atDate next) =
           do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
-             next
-        runSM (Unlock next) =
-          do unlock
              next
         -- For this particular implementation, it's safe simply to
         -- ignore this command. When the "unscheduled" lock fires, the

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TemplateHaskell #-}
 
@@ -47,10 +48,12 @@ module System.Mellon.StateMachine
          , stateMachineT
          ) where
 
+import Control.Monad.Trans.Class (lift)
 import Control.Monad.Trans.Free (FreeT, MonadFree, liftF)
 import Control.Monad.Free.TH (makeFreeCon)
 import Data.Functor.Identity (Identity)
 import Data.Time (UTCTime)
+import System.Mellon.Lock.Class
 
 -- | The states of a @mellon@ 'StateMachine'. Note that a
 -- 'System.Mellon.Controller' implementation may have additional state
@@ -84,16 +87,12 @@ data Cmd
 -- `StateMachine`'s pure state transformations into real-world
 -- actions.
 data StateMachineF next where
-  Lock :: next -> StateMachineF next
   ScheduleLock :: UTCTime -> next -> StateMachineF next
-  Unlock :: next -> StateMachineF next
   UnscheduleLock :: next -> StateMachineF next
   WaitForCmd :: (Cmd -> next) -> StateMachineF next
 
 instance Functor StateMachineF where
-  fmap f (Lock x) = Lock (f x)
   fmap f (ScheduleLock d x) = ScheduleLock d (f x)
-  fmap f (Unlock x)  = Unlock (f x)
   fmap f (UnscheduleLock x) = UnscheduleLock (f x)
   fmap f (WaitForCmd g) = WaitForCmd (f . g)
 
@@ -101,12 +100,14 @@ instance Functor StateMachineF where
 -- machine.
 type StateMachineT = FreeT StateMachineF
 
+instance (MonadLock m) => MonadLock (FreeT StateMachineF m) where
+  lock = lift lock
+  unlock = lift unlock
+
 -- | The basic @mellon@ state machine monad. Most
 -- 'System.Mellon.Controller' implementations will use this version.
 type StateMachine = StateMachineT Identity
 
-makeFreeCon 'Lock
-makeFreeCon 'Unlock
 makeFreeCon 'ScheduleLock
 makeFreeCon 'UnscheduleLock
 makeFreeCon 'WaitForCmd
@@ -118,14 +119,14 @@ makeFreeCon 'WaitForCmd
 -- implementations; what changes from one implementation to the next
 -- is the specific machinery for locking and scheduling, which is
 -- provided by a 'System.Mellon.Controller' implementation.
-stateMachineT :: (Monad m) => State -> StateMachineT m ()
+stateMachineT :: (MonadLock m) => State -> StateMachineT m ()
 stateMachineT = loop
   where loop state =
           do cmd <- waitForCmd
              newState <- execCmdT cmd state
              loop newState
 
-execCmdT :: (Monad m) => Cmd -> State -> StateMachineT m State
+execCmdT :: (MonadLock m) => Cmd -> State -> StateMachineT m State
 
 execCmdT LockNowCmd Locked = return Locked
 execCmdT LockNowCmd (Unlocked _) =
@@ -179,7 +180,7 @@ execCmdT (UnlockCmd untilDate) (Unlocked scheduledDate) =
      then unlockUntilT untilDate
      else return $ Unlocked scheduledDate
 
-unlockUntilT :: (Monad m) => UTCTime -> StateMachineT m State
+unlockUntilT :: (MonadLock m) => UTCTime -> StateMachineT m State
 unlockUntilT date =
   do scheduleLock date
      unlock
