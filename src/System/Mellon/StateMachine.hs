@@ -44,10 +44,10 @@ module System.Mellon.StateMachine
          , StateMachineF(..)
          , StateMachineT
          , State(..)
-         , stateMachine
+         , stateMachineT
          ) where
 
-import Control.Monad.Trans.Free (liftF, FreeT, MonadFree)
+import Control.Monad.Trans.Free (FreeT, MonadFree, liftF)
 import Control.Monad.Free.TH (makeFreeCon)
 import Data.Functor.Identity (Identity)
 import Data.Time (UTCTime)
@@ -113,28 +113,28 @@ makeFreeCon 'WaitForCmd
 
 -- | The pure 'StateMachine' interpreter.
 --
--- 'stateMachine' provides an abstract, pure model of the core
+-- 'stateMachineT' provides an abstract, pure model of the core
 -- @mellon@ state machine. The state machine is the same for all
 -- implementations; what changes from one implementation to the next
 -- is the specific machinery for locking and scheduling, which is
 -- provided by a 'System.Mellon.Controller' implementation.
-stateMachine :: State -> StateMachine ()
-stateMachine = loop
+stateMachineT :: (Monad m) => State -> StateMachineT m ()
+stateMachineT = loop
   where loop state =
           do cmd <- waitForCmd
-             newState <- execCmd cmd state
+             newState <- execCmdT cmd state
              loop newState
 
-execCmd :: Cmd -> State -> StateMachine State
+execCmdT :: (Monad m) => Cmd -> State -> StateMachineT m State
 
-execCmd LockNowCmd Locked = return Locked
-execCmd LockNowCmd (Unlocked _) =
+execCmdT LockNowCmd Locked = return Locked
+execCmdT LockNowCmd (Unlocked _) =
   do unscheduleLock
      lock
      return Locked
 
-execCmd (LockCmd _) (Locked) = return Locked
-execCmd (LockCmd lockDate) (Unlocked untilDate) =
+execCmdT (LockCmd _) (Locked) = return Locked
+execCmdT (LockCmd lockDate) (Unlocked untilDate) =
   -- Only execute the lock command if its date matches the current
   -- outstanding unlock request's expiration date, i.e., if the lock
   -- command is the one that was scheduled by the current outstanding
@@ -173,14 +173,14 @@ execCmd (LockCmd lockDate) (Unlocked untilDate) =
      then lock >> return Locked
      else return (Unlocked untilDate)
 
-execCmd (UnlockCmd untilDate) Locked = unlockUntil untilDate
-execCmd (UnlockCmd untilDate) (Unlocked scheduledDate) =
+execCmdT (UnlockCmd untilDate) Locked = unlockUntilT untilDate
+execCmdT (UnlockCmd untilDate) (Unlocked scheduledDate) =
   if untilDate > scheduledDate
-     then unlockUntil untilDate
+     then unlockUntilT untilDate
      else return $ Unlocked scheduledDate
 
-unlockUntil :: UTCTime -> StateMachine State
-unlockUntil date =
+unlockUntilT :: (Monad m) => UTCTime -> StateMachineT m State
+unlockUntilT date =
   do scheduleLock date
      unlock
      return $ Unlocked date
