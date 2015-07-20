@@ -66,7 +66,3 @@ instance (MonadLock m) => MonadLock (ContT r m) where
 instance (MonadLock m) => MonadLock (ListT m) where
   lock = lift lock
   unlock = lift unlock
-
-instance MonadLock IO where
-  lock = putStrLn "Locked"
-  unlock = putStrLn "Unlocked"

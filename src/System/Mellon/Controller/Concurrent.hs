@@ -18,7 +18,7 @@ import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineT, StateMachineF(..), stateMachineT)
-import System.Mellon.Lock.Class
+import System.Mellon.Lock
 
 -- | The basic concurrent controller type.
 type ConcurrentController = ControllerT IO ()
@@ -34,7 +34,7 @@ runConcurrentController = runConcurrentControllerT
 runConcurrentControllerT :: (MonadIO m) => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
-     _ <- liftIO $ forkIO (runConcurrentStateMachine m (stateMachineT Locked))
+     _ <- liftIO $ forkIO (evalMockLockT $ runConcurrentStateMachine m (stateMachineT Locked))
      iterT (run m) block
   where run :: (MonadIO m) => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
