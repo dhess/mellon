@@ -13,11 +13,11 @@ module System.Mellon.Controller.Concurrent
          ) where
 
 import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
-import Control.Monad.Trans.Free (iterM, iterT)
+import Control.Monad.Trans.Free (iterT)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
-import System.Mellon.StateMachine (Cmd(..), State(..), StateMachine, StateMachineF(..), stateMachineT)
+import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineT, StateMachineF(..), stateMachineT)
 import System.Mellon.Lock.Class
 
 -- | The basic concurrent controller type.
@@ -31,12 +31,12 @@ runConcurrentController = runConcurrentControllerT
 --
 -- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
 -- instance of 'MonadIO'.
-runConcurrentControllerT :: (MonadIO m, MonadLock m) => ControllerT m a -> m a
+runConcurrentControllerT :: (MonadIO m) => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
      _ <- liftIO $ forkIO (runConcurrentStateMachine m (stateMachineT Locked))
      iterT (run m) block
-  where run :: (MonadIO m, MonadLock m) => MVar Cmd -> ControllerF (m a) -> m a
+  where run :: (MonadIO m) => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
           do liftIO $ putMVar m LockNowCmd
              next
@@ -44,8 +44,8 @@ runConcurrentControllerT block =
           do liftIO $ putMVar m (UnlockCmd untilDate)
              next
 
-runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> StateMachine () -> m ()
-runConcurrentStateMachine m = iterM runSM
+runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> StateMachineT m () -> m ()
+runConcurrentStateMachine m = iterT runSM
   where runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
         runSM (Lock next) =
           do lock
