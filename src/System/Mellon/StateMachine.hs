@@ -74,6 +74,10 @@ data Cmd
     -- Note that this command is only ever issued directly by a
     -- 'System.Mellon.Controller', never by the user.
   | LockCmd UTCTime
+    -- | Quit the state machine. Note that this command is only ever
+    -- issued directly by a 'System.Mellon.Controller', never by the
+    -- user.
+  | QuitCmd
     -- | Unlock until the specified time. If no existing unlock
     -- command with a later expiration is currently in effect, the
     -- 'System.Mellon.Controller' managing the state machine will
@@ -87,11 +91,13 @@ data Cmd
 -- `StateMachine`'s pure state transformations into real-world
 -- actions.
 data StateMachineF next where
+  Halt :: StateMachineF next
   ScheduleLock :: UTCTime -> next -> StateMachineF next
   UnscheduleLock :: next -> StateMachineF next
   WaitForCmd :: (Cmd -> next) -> StateMachineF next
 
 instance Functor StateMachineF where
+  fmap _ Halt = Halt
   fmap f (ScheduleLock d x) = ScheduleLock d (f x)
   fmap f (UnscheduleLock x) = UnscheduleLock (f x)
   fmap f (WaitForCmd g) = WaitForCmd (f . g)
@@ -108,6 +114,7 @@ instance (MonadLock m) => MonadLock (FreeT StateMachineF m) where
 -- 'System.Mellon.Controller' implementations will use this version.
 type StateMachine = StateMachineT Identity
 
+makeFreeCon 'Halt
 makeFreeCon 'ScheduleLock
 makeFreeCon 'UnscheduleLock
 makeFreeCon 'WaitForCmd
@@ -119,14 +126,20 @@ makeFreeCon 'WaitForCmd
 -- implementations; what changes from one implementation to the next
 -- is the specific machinery for locking and scheduling, which is
 -- provided by a 'System.Mellon.Controller' implementation.
-stateMachineT :: (MonadLock m) => State -> StateMachineT m ()
+stateMachineT :: (MonadLock m) => State -> StateMachineT m a
 stateMachineT = loop
   where loop state =
           do cmd <- waitForCmd
-             newState <- execCmdT cmd state
-             loop newState
+             case cmd of
+               QuitCmd -> halt
+               _ ->
+                 do newState <- execCmdT cmd state
+                    loop newState
 
 execCmdT :: (MonadLock m) => Cmd -> State -> StateMachineT m State
+
+-- Should never happen.
+execCmdT QuitCmd _ = fail "execCmdT QuitCmd failed"
 
 execCmdT LockNowCmd Locked = return Locked
 execCmdT LockNowCmd (Unlocked _) =

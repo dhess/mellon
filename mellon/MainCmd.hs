@@ -121,8 +121,10 @@ testMockLock =
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Concurrent _)) =
   do cc <- concurrentController
-     _ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc)
-     runConcurrentController cc testConcurrent
+     --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc)
+     --runConcurrentController cc testConcurrent
+     _ <- CC.forkIO (runConcurrentController cc testConcurrent)
+     evalMockLockT $ runConcurrentStateMachine cc
 run (GlobalOptions False _ (MockLockCmd _)) =
   do output <- execMockLockT testMockLock
      print output

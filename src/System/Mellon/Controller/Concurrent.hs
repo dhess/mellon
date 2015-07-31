@@ -38,9 +38,11 @@ concurrentController = newEmptyMVar
 --
 -- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
 -- instance of 'MonadIO'.
-runConcurrentControllerT :: (MonadIO m) => MVar Cmd -> ControllerT m a -> m a
-runConcurrentControllerT m = iterT run
-  where run :: (MonadIO m) => ControllerF (m a) -> m a
+runConcurrentControllerT :: (MonadIO m) => MVar Cmd -> ControllerT m () -> m ()
+runConcurrentControllerT m block =
+  do _ <- iterT run block
+     liftIO $ putMVar m QuitCmd
+  where run :: (MonadIO m) => ControllerF (m ()) -> m ()
         run (LockNow next) =
           do liftIO $ putMVar m LockNowCmd
              next
@@ -50,7 +52,8 @@ runConcurrentControllerT m = iterT run
 
 runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> m ()
 runConcurrentStateMachine m = iterT runSM (stateMachineT Locked)
-  where runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
+  where runSM :: (MonadIO m, MonadLock m) => StateMachineF (m ()) -> m ()
+        runSM Halt = return ()
         runSM (ScheduleLock atDate next) =
           do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
              next
