@@ -17,7 +17,7 @@ import Control.Monad.Trans.Free (iterT)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
-import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineT, StateMachineF(..), stateMachineT)
+import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineF(..), stateMachineT)
 import System.Mellon.Lock
 
 -- | The basic concurrent controller type.
@@ -34,7 +34,7 @@ runConcurrentController = runConcurrentControllerT
 runConcurrentControllerT :: (MonadIO m) => ControllerT m a -> m a
 runConcurrentControllerT block =
   do m <- liftIO newEmptyMVar
-     _ <- liftIO $ forkIO (evalMockLockT $ runConcurrentStateMachine m (stateMachineT Locked))
+     _ <- liftIO $ forkIO (evalMockLockT $ runConcurrentStateMachine m)
      iterT (run m) block
   where run :: (MonadIO m) => MVar Cmd -> ControllerF (m a) -> m a
         run m (LockNow next) =
@@ -44,8 +44,8 @@ runConcurrentControllerT block =
           do liftIO $ putMVar m (UnlockCmd untilDate)
              next
 
-runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> StateMachineT m () -> m ()
-runConcurrentStateMachine m = iterT runSM
+runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> m ()
+runConcurrentStateMachine m = iterT runSM (stateMachineT Locked)
   where runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
         runSM (ScheduleLock atDate next) =
           do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
