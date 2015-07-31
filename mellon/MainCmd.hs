@@ -1,14 +1,14 @@
 module Main where
 
-import qualified Control.Concurrent as CC (threadDelay)
+import qualified Control.Concurrent as CC (forkIO, threadDelay)
 import Control.Monad.IO.Class
 import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, utcToLocalTime)
 import qualified Data.Time as Time (getCurrentTimeZone, getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
-import System.Mellon.Controller (ConcurrentController, runConcurrentController, unlockUntil, lockNow)
-import System.Mellon.Lock (MonadLock(..), MockLockT, execMockLockT)
+import System.Mellon.Controller (ConcurrentController, concurrentController, runConcurrentController, runConcurrentStateMachine, unlockUntil, lockNow)
+import System.Mellon.Lock (MonadLock(..), MockLockT, evalMockLockT, execMockLockT)
 
 data Verbosity
   = Normal
@@ -119,7 +119,10 @@ testMockLock =
      lock
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions False _ (Concurrent _)) = runConcurrentController testConcurrent
+run (GlobalOptions False _ (Concurrent _)) =
+  do cc <- concurrentController
+     _ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc)
+     runConcurrentController cc testConcurrent
 run (GlobalOptions False _ (MockLockCmd _)) =
   do output <- execMockLockT testMockLock
      print output

@@ -8,8 +8,10 @@
 
 module System.Mellon.Controller.Concurrent
          ( ConcurrentController
+         , concurrentController
          , runConcurrentController
          , runConcurrentControllerT
+         , runConcurrentStateMachine
          ) where
 
 import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
@@ -24,23 +26,25 @@ import System.Mellon.Lock
 type ConcurrentController = ControllerT IO ()
 
 -- | Run an 'IO' computation in the 'ConcurrentController' monad.
-runConcurrentController :: ConcurrentController -> IO ()
+runConcurrentController :: MVar Cmd -> ConcurrentController -> IO ()
 runConcurrentController = runConcurrentControllerT
+
+-- | Make a new 'ConcurrentController' by creating the MVar you'll use
+-- to communicate with it.
+concurrentController :: IO (MVar Cmd)
+concurrentController = newEmptyMVar
 
 -- | Run a computation in the 'ControllerT' monad transformer.
 --
 -- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
 -- instance of 'MonadIO'.
-runConcurrentControllerT :: (MonadIO m) => ControllerT m a -> m a
-runConcurrentControllerT block =
-  do m <- liftIO newEmptyMVar
-     _ <- liftIO $ forkIO (evalMockLockT $ runConcurrentStateMachine m)
-     iterT (run m) block
-  where run :: (MonadIO m) => MVar Cmd -> ControllerF (m a) -> m a
-        run m (LockNow next) =
+runConcurrentControllerT :: (MonadIO m) => MVar Cmd -> ControllerT m a -> m a
+runConcurrentControllerT m = iterT run
+  where run :: (MonadIO m) => ControllerF (m a) -> m a
+        run (LockNow next) =
           do liftIO $ putMVar m LockNowCmd
              next
-        run m (UnlockUntil untilDate next) =
+        run (UnlockUntil untilDate next) =
           do liftIO $ putMVar m (UnlockCmd untilDate)
              next
 
