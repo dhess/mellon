@@ -7,7 +7,7 @@ import qualified Data.Time as Time (getCurrentTimeZone, getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
-import System.Mellon.Controller (ConcurrentController, concurrentController, runConcurrentController, runConcurrentStateMachine, unlockUntil, lockNow)
+import System.Mellon.Controller (ControllerT, concurrentController, runConcurrentControllerT, runConcurrentStateMachine, unlockUntil, lockNow)
 import System.Mellon.Lock (MonadLock(..), MockLockT, evalMockLockT, execMockLockT)
 
 data Verbosity
@@ -73,7 +73,7 @@ putStrLn = liftIO . Prelude.putStrLn
 putStrLnWithTime :: MonadIO m => UTCTime -> TimeZone -> String -> m ()
 putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
 
-testConcurrent :: ConcurrentController
+testConcurrent :: ControllerT IO ()
 testConcurrent =
   do tz <- getCurrentTimeZone
      now <- getCurrentTime
@@ -122,8 +122,8 @@ run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Concurrent _)) =
   do cc <- concurrentController
      --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc)
-     --runConcurrentController cc testConcurrent
-     _ <- CC.forkIO (runConcurrentController cc testConcurrent)
+     --runConcurrentControllerT cc testConcurrent
+     _ <- CC.forkIO (runConcurrentControllerT cc testConcurrent)
      evalMockLockT $ runConcurrentStateMachine cc
 run (GlobalOptions False _ (MockLockCmd _)) =
   do output <- execMockLockT testMockLock

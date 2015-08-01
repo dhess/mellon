@@ -7,9 +7,7 @@
 -- execute controller commands without blocking.
 
 module System.Mellon.Controller.Concurrent
-         ( ConcurrentController
-         , concurrentController
-         , runConcurrentController
+         ( concurrentController
          , runConcurrentControllerT
          , runConcurrentStateMachine
          ) where
@@ -21,13 +19,6 @@ import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosec
 import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineF(..), stateMachineT)
 import System.Mellon.Lock
-
--- | The basic concurrent controller type.
-type ConcurrentController = ControllerT IO ()
-
--- | Run an 'IO' computation in the 'ConcurrentController' monad.
-runConcurrentController :: MVar Cmd -> ConcurrentController -> IO ()
-runConcurrentController = runConcurrentControllerT
 
 -- | Make a new 'ConcurrentController' by creating the MVar you'll use
 -- to communicate with it.
