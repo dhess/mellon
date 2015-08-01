@@ -1,3 +1,5 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Main where
 
 import qualified Control.Concurrent as CC (forkIO, threadDelay)
@@ -7,8 +9,8 @@ import qualified Data.Time as Time (getCurrentTimeZone, getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
-import System.Mellon.Controller (ControllerT, concurrentController, runConcurrentControllerT, runConcurrentStateMachine, unlockUntil, lockNow)
-import System.Mellon.Lock (MonadLock(..), MockLockT, evalMockLockT, execMockLockT)
+import System.Mellon.Controller (ConcurrentController, ControllerT, concurrentController, runConcurrentControllerT, runConcurrentStateMachine, unlockUntil, lockNow)
+import System.Mellon.Lock (MonadLock(..), MockLockT, execMockLockT)
 
 data Verbosity
   = Normal
@@ -120,11 +122,12 @@ testMockLock =
 
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Concurrent _)) =
-  do cc <- concurrentController
+  do cc :: ConcurrentController () <- concurrentController
      --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc)
      --runConcurrentControllerT cc testConcurrent
      _ <- CC.forkIO (runConcurrentControllerT cc testConcurrent)
-     evalMockLockT $ runConcurrentStateMachine cc
+     lockEvents <- execMockLockT $ runConcurrentStateMachine cc ()
+     print lockEvents
 run (GlobalOptions False _ (MockLockCmd _)) =
   do output <- execMockLockT testMockLock
      print output

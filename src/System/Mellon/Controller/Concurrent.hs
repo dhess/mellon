@@ -7,7 +7,8 @@
 -- execute controller commands without blocking.
 
 module System.Mellon.Controller.Concurrent
-         ( concurrentController
+         ( ConcurrentController
+         , concurrentController
          , runConcurrentControllerT
          , runConcurrentStateMachine
          ) where
@@ -20,29 +21,47 @@ import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineF(..), stateMachineT)
 import System.Mellon.Lock
 
+-- | A 'ConcurrentController' uses 'MVar's and other Concurrent
+-- Haskell mechanisms to run a controller/state machine in a
+-- background thread(s).
+--
+-- Note that the constructor is not exported. Use
+-- 'concurrentController' to create a new instance.
+data ConcurrentController a =
+  ConcurrentController {_cmd :: MVar Cmd
+                       ,_quit :: MVar a}
+
 -- | Make a new 'ConcurrentController' by creating the MVar you'll use
 -- to communicate with it.
-concurrentController :: IO (MVar Cmd)
-concurrentController = newEmptyMVar
+concurrentController :: IO (ConcurrentController a)
+concurrentController =
+  do cm <- newEmptyMVar
+     qm <- newEmptyMVar
+     return ConcurrentController {_cmd = cm, _quit = qm}
 
 -- | Run a computation in the 'ControllerT' monad transformer.
 --
 -- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
 -- instance of 'MonadIO'.
-runConcurrentControllerT :: (MonadIO m) => MVar Cmd -> ControllerT m () -> m ()
-runConcurrentControllerT m block =
+runConcurrentControllerT :: (MonadIO m) => ConcurrentController a -> ControllerT m a -> m a
+runConcurrentControllerT (ConcurrentController cm qm) block =
   do _ <- iterT run block
-     liftIO $ putMVar m QuitCmd
-  where run :: (MonadIO m) => ControllerF (m ()) -> m ()
+     liftIO $ putMVar cm QuitCmd
+     r <- liftIO $ takeMVar qm
+     return r
+  where run :: (MonadIO m) => ControllerF (m a) -> m a
         run (LockNow next) =
-          do liftIO $ putMVar m LockNowCmd
+          do liftIO $ putMVar cm LockNowCmd
              next
         run (UnlockUntil untilDate next) =
-          do liftIO $ putMVar m (UnlockCmd untilDate)
+          do liftIO $ putMVar cm (UnlockCmd untilDate)
              next
 
-runConcurrentStateMachine :: (MonadIO m, MonadLock m) => MVar Cmd -> m ()
-runConcurrentStateMachine m = iterT runSM (stateMachineT Locked)
+runConcurrentStateMachine :: (MonadIO m, MonadLock m) => ConcurrentController a -> a -> m a
+runConcurrentStateMachine (ConcurrentController cm qm) onQuit =
+  do _ <- iterT runSM (stateMachineT Locked)
+     liftIO $ putMVar qm onQuit
+     return onQuit
   where runSM :: (MonadIO m, MonadLock m) => StateMachineF (m ()) -> m ()
         runSM Halt = return ()
         runSM (ScheduleLock atDate next) =
@@ -53,11 +72,11 @@ runConcurrentStateMachine m = iterT runSM (stateMachineT Locked)
         -- state machine will simply ignore it.
         runSM (UnscheduleLock next) = next
         runSM (WaitForCmd next) =
-          do cmd <- liftIO $ takeMVar m
+          do cmd <- liftIO $ takeMVar cm
              next cmd
 
         lockAt :: UTCTime -> IO ()
-        lockAt t = putMVar m (LockCmd t)
+        lockAt t = putMVar cm (LockCmd t)
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be
