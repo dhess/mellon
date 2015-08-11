@@ -10,7 +10,7 @@ import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
 import System.Mellon.Controller (ConcurrentController, ControllerT, concurrentController, runConcurrentControllerT, runConcurrentStateMachine, unlockUntil, lockNow)
-import System.Mellon.Lock (MonadLock(..), MockLockT, execMockLockT)
+import System.Mellon.Lock (MonadLock(..), MockLockT, evalMockLockT, execMockLockT)
 
 data Verbosity
   = Normal
@@ -123,7 +123,7 @@ testMockLock =
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Concurrent _)) =
   do cc :: ConcurrentController () <- concurrentController
-     --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc)
+     --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc ())
      --runConcurrentControllerT cc testConcurrent
      _ <- CC.forkIO (runConcurrentControllerT cc testConcurrent)
      lockEvents <- execMockLockT $ runConcurrentStateMachine cc ()
