@@ -121,10 +121,10 @@ runCCTest cc =
 
 testMockLock :: MockLockT IO ()
 testMockLock =
-  do lock ()
-     unlock ()
-     unlock ()
-     lock ()
+  do lock
+     unlock
+     unlock
+     lock
 
 run :: GlobalOptions -> IO Int
 run (GlobalOptions False _ (Concurrent _)) =

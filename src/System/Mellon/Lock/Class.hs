@@ -16,53 +16,53 @@ import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
 
 class (Monad m) => MonadLock m where
-  lock :: a -> m ()
-  unlock :: a -> m ()
+  lock :: m ()
+  unlock :: m ()
 
 instance (MonadLock m) => MonadLock (IdentityT m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m) => MonadLock (SL.StateT s m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m) => MonadLock (SS.StateT s m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m, Monoid w) => MonadLock (WL.WriterT w m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m, Monoid w) => MonadLock (WS.WriterT w m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m) => MonadLock (ReaderT r m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m, Monoid w) => MonadLock (RWSL.RWST r w s m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m, Monoid w) => MonadLock (RWSS.RWST r w s m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m) => MonadLock (ExceptT e m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m) => MonadLock (MaybeT m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m) => MonadLock (ContT r m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
 
 instance (MonadLock m) => MonadLock (ListT m) where
-  lock = lift . lock
-  unlock = lift . unlock
+  lock = lift lock
+  unlock = lift unlock
