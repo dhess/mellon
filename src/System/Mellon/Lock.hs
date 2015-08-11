@@ -17,7 +17,6 @@ module System.Mellon.Lock
 
 import Control.Applicative (Alternative)
 import Control.Monad.Writer
-import Data.Functor.Identity (Identity, runIdentity)
 import Data.Time (UTCTime, getCurrentTime)
 import System.Mellon.Lock.Class
 
@@ -42,19 +41,19 @@ evalMockLockT (MockLockT x) = liftM fst (runWriterT x)
 execMockLockT :: (Monad m) => MockLockT m a -> m [Event]
 execMockLockT (MockLockT x) = execWriterT x
 
-type MockLock a = MockLockT Identity a
+type MockLock a = MockLockT IO a
 
 liftMockLock :: (a, [Event]) -> MockLock a
 liftMockLock = MockLockT . writer
 
-runMockLock :: MockLock a -> (a, [Event])
-runMockLock = runIdentity . runMockLockT
+runMockLock :: MockLock a -> IO (a, [Event])
+runMockLock = runMockLockT
 
-evalMockLock :: MockLock a -> a
-evalMockLock = runIdentity . evalMockLockT
+evalMockLock :: MockLock a -> IO a
+evalMockLock = evalMockLockT
 
-execMockLock :: MockLock a -> [Event]
-execMockLock = runIdentity . execMockLockT
+execMockLock :: MockLock a -> IO [Event]
+execMockLock = execMockLockT
 
 instance (MonadIO m) => MonadLock (MockLockT m) where
   lock =
@@ -63,4 +62,3 @@ instance (MonadIO m) => MonadLock (MockLockT m) where
   unlock =
     do now <- liftIO $ getCurrentTime
        MockLockT $ tell [Unlocked now]
-
