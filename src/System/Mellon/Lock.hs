@@ -18,38 +18,49 @@ module System.Mellon.Lock
 import Control.Applicative (Alternative)
 import Control.Monad.Writer
 import Data.Functor.Identity (Identity, runIdentity)
+import Data.Time (UTCTime, getCurrentTime)
 import System.Mellon.Lock.Class
 
-newtype MockLockT m a =
-  MockLockT (WriterT [String] m a)
-  deriving (Applicative,Foldable,Functor,Monad,MonadTrans,MonadIO,MonadFix,Traversable,Alternative,MonadPlus,Show,Read,Ord,Eq)
+data Event
+  = Locked UTCTime
+  | Unlocked UTCTime
+  deriving (Eq,Show)
 
-liftMockLockT :: (Monad m) => m (a, [String]) -> MockLockT m a
+newtype MockLockT m a =
+  MockLockT (WriterT [Event] m a)
+  deriving (Applicative,Foldable,Functor,Monad,MonadTrans,MonadIO,MonadFix,Traversable,Alternative,MonadPlus,Show,Eq)
+
+liftMockLockT :: (Monad m) => m (a, [Event]) -> MockLockT m a
 liftMockLockT = MockLockT . WriterT
 
-runMockLockT :: (Monad m) => MockLockT m a -> m (a, [String])
+runMockLockT :: (Monad m) => MockLockT m a -> m (a, [Event])
 runMockLockT (MockLockT x) = runWriterT x
 
 evalMockLockT :: (Monad m) => MockLockT m a -> m a
 evalMockLockT (MockLockT x) = liftM fst (runWriterT x)
 
-execMockLockT :: (Monad m) => MockLockT m a -> m [String]
+execMockLockT :: (Monad m) => MockLockT m a -> m [Event]
 execMockLockT (MockLockT x) = execWriterT x
 
 type MockLock a = MockLockT Identity a
 
-liftMockLock :: (a, [String]) -> MockLock a
+liftMockLock :: (a, [Event]) -> MockLock a
 liftMockLock = MockLockT . writer
 
-runMockLock :: MockLock a -> (a, [String])
+runMockLock :: MockLock a -> (a, [Event])
 runMockLock = runIdentity . runMockLockT
 
 evalMockLock :: MockLock a -> a
 evalMockLock = runIdentity . evalMockLockT
 
-execMockLock :: MockLock a -> [String]
+execMockLock :: MockLock a -> [Event]
 execMockLock = runIdentity . execMockLockT
 
-instance (Monad m) => MonadLock (MockLockT m) where
-  lock = MockLockT $ tell ["Locked"]
-  unlock = MockLockT $ tell ["Unlocked"]
+instance (MonadIO m) => MonadLock (MockLockT m) where
+  lock =
+    do now <- liftIO $ getCurrentTime
+       MockLockT $ tell [Locked now]
+  unlock =
+    do now <- liftIO $ getCurrentTime
+       MockLockT $ tell [Unlocked now]
+
