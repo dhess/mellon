@@ -51,5 +51,5 @@ execMockLock :: MockLock a -> [String]
 execMockLock = runIdentity . execMockLockT
 
 instance (Monad m) => MonadLock (MockLockT m) where
-  lock = MockLockT $ tell ["Locked"]
-  unlock = MockLockT $ tell ["Unlocked"]
+  lock = const $ MockLockT $ tell ["Locked"]
+  unlock = const $ MockLockT $ tell ["Unlocked"]

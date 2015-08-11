@@ -76,13 +76,13 @@ runConcurrentStateMachine (ConcurrentController cm qm) = loop Locked
 
         runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
         runSM (LockDevice next) =
-          do lock
+          do lock ()
              next
         runSM (ScheduleLock atDate next) =
           do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
              next
         runSM (UnlockDevice next) =
-          do unlock
+          do unlock ()
              next
         -- For this particular implementation, it's safe simply to
         -- ignore this command. When the "unscheduled" lock fires, the
