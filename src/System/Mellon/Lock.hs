@@ -29,16 +29,16 @@ newtype MockLockT m a =
   MockLockT (WriterT [Event] m a)
   deriving (Applicative,Foldable,Functor,Monad,MonadTrans,MonadIO,MonadFix,Traversable,Alternative,MonadPlus,Show,Eq)
 
-liftMockLockT :: (Monad m) => m (a, [Event]) -> MockLockT m a
+liftMockLockT :: (MonadIO m) => m (a, [Event]) -> MockLockT m a
 liftMockLockT = MockLockT . WriterT
 
-runMockLockT :: (Monad m) => MockLockT m a -> m (a, [Event])
+runMockLockT :: (MonadIO m) => MockLockT m a -> m (a, [Event])
 runMockLockT (MockLockT x) = runWriterT x
 
-evalMockLockT :: (Monad m) => MockLockT m a -> m a
+evalMockLockT :: (MonadIO m) => MockLockT m a -> m a
 evalMockLockT (MockLockT x) = liftM fst (runWriterT x)
 
-execMockLockT :: (Monad m) => MockLockT m a -> m [Event]
+execMockLockT :: (MonadIO m) => MockLockT m a -> m [Event]
 execMockLockT (MockLockT x) = execWriterT x
 
 type MockLock a = MockLockT IO a
