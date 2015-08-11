@@ -21,8 +21,8 @@ import System.Mellon.Controller.Free (ControllerF(..), ControllerT)
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineF(..), execCmdT)
 import System.Mellon.Lock
 
-data CCCmd
-  = Quit
+data CCCmd a
+  = Quit a
   | SMCmd Cmd
   deriving (Eq)
 
@@ -33,7 +33,7 @@ data CCCmd
 -- Note that the constructor is not exported. Use
 -- 'concurrentController' to create a new instance.
 data ConcurrentController a =
-  ConcurrentController {_cmd :: MVar CCCmd
+  ConcurrentController {_cmd :: MVar (CCCmd a)
                        ,_quit :: MVar a}
 
 -- | Make a new 'ConcurrentController' by creating the MVar you'll use
@@ -50,10 +50,10 @@ concurrentController =
 -- instance of 'MonadIO'.
 runConcurrentControllerT :: (MonadIO m) => ConcurrentController a -> ControllerT m a -> m a
 runConcurrentControllerT (ConcurrentController cm qm) block =
-  do _ <- iterT run block
-     liftIO $ putMVar cm Quit
-     r <- liftIO $ takeMVar qm
-     return r
+  do result <- iterT run block
+     liftIO $ putMVar cm $ Quit result
+     _ <- liftIO $ takeMVar qm
+     return result
   where run :: (MonadIO m) => ControllerF (m a) -> m a
         run (LockNow next) =
           do liftIO $ putMVar cm $ SMCmd LockNowCmd
@@ -62,14 +62,14 @@ runConcurrentControllerT (ConcurrentController cm qm) block =
           do liftIO $ putMVar cm $ SMCmd (UnlockCmd untilDate)
              next
 
-runConcurrentStateMachine :: (MonadIO m, MonadLock m) => ConcurrentController a -> a -> m a
-runConcurrentStateMachine (ConcurrentController cm qm) onQuit = loop Locked
+runConcurrentStateMachine :: (MonadIO m, MonadLock m) => ConcurrentController a -> m a
+runConcurrentStateMachine (ConcurrentController cm qm) = loop Locked
   where loop state =
           do cmd <- liftIO $ takeMVar cm
              case cmd of
-               Quit ->
-                 do liftIO $ putMVar qm onQuit
-                    return onQuit
+               (Quit result) ->
+                 do liftIO $ putMVar qm result
+                    return result
                (SMCmd smc) ->
                  do newState <- iterT runSM (execCmdT smc state)
                     loop newState

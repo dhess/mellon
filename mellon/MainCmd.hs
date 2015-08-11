@@ -10,7 +10,7 @@ import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
 import System.Mellon.Controller (ConcurrentController, ControllerT, concurrentController, runConcurrentControllerT, runConcurrentStateMachine, unlockUntil, lockNow)
-import System.Mellon.Lock (MonadLock(..), MockLockT, evalMockLockT, execMockLockT)
+import System.Mellon.Lock (MonadLock(..), MockLockT, execMockLockT, runMockLockT)
 
 data Verbosity
   = Normal
@@ -75,7 +75,7 @@ putStrLn = liftIO . Prelude.putStrLn
 putStrLnWithTime :: MonadIO m => UTCTime -> TimeZone -> String -> m ()
 putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
 
-testConcurrent :: ControllerT IO ()
+testConcurrent :: ControllerT IO Int
 testConcurrent =
   do tz <- getCurrentTimeZone
      now <- getCurrentTime
@@ -112,6 +112,12 @@ testConcurrent =
      threadDelay (3 * 1000000)
      lockNow
      threadDelay (12 * 1000000)
+     return 7
+
+runCCTest :: ConcurrentController Int -> IO ()
+runCCTest cc =
+  do _ <- runConcurrentControllerT cc testConcurrent
+     return ()
 
 testMockLock :: MockLockT IO ()
 testMockLock =
@@ -120,21 +126,22 @@ testMockLock =
      unlock
      lock
 
-run :: GlobalOptions -> IO ()
+run :: GlobalOptions -> IO Int
 run (GlobalOptions False _ (Concurrent _)) =
-  do cc :: ConcurrentController () <- concurrentController
+  do cc :: ConcurrentController Int <- concurrentController
      --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc ())
      --runConcurrentControllerT cc testConcurrent
-     _ <- CC.forkIO (runConcurrentControllerT cc testConcurrent)
-     lockEvents <- execMockLockT $ runConcurrentStateMachine cc ()
-     print lockEvents
+     _ <- CC.forkIO (runCCTest cc)
+     (result, lockEvents) <- runMockLockT $ runConcurrentStateMachine cc
+     print (result, lockEvents)
+     return result
 run (GlobalOptions False _ (MockLockCmd _)) =
   do output <- execMockLockT testMockLock
      print output
-     return ()
-run _ = return ()
+     return 0
+run _ = return 0
 
-main :: IO ()
+main :: IO Int
 main = execParser opts >>= run
   where opts =
           info (helper <*> cmds)
