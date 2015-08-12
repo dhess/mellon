@@ -4,13 +4,14 @@ module Main where
 
 import qualified Control.Concurrent as CC (forkIO, threadDelay)
 import Control.Monad.IO.Class
-import Data.Time (NominalDiffTime, UTCTime, TimeZone, addUTCTime, defaultTimeLocale, formatTime, utcToLocalTime)
-import qualified Data.Time as Time (getCurrentTimeZone, getCurrentTime)
+import Control.Monad.Writer
+import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
+import qualified Data.Time as Time (getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
 import System.Mellon.Controller (ConcurrentController, ControllerT, concurrentController, runConcurrentControllerT, runConcurrentStateMachine, unlockUntil, lockNow)
-import System.Mellon.Lock (MonadLock(..), MockLockT, execMockLockT, runMockLockT)
+import System.Mellon.Lock (MonadLock(..), MockLockEvent(..), MockLockT, execMockLockT, runMockLockT)
 
 data Verbosity
   = Normal
@@ -60,11 +61,11 @@ cmds =
     (command "concurrent" (info concurrentCmd (progDesc "Run the concurrent controller test")) <>
      command "mocklock" (info mockLockCmd (progDesc "Run the mock lock test")))
 
+sleep :: MonadIO m => Int -> m ()
+sleep = liftIO . CC.threadDelay . (* 1000000)
+
 threadDelay :: MonadIO m => Int -> m ()
 threadDelay = liftIO . CC.threadDelay
-
-getCurrentTimeZone :: MonadIO m => m TimeZone
-getCurrentTimeZone = liftIO Time.getCurrentTimeZone
 
 getCurrentTime :: MonadIO m => m UTCTime
 getCurrentTime = liftIO Time.getCurrentTime
@@ -72,52 +73,86 @@ getCurrentTime = liftIO Time.getCurrentTime
 putStrLn :: MonadIO m => String -> m ()
 putStrLn = liftIO . Prelude.putStrLn
 
-putStrLnWithTime :: MonadIO m => UTCTime -> TimeZone -> String -> m ()
-putStrLnWithTime t tz msg = putStrLn $ concat [formatTime defaultTimeLocale "%I:%M:%S %p" (utcToLocalTime tz t), " -- ", msg]
+timePlusN :: UTCTime -> Integer -> UTCTime
+timePlusN time n = (fromInteger n) `addUTCTime` time
 
-testConcurrent :: ControllerT IO Int
-testConcurrent =
-  do tz <- getCurrentTimeZone
-     now <- getCurrentTime
+type TestConcurrent a = WriterT [MockLockEvent] (ControllerT IO) a
 
-     putStrLn "The test to be run (times may vary a slight bit due to thread scheduling vagaries):"
-     putStrLnWithTime ((2 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 5 seconds"
-     putStrLnWithTime ((10 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 3 seconds"
-     putStrLnWithTime ((11 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 10 seconds; this unlock should override the previous one"
-     putStrLnWithTime ((25 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 8 seconds"
-     putStrLnWithTime ((27 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 1 second; this unlock should be ignored"
-     putStrLnWithTime ((40 :: NominalDiffTime) `addUTCTime` now) tz "Unlock for 8 seconds"
-     putStrLnWithTime ((43 :: NominalDiffTime) `addUTCTime` now) tz "Lock immediately; this should unschedule the previous lock"
-     putStrLnWithTime ((55 :: NominalDiffTime) `addUTCTime` now) tz "Quit"
-     putStrLn ""
-     putStrLn "Test begins now."
-     threadDelay (2 * 1000000)
-     tPlus2 <- getCurrentTime
-     unlockUntil $ (5 :: NominalDiffTime) `addUTCTime` tPlus2
-     threadDelay (8 * 1000000)
-     tPlus10 <- getCurrentTime
-     unlockUntil $ (3 :: NominalDiffTime) `addUTCTime` tPlus10
-     threadDelay (1 * 1000000)
-     tPlus11 <- getCurrentTime
-     unlockUntil $ (10 :: NominalDiffTime) `addUTCTime` tPlus11
-     threadDelay (14 * 1000000)
-     tPlus25 <- getCurrentTime
-     unlockUntil $ (8 :: NominalDiffTime) `addUTCTime` tPlus25
-     threadDelay (2 * 1000000)
-     tPlus27 <- getCurrentTime
-     unlockUntil $ (1 :: NominalDiffTime) `addUTCTime` tPlus27
-     threadDelay (13 * 1000000)
-     tPlus40 <- getCurrentTime
-     unlockUntil $ (8 :: NominalDiffTime) `addUTCTime` tPlus40
-     threadDelay (3 * 1000000)
-     lockNow
-     threadDelay (12 * 1000000)
-     return 7
+testCC :: ControllerT IO [MockLockEvent]
+testCC =
+  do expectedResults <- execWriterT theTest
+     return expectedResults
 
-runCCTest :: ConcurrentController Int -> IO ()
+  where theTest :: TestConcurrent ()
+        theTest =
+          do putStrLn "Beginning test. This will take about 1 minute."
+             unlockWillExpire 5
+             sleep 8
+             unlockWontExpire 3
+             sleep 1
+             unlockWillExpire 10
+             sleep 14
+             unlockWillExpire 8
+             sleep 2
+             unlockWillBeIgnored 1
+             sleep 13
+             unlockWontExpire 8
+             sleep 3
+             lockIt
+             sleep 12
+
+        lockIt :: TestConcurrent ()
+        lockIt =
+          do now <- getCurrentTime
+             lockNow
+             tell [LockEvent now]
+
+        unlock_ :: Integer -> TestConcurrent (UTCTime, UTCTime)
+        unlock_ duration =
+          do now <- getCurrentTime
+             let expire = timePlusN now duration
+             unlockUntil expire
+             return (now, expire)
+
+        unlockWillExpire :: Integer -> TestConcurrent ()
+        unlockWillExpire duration =
+          do (now, expire) <- unlock_ duration
+             tell [UnlockEvent now]
+             tell [LockEvent expire]
+
+        unlockWontExpire :: Integer -> TestConcurrent ()
+        unlockWontExpire duration =
+          do (now, _) <- unlock_ duration
+             tell [UnlockEvent now]
+
+        unlockWillBeIgnored :: Integer -> TestConcurrent ()
+        unlockWillBeIgnored duration =
+          do _ <- unlock_ duration
+             return ()
+
+runCCTest :: ConcurrentController [MockLockEvent] -> IO ()
 runCCTest cc =
-  do _ <- runConcurrentControllerT cc testConcurrent
+  do _ <- runConcurrentControllerT cc testCC
      return ()
+
+type CheckedResults = Either ((MockLockEvent, MockLockEvent), String) String
+
+checkResults :: [MockLockEvent]
+             -> [MockLockEvent]
+             -> NominalDiffTime
+             -> CheckedResults
+checkResults expected actual epsilon = foldr compareResult (Right "No results to compare") $ zip expected actual
+  where compareResult :: (MockLockEvent, MockLockEvent) -> CheckedResults -> CheckedResults
+        compareResult _ (Left l) = Left l
+        compareResult ev@(UnlockEvent t1, UnlockEvent t2) _ =
+          if t2 `diffUTCTime` t1 < epsilon
+             then Right "OK"
+             else Left (ev, "Time difference exceeds epsilon")
+        compareResult ev@(LockEvent t1, LockEvent t2) _ =
+          if t2 `diffUTCTime` t1 < epsilon
+             then Right "OK"
+             else Left (ev, "Time difference exceeds epsilon")
+        compareResult ev _ = Left (ev, "Event types don't match")
 
 testMockLock :: MockLockT IO ()
 testMockLock =
@@ -126,22 +161,22 @@ testMockLock =
      unlock
      lock
 
-run :: GlobalOptions -> IO Int
+run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Concurrent _)) =
-  do cc :: ConcurrentController Int <- concurrentController
+  do cc :: ConcurrentController [MockLockEvent] <- concurrentController
      --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc ())
      --runConcurrentControllerT cc testConcurrent
      _ <- CC.forkIO (runCCTest cc)
-     (result, lockEvents) <- runMockLockT $ runConcurrentStateMachine cc
-     print (result, lockEvents)
-     return result
+     (ccEvents, lockEvents) <- runMockLockT $ runConcurrentStateMachine cc
+     let outcome = checkResults ccEvents lockEvents (0.5 :: NominalDiffTime)
+     print outcome
+
 run (GlobalOptions False _ (MockLockCmd _)) =
   do output <- execMockLockT testMockLock
      print output
-     return 0
-run _ = return 0
+run _ = return ()
 
-main :: IO Int
+main :: IO ()
 main = execParser opts >>= run
   where opts =
           info (helper <*> cmds)
