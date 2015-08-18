@@ -1,7 +1,7 @@
--- | 'Lock' is a very simple interface for implementing lock devices
+-- | 'MonadLock' is a very simple interface for implementing lock devices
 -- in @mellon@. The core @mellon@ library does not include any
--- physical 'Lock' implementations, but it does include a "mock lock"
--- implementation for debugging and testing.
+-- physical 'MonadLock' implementations, but it does include a "mock
+-- lock" implementation for debugging and testing.
 
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
