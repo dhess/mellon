@@ -6,22 +6,21 @@
 -- | A 'MonadFree' monad implementation of the @mellon@ state machine.
 --
 -- Typically, a user process does not interact directly with a
--- 'StateMachine'. That is the job of a controller. Generally
--- speaking, you will only need to use 'StateMachine' if you're
--- implementing a 'System.Mellon.Controller'.
+-- 'StateMachineT'. That is the job of a controller. Generally
+-- speaking, you will only need to use 'StateMachineT' if you're
+-- implementing a 'System.Mellon.Controller.ControllerT'.
 --
 -- The @mellon@ state machine model is shown in the following diagram:
 --
 -- <<https://s3-us-west-2.amazonaws.com/mellon/mellon-state-diagram.svg mellon state diagram>>
 --
--- Note that the state machine model as implemented by 'StateMachine'
+-- Note that the state machine model as implemented by 'StateMachineT'
 -- is slightly different than the one shown in the diagram.
 -- Specificaly, there is a difference between the 'LockNowCmd' and
 -- 'LockCmd' commands that is not represented in the state diagram,
 -- which only shows a single "lock" command. This is due to the fact
 -- that, in a concurrent implementation of a
--- 'System.Mellon.Controller' (e.g.,
--- 'System.Mellon.Controller.Concurrent'), it may not be possible (let
+-- 'System.Mellon.Controller.ControllerT', it may not be possible (let
 -- alone performant) to guarantee that the
 -- unlock-expiration-followed-by-lock sequence is atomic: the
 -- controller could receive a new unlock command from the user while
@@ -51,13 +50,13 @@ import Control.Monad.Free.TH (makeFreeCon)
 import Data.Functor.Identity (Identity)
 import Data.Time (UTCTime)
 
--- | The states of a @mellon@ 'StateMachine'.
+-- | The states of a @mellon@ 'StateMachineT'.
 data State
   = Locked
   | Unlocked UTCTime
   deriving (Eq)
 
--- | The 'StateMachine' commands. These represent the transitions
+-- | The 'StateMachineT' commands. These represent the transitions
 -- from one state to the next.
 data Cmd
     -- | Lock immediately, canceling any unlock currently in effect.
@@ -73,9 +72,9 @@ data Cmd
   | UnlockCmd UTCTime
   deriving (Eq)
 
--- | The 'StateMachine' embedded DSL (EDSL). A 'System.Mellon.Controller'
+-- | The 'StateMachineT' embedded DSL (EDSL). A 'System.Mellon.Controller.ControllerT'
 --  provides an implementation of the EDSL which turns the
--- `StateMachine`'s pure state transformations into real-world
+-- `StateMachineT`'s pure state transformations into real-world
 -- actions.
 data StateMachineF next where
   LockDevice :: next -> StateMachineF next
@@ -89,11 +88,10 @@ instance Functor StateMachineF where
   fmap f (UnlockDevice x) = UnlockDevice (f x)
   fmap f (UnscheduleLock x) = UnscheduleLock (f x)
 
--- | A 'FreeT' monad transformer version of the @mellon@ state
--- machine.
+-- | 'StateMachineT' is a free monad transformer.
 type StateMachineT = FreeT StateMachineF
 
--- | The basic @mellon@ state machine monad.
+-- | Wraps 'StateMachineT' around the 'Identity' monad.
 type StateMachine = StateMachineT Identity
 
 makeFreeCon 'LockDevice
@@ -101,13 +99,14 @@ makeFreeCon 'ScheduleLock
 makeFreeCon 'UnlockDevice
 makeFreeCon 'UnscheduleLock
 
--- | The pure 'StateMachine' interpreter.
+-- | The pure 'StateMachineT' interpreter.
 --
 -- 'execCmdT' provides an abstract, pure model of the core @mellon@
 -- state machine. The state machine is the same for all
 -- implementations; what changes from one implementation to the next
 -- is the specific machinery for locking and scheduling, which is
--- provided by a 'System.Mellon.Controller' implementation.
+-- provided by a 'System.Mellon.Controller.ControllerT'
+-- implementation.
 execCmdT :: (Monad m) => Cmd -> State -> StateMachineT m State
 
 execCmdT LockNowCmd Locked = return Locked
