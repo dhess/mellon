@@ -1,10 +1,5 @@
--- | A concurrent @mellon@ controller implementation. When run, the
--- controller forks a separate unbound (i.e., 'forkIO') thread to
--- control the 'StateMachine', and communicates with it safely using
--- 'MVar's.
---
--- While running in the concurrent controller monad, the program can
--- execute controller commands without blocking.
+-- | A 'ControllerT' implementation supporting concurrency via
+-- "Control.Concurrent"s concurrency mechanisms.
 
 module System.Mellon.Controller.Concurrent
          ( ConcurrentController
@@ -36,18 +31,21 @@ data ConcurrentController a =
   ConcurrentController {_cmd :: MVar (CCCmd a)
                        ,_quit :: MVar a}
 
--- | Make a new 'ConcurrentController' by creating the MVar you'll use
--- to communicate with it.
+-- | Create a new 'ConcurrentController'.
 concurrentController :: IO (ConcurrentController a)
 concurrentController =
   do cm <- newEmptyMVar
      qm <- newEmptyMVar
      return ConcurrentController {_cmd = cm, _quit = qm}
 
--- | Run a computation in the 'ControllerT' monad transformer.
+-- | Run a 'MonadIO' computation in the 'ControllerT' monad transformer using
+-- 'ConcurrentController'.
 --
--- Because it uses 'forkIO' and 'MVar', the wrapped monad must be an
--- instance of 'MonadIO'.
+-- You may safely run multiple computations simultaneously, each in
+-- its own thread, using the same 'ConcurrentController'.
+--
+-- Note that you will also need to invoke 'runConcurrentStateMachine'
+-- on its own thread.
 runConcurrentControllerT :: (MonadIO m) => ConcurrentController a -> ControllerT m a -> m a
 runConcurrentControllerT (ConcurrentController cm qm) block =
   do result <- iterT run block
@@ -62,6 +60,16 @@ runConcurrentControllerT (ConcurrentController cm qm) block =
           do liftIO $ putMVar cm $ SMCmd (UnlockCmd untilDate)
              next
 
+-- | For each 'ConcurrentController', you will need exactly one thread
+-- running a @mellon@ state machine. 'runConcurrentStateMachine' takes
+-- a 'ConcurrentController' and runs a state machine that waits for
+-- commands from 'runConcurrentControllerT' threads using the same
+-- 'ConcurrentController'.
+--
+-- Note that while you can run many simultaneous
+-- 'runConcurrentControllerT' computations for the same
+-- 'ConcurrentController', you must run only one (and exactly one)
+-- state machine for that 'ConcurrentController'.
 runConcurrentStateMachine :: (MonadIO m, MonadLock m) => ConcurrentController a -> m a
 runConcurrentStateMachine (ConcurrentController cm qm) = loop Locked
   where loop state =
