@@ -42,17 +42,32 @@ instance (MonadIO m, MonadLock m) => MonadController (ConcurrentControllerT m) w
   lockNow =
     do (ConcurrentController c) <- ConcurrentControllerT ask
        state <- liftIO $ takeMVar c
-       lock
-       liftIO $ putMVar c state
-  unlockUntil _ =
+       newState <- iterT runSM (execCmdT LockNowCmd state)
+       liftIO $ putMVar c newState
+  unlockUntil date =
     do (ConcurrentController c) <- ConcurrentControllerT ask
        state <- liftIO $ takeMVar c
-       unlock
+       newState <- iterT runSM (execCmdT (UnlockCmd date) state)
        liftIO $ putMVar c state
 
 instance (MonadLock m) => MonadLock (ConcurrentControllerT m) where
   lock = lift lock
   unlock = lift unlock
+
+runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
+runSM (LockDevice next) =
+  do lock
+     next
+runSM (ScheduleLock atDate next) = next
+  --do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
+  --   next
+runSM (UnlockDevice next) =
+  do unlock
+     next
+-- For this particular implementation, it's safe simply to
+-- ignore this command. When the "unscheduled" lock fires, the
+-- state machine will simply ignore it.
+runSM (UnscheduleLock next) = next
 
 runConcurrentControllerT :: (MonadIO m) => ConcurrentControllerT m a -> ConcurrentController -> m a
 runConcurrentControllerT (ConcurrentControllerT action) c = runReaderT action c
