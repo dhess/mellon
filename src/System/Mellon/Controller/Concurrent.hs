@@ -38,29 +38,40 @@ newtype ConcurrentControllerT m a =
   ConcurrentControllerT (ReaderT ConcurrentController m a)
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
+runConcurrentControllerT :: (MonadIO m) => ConcurrentControllerT m a -> ConcurrentController -> m a
+runConcurrentControllerT (ConcurrentControllerT action) c = runReaderT action c
+
+runInMutex :: (MonadIO m, MonadLock m) => Cmd -> ConcurrentControllerT m ()
+runInMutex cmd =
+  do (ConcurrentController c) <- ConcurrentControllerT ask
+     state <- liftIO $ takeMVar c
+     newState <- iterT runSM (execCmdT cmd state)
+     liftIO $ putMVar c newState
+
 instance (MonadIO m, MonadLock m) => MonadController (ConcurrentControllerT m) where
-  lockNow =
-    do (ConcurrentController c) <- ConcurrentControllerT ask
-       state <- liftIO $ takeMVar c
-       newState <- iterT runSM (execCmdT LockNowCmd state)
-       liftIO $ putMVar c newState
-  unlockUntil date =
-    do (ConcurrentController c) <- ConcurrentControllerT ask
-       state <- liftIO $ takeMVar c
-       newState <- iterT runSM (execCmdT (UnlockCmd date) state)
-       liftIO $ putMVar c state
+  lockNow = runInMutex LockNowCmd
+  unlockUntil = runInMutex . UnlockCmd
 
 instance (MonadLock m) => MonadLock (ConcurrentControllerT m) where
   lock = lift lock
   unlock = lift unlock
 
-runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
+lockAt :: (MonadIO m, MonadLock m) => UTCTime -> ConcurrentControllerT m ()
+lockAt = runInMutex . LockCmd
+
+scheduleLockAt :: (MonadIO m, MonadLock m) => UTCTime -> ConcurrentControllerT m ()
+scheduleLockAt date =
+  do cc <- ConcurrentControllerT ask
+     _ <- liftIO $ forkIO (threadSleepUntil date {- >> runConcurrentControllerT (lockAt date) cc -} )
+     return ()
+
+runSM :: (MonadIO m, MonadLock m) => StateMachineF (ConcurrentControllerT m a) -> ConcurrentControllerT m a
 runSM (LockDevice next) =
   do lock
      next
-runSM (ScheduleLock atDate next) = next
-  --do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
-  --   next
+runSM (ScheduleLock atDate next) =
+  do scheduleLockAt atDate
+     next
 runSM (UnlockDevice next) =
   do unlock
      next
@@ -68,39 +79,6 @@ runSM (UnlockDevice next) =
 -- ignore this command. When the "unscheduled" lock fires, the
 -- state machine will simply ignore it.
 runSM (UnscheduleLock next) = next
-
-runConcurrentControllerT :: (MonadIO m) => ConcurrentControllerT m a -> ConcurrentController -> m a
-runConcurrentControllerT (ConcurrentControllerT action) c = runReaderT action c
-
--- runConcurrentStateMachine :: (MonadIO m, MonadLock m) => ConcurrentController a -> m a
--- runConcurrentStateMachine (ConcurrentController m) = loop Locked
---   where loop state =
---           do cmd <- liftIO $ takeMVar cm
---              case cmd of
---                (Quit result) ->
---                  do liftIO $ putMVar qm result
---                     return result
---                (SMCmd smc) ->
---                  do newState <- iterT runSM (execCmdT smc state)
---                     loop newState
-
---         runSM :: (MonadIO m, MonadLock m) => StateMachineF (m a) -> m a
---         runSM (LockDevice next) =
---           do lock
---              next
---         runSM (ScheduleLock atDate next) =
---           do _ <- liftIO $ forkIO (threadSleepUntil atDate >> lockAt atDate)
---              next
---         runSM (UnlockDevice next) =
---           do unlock
---              next
---         -- For this particular implementation, it's safe simply to
---         -- ignore this command. When the "unscheduled" lock fires, the
---         -- state machine will simply ignore it.
---         runSM (UnscheduleLock next) = next
-
---         lockAt :: UTCTime -> IO ()
---         lockAt t = putMVar cm $ SMCmd (LockCmd t)
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be
