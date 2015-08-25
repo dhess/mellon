@@ -38,8 +38,8 @@ newtype ConcurrentControllerT m a =
   ConcurrentControllerT (ReaderT ConcurrentController m a)
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
-runConcurrentControllerT :: (MonadIO m) => ConcurrentControllerT m a -> ConcurrentController -> m a
-runConcurrentControllerT (ConcurrentControllerT action) c = runReaderT action c
+runConcurrentControllerT :: (MonadIO m) => ConcurrentController -> ConcurrentControllerT m a -> m a
+runConcurrentControllerT c (ConcurrentControllerT action) = runReaderT action c
 
 runInMutex :: (MonadIO m, MonadLock m) => Cmd -> ConcurrentControllerT m ()
 runInMutex cmd =

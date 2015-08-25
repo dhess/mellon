@@ -2,7 +2,7 @@
 
 module Main where
 
-import qualified Control.Concurrent as CC (forkIO, threadDelay)
+import qualified Control.Concurrent as CC (threadDelay)
 import Control.Monad.IO.Class
 import Control.Monad.Writer
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
@@ -10,8 +10,8 @@ import qualified Data.Time as Time (getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
-import System.Mellon.Controller (MonadController(..), ConcurrentController, ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
-import System.Mellon.Lock (MonadLock(..), MockLockEvent(..), MockLockT, execMockLockT, runMockLockT)
+import System.Mellon.Controller (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
+import System.Mellon.Lock (MonadLock(..), MockLockEvent(..), events, mockLock, runMockLockT)
 import System.Mellon.StateMachine (State(..))
 
 data Verbosity
@@ -25,7 +25,6 @@ data GlobalOptions =
 
 data Command
   = Concurrent ConcurrentOptions
-  | MockLockCmd MockLockOptions
 
 data ConcurrentOptions = ConcurrentOptions {unusedConcurrent :: Maybe String}
 
@@ -35,16 +34,6 @@ concurrentCmd = Concurrent <$> concurrentOptions
 concurrentOptions :: Parser ConcurrentOptions
 concurrentOptions =
   ConcurrentOptions <$>
-  optional (strOption (help "unused"))
-
-data MockLockOptions = MockLockOptions {unusedMockLock :: Maybe String}
-
-mockLockCmd :: Parser Command
-mockLockCmd = MockLockCmd <$> mockLockOptions
-
-mockLockOptions :: Parser MockLockOptions
-mockLockOptions =
-  MockLockOptions <$>
   optional (strOption (help "unused"))
 
 cmds :: Parser GlobalOptions
@@ -59,8 +48,7 @@ cmds =
         short 'v' <>
         help "Enable verbose mode") <*>
   hsubparser
-    (command "concurrent" (info concurrentCmd (progDesc "Run the concurrent controller test")) <>
-     command "mocklock" (info mockLockCmd (progDesc "Run the mock lock test")))
+    (command "concurrent" (info concurrentCmd (progDesc "Run the concurrent controller test")))
 
 sleep :: MonadIO m => Int -> m ()
 sleep = liftIO . CC.threadDelay . (* 1000000)
@@ -150,25 +138,15 @@ checkResults expected actual epsilon = foldr compareResult (Right "No results to
              else Left (ev, "Time difference exceeds epsilon")
         compareResult ev _ = Left (ev, "Event types don't match")
 
-testMockLock :: MockLockT IO ()
-testMockLock =
-  do lock
-     unlock
-     unlock
-     lock
-
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Concurrent _)) =
   do cc <- concurrentController Locked
-     --_ <- CC.forkIO (evalMockLockT $ runConcurrentStateMachine cc ())
-     --runConcurrentControllerT cc testConcurrent
-     (ccEvents, lockEvents) <- runMockLockT $ runConcurrentControllerT testCC cc
+     ml <- mockLock
+     ccEvents <- runMockLockT ml $ runConcurrentControllerT cc testCC
+     lockEvents <- events ml
      let outcome = checkResults ccEvents lockEvents (0.5 :: NominalDiffTime)
      print outcome
-
-run (GlobalOptions False _ (MockLockCmd _)) =
-  do output <- execMockLockT testMockLock
-     print output
+     return ()
 run _ = return ()
 
 main :: IO ()
