@@ -24,15 +24,15 @@ import System.Mellon.Lock
 -- Note that the constructor is not exported. Use
 -- 'concurrentController' to create a new instance.
 data ConcurrentController =
-  ConcurrentController (MVar State)
+  ConcurrentController (MVar State) (MockLock)
   deriving (Eq)
 
 -- | Create a new 'ConcurrentController'.
-concurrentController :: State -> IO ConcurrentController
-concurrentController initialState =
+concurrentController :: MockLock -> State -> IO ConcurrentController
+concurrentController l initialState =
   do m <- newEmptyMVar
      putMVar m initialState
-     return $ ConcurrentController m
+     return $ ConcurrentController m l
 
 newtype ConcurrentControllerT m a =
   ConcurrentControllerT (ReaderT ConcurrentController m a)
@@ -41,39 +41,37 @@ newtype ConcurrentControllerT m a =
 runConcurrentControllerT :: (MonadIO m) => ConcurrentController -> ConcurrentControllerT m a -> m a
 runConcurrentControllerT c (ConcurrentControllerT action) = runReaderT action c
 
-runInMutex :: (MonadIO m, MonadLock m) => Cmd -> ConcurrentControllerT m ()
+runInMutex :: (MonadIO m) => Cmd -> ConcurrentControllerT m ()
 runInMutex cmd =
-  do (ConcurrentController c) <- ConcurrentControllerT ask
+  do (ConcurrentController c _) <- ConcurrentControllerT ask
      state <- liftIO $ takeMVar c
      newState <- iterT runSM (execCmdT cmd state)
      liftIO $ putMVar c newState
 
-instance (MonadIO m, MonadLock m) => MonadController (ConcurrentControllerT m) where
+instance (MonadIO m) => MonadController (ConcurrentControllerT m) where
   lockNow = runInMutex LockNowCmd
   unlockUntil = runInMutex . UnlockCmd
 
-instance (MonadLock m) => MonadLock (ConcurrentControllerT m) where
-  lock = lift lock
-  unlock = lift unlock
-
-lockAt :: (MonadIO m, MonadLock m) => UTCTime -> ConcurrentControllerT m ()
+lockAt :: (MonadIO m) => UTCTime -> ConcurrentControllerT m ()
 lockAt = runInMutex . LockCmd
 
-scheduleLockAt :: (MonadIO m, MonadLock m) => UTCTime -> ConcurrentControllerT m ()
+scheduleLockAt :: (MonadIO m) => UTCTime -> ConcurrentControllerT m ()
 scheduleLockAt date =
   do cc <- ConcurrentControllerT ask
-     _ <- liftIO $ forkIO (threadSleepUntil date {- >> runConcurrentControllerT (lockAt date) cc -} )
+     _ <- liftIO $ forkIO (threadSleepUntil date >> runConcurrentControllerT cc (lockAt date))
      return ()
 
-runSM :: (MonadIO m, MonadLock m) => StateMachineF (ConcurrentControllerT m a) -> ConcurrentControllerT m a
+runSM :: (MonadIO m) => StateMachineF (ConcurrentControllerT m a) -> ConcurrentControllerT m a
 runSM (LockDevice next) =
-  do lock
+  do (ConcurrentController _ l) <- ConcurrentControllerT ask
+     runMockLockT l lock
      next
 runSM (ScheduleLock atDate next) =
   do scheduleLockAt atDate
      next
 runSM (UnlockDevice next) =
-  do unlock
+  do (ConcurrentController _ l) <- ConcurrentControllerT ask
+     runMockLockT l unlock
      next
 -- For this particular implementation, it's safe simply to
 -- ignore this command. When the "unscheduled" lock fires, the
