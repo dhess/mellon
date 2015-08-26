@@ -55,10 +55,10 @@ Library
                       , System.Mellon.Controller
                       , System.Mellon.Controller.Class
                       , System.Mellon.Controller.Concurrent
-                      , System.Mellon.Lock
                       , System.Mellon.LockDevice
+                      , System.Mellon.MockLock
                       , System.Mellon.MonadLock
-                      , System.Mellon.Lock.Class
+                      , System.Mellon.MonadLock.Class
                       , System.Mellon.StateMachine
   Build-Depends:        base >= 4 && < 5
                       , free

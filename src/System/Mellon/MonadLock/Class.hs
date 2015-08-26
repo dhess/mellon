@@ -1,7 +1,7 @@
 -- | 'MonadLock' is a 'Monad' typeclass for controlling lock
 -- devices.
 
-module System.Mellon.Lock.Class
+module System.Mellon.MonadLock.Class
          ( MonadLock(..)
          ) where
 

@@ -7,7 +7,7 @@
 
 module System.Mellon.MonadLock
        ( -- * Classes
-         module System.Mellon.Lock.Class
+         module System.Mellon.MonadLock.Class
        , LockT
        , liftLockT
        , runLockT
@@ -19,7 +19,7 @@ module System.Mellon.MonadLock
 import Control.Applicative (Alternative)
 import Control.Monad.Identity
 import Control.Monad.Reader
-import System.Mellon.Lock.Class
+import System.Mellon.MonadLock.Class
 import System.Mellon.LockDevice
 
 -- | A monad transformer which adds a lock device to an existing
