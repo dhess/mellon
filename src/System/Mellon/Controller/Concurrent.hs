@@ -64,14 +64,14 @@ scheduleLockAt date =
 runSM :: (MonadIO m, LockDevice l) => StateMachineF (ConcurrentControllerT l m a) -> ConcurrentControllerT l m a
 runSM (RunLock next) =
   do (ConcurrentController _ l) <- ConcurrentControllerT ask
-     runLockT lock l
+     runLockT l lock
      next
 runSM (ScheduleLock atDate next) =
   do scheduleLockAt atDate
      next
 runSM (RunUnlock next) =
   do (ConcurrentController _ l) <- ConcurrentControllerT ask
-     runLockT unlock l
+     runLockT l unlock
      next
 -- For this particular implementation, it's safe simply to
 -- ignore this command. When the "unscheduled" lock fires, the

@@ -34,8 +34,8 @@ instance (MonadIO m, LockDevice l) => MonadLock (LockT l m) where
 
 -- | Run an action inside the LockT transformer using lock device l
 -- and return the result.
-runLockT :: (Monad m, LockDevice l) => LockT l m a -> l -> m a
-runLockT (LockT action) device = runReaderT action device
+runLockT :: (Monad m, LockDevice l) => l -> LockT l m a -> m a
+runLockT device (LockT action) = runReaderT action device
 
 -- | Lift an action into LockT.
 liftLockT :: (Monad m, LockDevice l) => (l -> m a) -> LockT l m a
@@ -50,6 +50,6 @@ liftLock = LockT . reader
 
 -- | Run a lock computation using the lock device l and return the
 -- result.
-runLock :: (LockDevice l) => Lock l a -> l -> a
-runLock x l = runIdentity (runLockT x l)
+runLock :: (LockDevice l) => l -> Lock l a -> a
+runLock l x = runIdentity (runLockT l x)
 
