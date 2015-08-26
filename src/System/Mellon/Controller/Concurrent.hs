@@ -62,14 +62,14 @@ scheduleLockAt date =
      return ()
 
 runSM :: (MonadIO m) => StateMachineF (ConcurrentControllerT m a) -> ConcurrentControllerT m a
-runSM (LockDevice next) =
+runSM (RunLock next) =
   do (ConcurrentController _ l) <- ConcurrentControllerT ask
      runMockLockT l lock
      next
 runSM (ScheduleLock atDate next) =
   do scheduleLockAt atDate
      next
-runSM (UnlockDevice next) =
+runSM (RunUnlock next) =
   do (ConcurrentController _ l) <- ConcurrentControllerT ask
      runMockLockT l unlock
      next

@@ -77,15 +77,15 @@ data Cmd
 -- `StateMachineT`'s pure state transformations into real-world
 -- actions.
 data StateMachineF next where
-  LockDevice :: next -> StateMachineF next
+  RunLock :: next -> StateMachineF next
   ScheduleLock :: UTCTime -> next -> StateMachineF next
-  UnlockDevice :: next -> StateMachineF next
+  RunUnlock :: next -> StateMachineF next
   UnscheduleLock :: next -> StateMachineF next
 
 instance Functor StateMachineF where
-  fmap f (LockDevice x) = LockDevice (f x)
+  fmap f (RunLock x) = RunLock (f x)
   fmap f (ScheduleLock d x) = ScheduleLock d (f x)
-  fmap f (UnlockDevice x) = UnlockDevice (f x)
+  fmap f (RunUnlock x) = RunUnlock (f x)
   fmap f (UnscheduleLock x) = UnscheduleLock (f x)
 
 -- | 'StateMachineT' is a free monad transformer.
@@ -94,9 +94,9 @@ type StateMachineT = FreeT StateMachineF
 -- | Wraps 'StateMachineT' around the 'Identity' monad.
 type StateMachine = StateMachineT Identity
 
-makeFreeCon 'LockDevice
+makeFreeCon 'RunLock
 makeFreeCon 'ScheduleLock
-makeFreeCon 'UnlockDevice
+makeFreeCon 'RunUnlock
 makeFreeCon 'UnscheduleLock
 
 -- | The pure 'StateMachineT' interpreter.
@@ -112,7 +112,7 @@ execCmdT :: (Monad m) => Cmd -> State -> StateMachineT m State
 execCmdT LockNowCmd Locked = return Locked
 execCmdT LockNowCmd (Unlocked _) =
   do unscheduleLock
-     lockDevice
+     runLock
      return Locked
 
 execCmdT (LockCmd _) (Locked) = return Locked
@@ -152,7 +152,7 @@ execCmdT (LockCmd lockDate) (Unlocked untilDate) =
   -- most implementations, it's a very unlikely but probably harmless
   -- occurrence. That's how we treat it here.
   if lockDate == untilDate
-     then lockDevice >> return Locked
+     then runLock >> return Locked
      else return (Unlocked untilDate)
 
 execCmdT (UnlockCmd untilDate) Locked = unlockUntilT untilDate
@@ -164,5 +164,5 @@ execCmdT (UnlockCmd untilDate) (Unlocked scheduledDate) =
 unlockUntilT :: (Monad m) => UTCTime -> StateMachineT m State
 unlockUntilT date =
   do scheduleLock date
-     unlockDevice
+     runUnlock
      return $ Unlocked date
