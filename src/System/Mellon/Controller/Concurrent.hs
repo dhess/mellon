@@ -8,7 +8,7 @@ module System.Mellon.Controller.Concurrent
          ) where
 
 import Control.Applicative (Alternative)
-import Control.Concurrent (MVar, forkIO, newMVar, putMVar, takeMVar, threadDelay)
+import Control.Concurrent (MVar, forkIO, newMVar, putMVar, readMVar, takeMVar, threadDelay)
 import Control.Monad.Trans.Free (iterT)
 import Control.Monad.IO.Class
 import Control.Monad.Reader
@@ -42,13 +42,16 @@ runConcurrentControllerT c (ConcurrentControllerT action) = runReaderT action c
 runInMutex :: (MonadIO m, LockDevice l) => Cmd -> ConcurrentControllerT l m ()
 runInMutex cmd =
   do (ConcurrentController c _) <- ConcurrentControllerT ask
-     state <- liftIO $ takeMVar c
-     newState <- iterT runSM (execCmdT cmd state)
+     st <- liftIO $ takeMVar c
+     newState <- iterT runSM (execCmdT cmd st)
      liftIO $ putMVar c $! newState
 
 instance (MonadIO m, LockDevice l) => MonadController (ConcurrentControllerT l m) where
   lockNow = runInMutex LockNowCmd
   unlockUntil = runInMutex . UnlockCmd
+  state =
+    do (ConcurrentController c _) <- ConcurrentControllerT ask
+       liftIO $ readMVar c
 
 lockAt :: (MonadIO m, LockDevice l) => UTCTime -> ConcurrentControllerT l m ()
 lockAt = runInMutex . LockCmd

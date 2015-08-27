@@ -20,6 +20,7 @@ import Control.Monad.Trans.Maybe
 import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
 import Data.Time (UTCTime)
+import System.Mellon.StateMachine (State)
 
 -- | The 'MonadController' interface.
 class (Monad m) => MonadController m where
@@ -31,51 +32,65 @@ class (Monad m) => MonadController m where
   -- Note that you can unlock the device indefinitely by specifying a
   -- time in the past.
   unlockUntil :: UTCTime -> m ()
+  -- | Get the current state of the controller.
+  state :: m State
 
 instance (MonadController m) => MonadController (IdentityT m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m) => MonadController (SL.StateT s m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m) => MonadController (SS.StateT s m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m, Monoid w) => MonadController (WL.WriterT w m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m, Monoid w) => MonadController (WS.WriterT w m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m) => MonadController (ReaderT r m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m, Monoid w) => MonadController (RWSL.RWST r w s m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m, Monoid w) => MonadController (RWSS.RWST r w s m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m) => MonadController (ExceptT e m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m) => MonadController (MaybeT m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m) => MonadController (ContT r m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
 
 instance (MonadController m) => MonadController (ListT m) where
   lockNow = lift lockNow
   unlockUntil = lift . unlockUntil
+  state = lift state
