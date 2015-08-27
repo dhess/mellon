@@ -39,12 +39,13 @@ newtype ConcurrentControllerT l m a =
 runConcurrentControllerT :: (MonadIO m, LockDevice l) => (ConcurrentController l) -> ConcurrentControllerT l m a -> m a
 runConcurrentControllerT c (ConcurrentControllerT action) = runReaderT action c
 
-runInMutex :: (MonadIO m, LockDevice l) => Cmd -> ConcurrentControllerT l m ()
+runInMutex :: (MonadIO m, LockDevice l) => Cmd -> ConcurrentControllerT l m State
 runInMutex cmd =
   do (ConcurrentController c _) <- ConcurrentControllerT ask
      st <- liftIO $ takeMVar c
      newState <- iterT runSM (execCmdT cmd st)
      liftIO $ putMVar c $! newState
+     return newState
 
 instance (MonadIO m, LockDevice l) => MonadController (ConcurrentControllerT l m) where
   lockNow = runInMutex LockNowCmd
@@ -54,7 +55,9 @@ instance (MonadIO m, LockDevice l) => MonadController (ConcurrentControllerT l m
        liftIO $ readMVar c
 
 lockAt :: (MonadIO m, LockDevice l) => UTCTime -> ConcurrentControllerT l m ()
-lockAt = runInMutex . LockCmd
+lockAt date =
+  do _ <- runInMutex (LockCmd date)
+     return ()
 
 scheduleLockAt :: (MonadIO m, LockDevice l) => UTCTime -> ConcurrentControllerT l m ()
 scheduleLockAt date =

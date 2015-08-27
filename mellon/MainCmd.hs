@@ -94,14 +94,14 @@ testCC =
         lockIt :: (MonadIO m, LockDevice l) => TestConcurrent l m ()
         lockIt =
           do now <- getCurrentTime
-             lockNow
+             _ <- lockNow
              tell [LockEvent now]
 
         unlock_ :: (MonadIO m, LockDevice l) => Integer -> TestConcurrent l m (UTCTime, UTCTime)
         unlock_ duration =
           do now <- getCurrentTime
              let expire = timePlusN now duration
-             unlockUntil expire
+             _ <- unlockUntil expire
              return (now, expire)
 
         unlockWillExpire :: (MonadIO m, LockDevice l) => Integer -> TestConcurrent l m ()

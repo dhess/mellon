@@ -26,12 +26,12 @@ import System.Mellon.StateMachine (State)
 class (Monad m) => MonadController m where
   -- | Lock the controlled device immediately. Any previously-executed unlock
   -- command that is currently in effect will be canceled.
-  lockNow :: m ()
+  lockNow :: m State
   -- | Unlock the controlled device until a given 'UTCTime', at which
   -- time the controller will automatically lock the device again.
   -- Note that you can unlock the device indefinitely by specifying a
   -- time in the past.
-  unlockUntil :: UTCTime -> m ()
+  unlockUntil :: UTCTime -> m State
   -- | Get the current state of the controller.
   state :: m State
 
