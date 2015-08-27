@@ -7,7 +7,7 @@ module System.Mellon.MockLock
        , mockLock
        ) where
 
-import Control.Concurrent (MVar, newEmptyMVar, putMVar, takeMVar)
+import Control.Concurrent (MVar, newMVar, putMVar, readMVar, takeMVar)
 import Data.Time (UTCTime, getCurrentTime)
 import System.Mellon.LockDevice
 
@@ -22,15 +22,11 @@ data MockLock =
   deriving (Eq)
 
 events :: MockLock -> IO [MockLockEvent]
-events (MockLock m) =
-  do ev <- takeMVar m
-     putMVar m ev
-     return ev
+events (MockLock m) = readMVar m
 
 mockLock :: IO MockLock
 mockLock =
-  do m <- newEmptyMVar
-     putMVar m []
+  do m <- newMVar []
      return $ MockLock m
 
 instance LockDevice MockLock where
