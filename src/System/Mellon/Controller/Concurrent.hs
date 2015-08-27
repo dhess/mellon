@@ -8,7 +8,7 @@ module System.Mellon.Controller.Concurrent
          ) where
 
 import Control.Applicative (Alternative)
-import Control.Concurrent (MVar, forkIO, newEmptyMVar, putMVar, takeMVar, threadDelay)
+import Control.Concurrent (MVar, forkIO, newMVar, putMVar, takeMVar, threadDelay)
 import Control.Monad.Trans.Free (iterT)
 import Control.Monad.IO.Class
 import Control.Monad.Reader
@@ -30,8 +30,7 @@ data ConcurrentController l =
 -- | Create a new 'ConcurrentController'.
 concurrentController :: (LockDevice l) => l -> State -> IO (ConcurrentController l)
 concurrentController l initialState =
-  do m <- newEmptyMVar
-     putMVar m initialState
+  do m <- newMVar initialState
      return $ ConcurrentController m l
 
 newtype ConcurrentControllerT l m a =
