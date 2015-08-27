@@ -45,7 +45,7 @@ runInMutex cmd =
   do (ConcurrentController c _) <- ConcurrentControllerT ask
      state <- liftIO $ takeMVar c
      newState <- iterT runSM (execCmdT cmd state)
-     liftIO $ putMVar c newState
+     liftIO $ putMVar c $! newState
 
 instance (MonadIO m, LockDevice l) => MonadController (ConcurrentControllerT l m) where
   lockNow = runInMutex LockNowCmd
