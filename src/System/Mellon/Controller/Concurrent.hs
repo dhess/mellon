@@ -15,7 +15,6 @@ import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import System.Mellon.Controller.Class
 import System.Mellon.LockDevice
-import System.Mellon.MonadLock
 import System.Mellon.StateMachine (Cmd(..), State(..), StateMachineF(..), execCmdT)
 
 -- | A 'ConcurrentController' uses 'MVar's and other Concurrent
@@ -63,14 +62,14 @@ scheduleLockAt date =
 runSM :: (MonadIO m, LockDevice l) => StateMachineF (ConcurrentControllerT l m a) -> ConcurrentControllerT l m a
 runSM (RunLock next) =
   do (ConcurrentController _ l) <- ConcurrentControllerT ask
-     runLockT l lock
+     liftIO $ lockDevice l
      next
 runSM (ScheduleLock atDate next) =
   do scheduleLockAt atDate
      next
 runSM (RunUnlock next) =
   do (ConcurrentController _ l) <- ConcurrentControllerT ask
-     runLockT l unlock
+     liftIO $ unlockDevice l
      next
 -- For this particular implementation, it's safe simply to
 -- ignore this command. When the "unscheduled" lock fires, the
