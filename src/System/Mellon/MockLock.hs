@@ -1,3 +1,6 @@
+-- | A dummy 'LockDevice' implementation that simply logs lock/unlock
+-- events, including timestamps. Useful for testing and debugging.
+
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module System.Mellon.MockLock
@@ -17,13 +20,19 @@ data MockLockEvent
   | UnlockEvent !UTCTime
   deriving (Eq,Show)
 
+-- | A mock lock device that logs lock/unlock events.
+--
+-- No constructor is exported. Use 'mockLock' to create a new
+-- instance.
 data MockLock =
   MockLock (MVar [MockLockEvent])
   deriving (Eq)
 
+-- | Extract the current log of events from the mock lock.
 events :: MockLock -> IO [MockLockEvent]
 events (MockLock m) = readMVar m
 
+-- | Construct a new mock lock with an empty event log.
 mockLock :: IO MockLock
 mockLock =
   do m <- newMVar []

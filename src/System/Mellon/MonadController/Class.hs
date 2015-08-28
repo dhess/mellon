@@ -1,9 +1,10 @@
--- | 'MonadController' is a 'Monad' typeclass for controllers.
--- Controllers provide the user-facing interface for interacting with
--- lock devices and 'StateMachineT', and 'MonadController' defines the
--- common controller interface implemented by all controllers.
+-- | A typeclass for controllers.
+--
+-- Controllers provide the bridge between physical locks and the
+-- @mellon@ state machine. 'MonadController' defines the common
+-- controller interface implemented by all controllers.
 
-module System.Mellon.Controller.Class
+module System.Mellon.MonadController.Class
        ( MonadController(..)
        ) where
 
@@ -22,7 +23,7 @@ import qualified Control.Monad.Writer.Strict as WS
 import Data.Time (UTCTime)
 import System.Mellon.StateMachine (State)
 
--- | The 'MonadController' interface.
+-- | A controller monad interface.
 class (Monad m) => MonadController m where
   -- | Lock the controlled device immediately. Any previously-executed unlock
   -- command that is currently in effect will be canceled.

@@ -15,7 +15,7 @@ Synopsis:               Control physical access devices
 Description:
   "Speak, friend, and enter."
   .
-  @System.Mellon@ is a Haskell package for controlling physical access
+  @mellon@ is a Haskell package for controlling physical access
   devices, e.g., electric strikes. It provides a simple abstract state
   machine for locking and unlocking such devices.
   .
@@ -24,26 +24,25 @@ Description:
   <images/mellon-state-diagram.svg (local copy of mellon state diagram)>
   .
 
-  @System.Mellon@ is a low-level package that provides:
+  @mellon@ is a low-level package that provides, among other things:
   .
-  * The 'System.Mellon.Lock.Lock' typeclass, which provides a generic
-    interface for the physical device.
+  * The 'System.Mellon.LockDevice' typeclass, for interfacing with a
+    physical device driver or other low-level lock mechanism.
   .
-  * The 'System.Mellon.Controller.Controller' typeclass, which
-    provides a generic interface for controlling a device from a user
-    application or service.
+  * The 'System.Mellon.MonadController' typeclass, which provides a
+    monadic interface for controlling a device from a user application
+    or service.
   .
-  * Two 'System.Mellon.Controller.Controller' instances,
-    'System.Mellon.Impl.ThreadedController.ThreadedController' and
-    'System.Mellon.Impl.TimedController.TimedController', each with a
-    different scheduler implementation.
+  * 'System.Mellon.ConcurrentController', a controller implementation
+    that works with multiple simultaneous control threads. This is useful
+    for controlling a lock from a network service, for example.
   .
-  Note that @System.Mellon@ does not provide any useful
-  'System.Mellon.Lock.Lock' implementations; that is the domain of
-  access device implementation-specific packages. Similarly,
-  @System.Mellon@ does not provide authentication mechanisms or
-  network services; that is the domain of higher-level packages which
-  use the base @System.Mellon@ package.
+  Note that @mellon@ does not provide any useful
+  'System.Mellon.LockDevice' implementations; that is the domain of
+  access device implementation-specific packages. Similarly, @mellon@
+  does not provide authentication mechanisms or network services; that
+  is the domain of higher-level packages which use the base @mellon@
+  package.
 
 Extra-Doc-Files:   images/*.svg
 
@@ -52,11 +51,11 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      System.Mellon
-                      , System.Mellon.Controller
-                      , System.Mellon.Controller.Class
-                      , System.Mellon.Controller.Concurrent
+                      , System.Mellon.ConcurrentController
                       , System.Mellon.LockDevice
                       , System.Mellon.MockLock
+                      , System.Mellon.MonadController
+                      , System.Mellon.MonadController.Class
                       , System.Mellon.MonadLock
                       , System.Mellon.MonadLock.Class
                       , System.Mellon.StateMachine

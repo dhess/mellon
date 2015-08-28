@@ -2,11 +2,11 @@
 -- application will need to interact with an access device.
 
 module System.Mellon
-  ( module System.Mellon.Controller
+  ( module System.Mellon.MonadController
   , module System.Mellon.MonadLock
   , module System.Mellon.StateMachine
   ) where
 
-import System.Mellon.Controller
+import System.Mellon.MonadController
 import System.Mellon.MonadLock
 import System.Mellon.StateMachine

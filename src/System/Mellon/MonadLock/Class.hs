@@ -1,5 +1,7 @@
--- | 'MonadLock' is a 'Monad' typeclass for controlling lock
--- devices.
+-- | A typeclass for lock monads.
+--
+-- Instances of this typeclass include 'System.Mellon.MonadLock.Lock'
+-- and monads created using 'System.Mellon.MonadLock.LockT'.
 
 module System.Mellon.MonadLock.Class
          ( MonadLock(..)
@@ -18,7 +20,7 @@ import Control.Monad.Trans.Maybe
 import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
 
--- | A 'MonadLock' can be 'lock'ed or 'unlock'ed. That's it!
+-- | An interface to lock monads.
 class (Monad m) => MonadLock m where
   lock :: m ()
   unlock :: m ()

@@ -10,10 +10,9 @@ import qualified Data.Time as Time (getCurrentTime)
 import Options.Applicative
 import Prelude hiding (putStrLn)
 import qualified Prelude as Prelude (putStrLn)
-import System.Mellon.Controller (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
+import System.Mellon.MonadController (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
 import System.Mellon.LockDevice
 import System.Mellon.MockLock (MockLockEvent(..), events, mockLock)
-import System.Mellon.StateMachine (State(..))
 
 data Verbosity
   = Normal
@@ -142,9 +141,11 @@ checkResults expected actual epsilon = foldr compareResult (Right "No results to
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Concurrent _)) =
   do ml <- mockLock
-     cc <- concurrentController ml Locked
+     cc <- concurrentController ml
      ccEvents <- runConcurrentControllerT cc testCC
-     lockEvents <- events ml
+     -- Discard the first MockLock event, which happened when
+     -- concurrentController initialized the lock.
+     _:lockEvents <- events ml
      let outcome = checkResults ccEvents lockEvents (0.5 :: NominalDiffTime)
      print outcome
      return ()
