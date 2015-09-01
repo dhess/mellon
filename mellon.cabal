@@ -66,21 +66,6 @@ Library
                       , time
                       , transformers
 
-Executable mellon
-  Main-Is:              MainCmd.hs
-  Default-Language:     Haskell2010
-  HS-Source-Dirs:       mellon
-                      , src
-  GHC-Options:          -Wall
-  Build-Depends:        base >= 4 && < 5
-                      , free
-                      , mtl
-                      , optparse-applicative >= 0.11.0
-                      , text
-                      , time
-                      , transformers
-  Other-Modules:        System.Mellon
-
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
   Default-Language:     Haskell2010
