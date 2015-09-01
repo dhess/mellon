@@ -59,6 +59,12 @@ Library
                       , System.Mellon.MonadLock
                       , System.Mellon.MonadLock.Class
                       , System.Mellon.StateMachine
+  Other-Extensions:     FlexibleContexts
+                      , FlexibleInstances
+                      , GADTs
+                      , GeneralizedNewtypeDeriving
+                      , ScopedTypeVariables
+                      , TemplateHaskell
   Build-Depends:        base >= 4 && < 5
                       , free
                       , mtl
