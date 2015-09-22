@@ -6,9 +6,10 @@ module Web.Mellon.Service
          ( app
          ) where
 
+import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Aeson.Types
-import Data.Time
+import Data.Time.Clock
 import GHC.Generics
 import Network.Wai
 import Servant
@@ -27,7 +28,9 @@ instance ToJSON State where
 type StateAPI = "state" :> Get '[JSON] State
 
 server :: Server StateAPI
-server = return Locked
+server =
+  do now <- liftIO $ getCurrentTime
+     return $ Unlocked now
 
 stateAPI :: Proxy StateAPI
 stateAPI = Proxy

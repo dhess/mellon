@@ -22,6 +22,7 @@ Library
                       , servant-docs
                       , servant-server
                       , time
+                      , transformers
                       , wai
                       , warp
 
@@ -38,6 +39,7 @@ Executable mellon-server
                       , servant-docs
                       , servant-server
                       , time
+                      , transformers
                       , wai
                       , warp
   Other-Modules:        Web.Mellon
