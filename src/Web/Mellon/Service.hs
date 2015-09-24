@@ -3,9 +3,12 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Web.Mellon.Service
-         ( app
+         ( State(..)
+         , app
          ) where
 
+import Control.Concurrent.MVar (MVar, readMVar, swapMVar)
+import Control.Monad.Trans.Either (EitherT)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
 import Data.Aeson.Types
@@ -13,6 +16,17 @@ import Data.Time.Clock
 import GHC.Generics
 import Network.Wai
 import Servant
+
+data Command = LockNow | UnlockUntil UTCTime deriving (Eq, Show, Generic)
+
+commandJSONOptions :: Options
+commandJSONOptions = defaultOptions { sumEncoding = taggedObject }
+  where
+    taggedObject = defaultTaggedObject { tagFieldName = "command"
+                                       , contentsFieldName = "until" }
+
+instance FromJSON Command where
+  parseJSON = genericParseJSON commandJSONOptions
 
 data State = Locked | Unlocked UTCTime deriving (Eq, Show, Generic)
 
@@ -25,16 +39,37 @@ stateJSONOptions = defaultOptions { sumEncoding = taggedObject }
 instance ToJSON State where
   toJSON = genericToJSON stateJSONOptions
 
-type StateAPI = "state" :> Get '[JSON] State
+type StateAPI =
+  "time" :> Get '[JSON] UTCTime :<|>
+  "state" :> Get '[JSON] State :<|>
+  "command" :> ReqBody '[JSON] Command :> Post '[JSON] State
 
-server :: Server StateAPI
-server =
-  do now <- liftIO $ getCurrentTime
-     return $ Unlocked now
+server :: MVar State -> Server StateAPI
+server m =
+  time :<|>
+  state :<|>
+  command
+  where
+    time :: EitherT ServantErr IO UTCTime
+    time =
+      do now <- liftIO $ getCurrentTime
+         return now
+
+    state :: EitherT ServantErr IO State
+    state =
+      do s <- liftIO $ readMVar m
+         return s
+
+    command :: Command -> EitherT ServantErr IO State
+    command LockNow =
+      do _ <- liftIO $ swapMVar m Locked
+         return Locked
+    command (UnlockUntil date) =
+      do _ <- liftIO $ swapMVar m (Unlocked date)
+         return $ Unlocked date
 
 stateAPI :: Proxy StateAPI
 stateAPI = Proxy
 
-app :: Application
-app = serve stateAPI server
-
+app :: MVar State -> Application
+app = serve stateAPI . server

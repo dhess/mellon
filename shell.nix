@@ -4,8 +4,9 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, aeson, base, hspec, optparse-applicative
-      , servant, servant-docs, servant-server, stdenv, time, wai, warp
+  f = { mkDerivation, aeson, base, either, hspec
+      , optparse-applicative, servant, servant-docs, servant-server
+      , stdenv, time, transformers, wai, warp
       }:
       mkDerivation {
         pname = "mellon-server";
@@ -14,10 +15,13 @@ let
         isLibrary = true;
         isExecutable = true;
         libraryHaskellDepends = [
-          aeson base optparse-applicative servant servant-docs servant-server
-          time wai warp
+          aeson base either optparse-applicative servant servant-docs
+          servant-server time transformers wai warp
         ];
-        executableHaskellDepends = [ base optparse-applicative ];
+        executableHaskellDepends = [
+          aeson base either optparse-applicative servant servant-docs
+          servant-server time transformers wai warp
+        ];
         testHaskellDepends = [ base hspec ];
         license = stdenv.lib.licenses.bsd3;
       };
