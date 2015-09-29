@@ -1,6 +1,6 @@
-{ mkDerivation, aeson, base, either, hspec, optparse-applicative
-, servant, servant-docs, servant-server, stdenv, time, transformers
-, wai, warp
+{ mkDerivation, aeson, base, either, hspec, lucid
+, optparse-applicative, servant, servant-docs, servant-lucid
+, servant-server, stdenv, text, time, transformers, wai, warp
 }:
 mkDerivation {
   pname = "mellon-server";
@@ -9,12 +9,12 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base either optparse-applicative servant servant-docs
-    servant-server time transformers wai warp
+    aeson base either lucid optparse-applicative servant servant-docs
+    servant-lucid servant-server text time transformers wai warp
   ];
   executableHaskellDepends = [
-    aeson base either optparse-applicative servant servant-docs
-    servant-server time transformers wai warp
+    aeson base either lucid optparse-applicative servant servant-docs
+    servant-lucid servant-server text time transformers wai warp
   ];
   testHaskellDepends = [ base hspec ];
   license = stdenv.lib.licenses.bsd3;

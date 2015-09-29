@@ -1,5 +1,6 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Web.Mellon.Service
@@ -14,8 +15,17 @@ import Data.Aeson
 import Data.Aeson.Types
 import Data.Time.Clock
 import GHC.Generics
+import Lucid
 import Network.Wai
 import Servant
+import Servant.HTML.Lucid
+
+wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
+wrapBody title body =
+  doctypehtml_ $
+    do head_ $
+         do title_ title
+       body_ body
 
 data Command = LockNow | UnlockUntil UTCTime deriving (Eq, Show, Generic)
 
@@ -39,10 +49,22 @@ stateJSONOptions = defaultOptions { sumEncoding = taggedObject }
 instance ToJSON State where
   toJSON = genericToJSON stateJSONOptions
 
+stateDocument :: Monad m => HtmlT m a -> HtmlT m a
+stateDocument = wrapBody "Mellon state"
+
+instance ToHtml State where
+  toHtml Locked = stateDocument "Locked"
+  toHtml (Unlocked time) = stateDocument $ "Unlocked until " >> toHtml (show time)
+  toHtmlRaw = toHtml
+
+instance ToHtml UTCTime where
+  toHtml t = toHtml (show t)
+  toHtmlRaw = toHtml
+
 type StateAPI =
-  "time" :> Get '[JSON] UTCTime :<|>
-  "state" :> Get '[JSON] State :<|>
-  "command" :> ReqBody '[JSON] Command :> Post '[JSON] State
+  "time" :> Get '[JSON, HTML] UTCTime :<|>
+  "state" :> Get '[JSON, HTML] State :<|>
+  "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] State
 
 server :: MVar State -> Server StateAPI
 server m =
