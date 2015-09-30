@@ -28,7 +28,7 @@ wrapBody title body =
          do title_ title
        body_ body
 
-data Command = LockNow | UnlockUntil UTCTime deriving (Eq, Show, Generic)
+data Command = LockNow | UnlockUntil !UTCTime deriving (Eq, Show, Generic)
 
 commandJSONOptions :: Options
 commandJSONOptions = defaultOptions { sumEncoding = taggedObject }
@@ -39,7 +39,7 @@ commandJSONOptions = defaultOptions { sumEncoding = taggedObject }
 instance FromJSON Command where
   parseJSON = genericParseJSON commandJSONOptions
 
-data State = Locked | Unlocked UTCTime deriving (Eq, Show, Generic)
+data State = Locked | Unlocked !UTCTime deriving (Eq, Show, Generic)
 
 stateJSONOptions :: Options
 stateJSONOptions = defaultOptions { sumEncoding = taggedObject }
