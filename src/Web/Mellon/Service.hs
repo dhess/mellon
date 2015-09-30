@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -57,12 +58,20 @@ instance ToHtml State where
   toHtml (Unlocked time) = stateDocument $ "Unlocked until " >> toHtml (show time)
   toHtmlRaw = toHtml
 
-instance ToHtml UTCTime where
-  toHtml t = toHtml (show t)
+newtype Time = Time UTCTime deriving (Eq, Show, Generic)
+
+instance ToJSON Time where
+  toJSON = genericToJSON defaultOptions
+
+timeDocument :: Monad m => HtmlT m a -> HtmlT m a
+timeDocument = wrapBody "Server time"
+
+instance ToHtml Time where
+  toHtml (Time time) = timeDocument $ toHtml $ "Server time is " ++ (show time)
   toHtmlRaw = toHtml
 
 type StateAPI =
-  "time" :> Get '[JSON, HTML] UTCTime :<|>
+  "time" :> Get '[JSON, HTML] Time :<|>
   "state" :> Get '[JSON, HTML] State :<|>
   "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] State
 
@@ -72,10 +81,10 @@ server m =
   state :<|>
   command
   where
-    time :: EitherT ServantErr IO UTCTime
+    time :: EitherT ServantErr IO Time
     time =
       do now <- liftIO $ getCurrentTime
-         return now
+         return $ Time now
 
     state :: EitherT ServantErr IO State
     state =
