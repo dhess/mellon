@@ -33,7 +33,7 @@ Library
 Executable mellon-server
   Main-Is:              Main.hs
   Default-Language:     Haskell2010
-  HS-Source-Dirs:       mellon-server
+  HS-Source-Dirs:       examples
                       , src
   GHC-Options:          -Wall
   Build-Depends:        base >= 4 && < 5
