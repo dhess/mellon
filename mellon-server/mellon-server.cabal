@@ -1,5 +1,5 @@
 Name:                   mellon-server
-Version:                0.0.1
+Version:                0.1.1
 Author:                 Drew Hess <src@drewhess.com>
 Maintainer:             Drew Hess <src@drewhess.com>
 License:                BSD3
@@ -19,6 +19,7 @@ Library
                       , aeson
                       , either
                       , lucid
+                      , mellon
                       , optparse-applicative >= 0.11.0
                       , servant
                       , servant-docs
@@ -40,6 +41,7 @@ Executable mellon-server
                       , aeson
                       , either
                       , lucid
+                      , mellon
                       , optparse-applicative >= 0.11.0
                       , servant
                       , servant-docs
