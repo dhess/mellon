@@ -9,6 +9,7 @@ module Web.Mellon.Service
          ) where
 
 import Control.Concurrent.MVar (MVar, readMVar, swapMVar)
+import Control.Monad.Trans.Reader
 import Control.Monad.Trans.Either (EitherT)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
@@ -69,37 +70,48 @@ instance ToHtml Time where
   toHtml (Time time) = timeDocument $ toHtml $ "Server time is " ++ (show time)
   toHtmlRaw = toHtml
 
-type StateAPI =
+type MellonAPI =
   "time" :> Get '[JSON, HTML] Time :<|>
   "state" :> Get '[JSON, HTML] State :<|>
   "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] State
 
-server :: MVar State -> Server StateAPI
-server m =
-  time :<|>
-  state :<|>
-  command
+type AppM = ReaderT (MVar State) (EitherT ServantErr IO)
+
+serverT :: ServerT MellonAPI AppM
+serverT =
+  getTime :<|>
+  getState :<|>
+  execCommand
   where
-    time :: EitherT ServantErr IO Time
-    time =
+    getTime :: AppM Time
+    getTime =
       do now <- liftIO $ getCurrentTime
          return $ Time now
 
-    state :: EitherT ServantErr IO State
-    state =
-      do s <- liftIO $ readMVar m
+    getState :: AppM State
+    getState =
+      do m <- ask
+         s <- liftIO $ readMVar m
          return s
 
-    command :: Command -> EitherT ServantErr IO State
-    command LockNow =
-      do _ <- liftIO $ swapMVar m Locked
+    execCommand :: Command -> AppM State
+    execCommand LockNow =
+      do m <- ask
+         _ <- liftIO $ swapMVar m Locked
          return Locked
-    command (UnlockUntil date) =
-      do _ <- liftIO $ swapMVar m (Unlocked date)
+    execCommand (UnlockUntil date) =
+      do m <- ask
+         _ <- liftIO $ swapMVar m (Unlocked date)
          return $ Unlocked date
 
-stateAPI :: Proxy StateAPI
-stateAPI = Proxy
+mellonAPI :: Proxy MellonAPI
+mellonAPI = Proxy
+
+adaptServer :: MVar State -> Server MellonAPI
+adaptServer m = enter serverToEither serverT
+  where
+    serverToEither :: AppM :~> EitherT ServantErr IO
+    serverToEither = Nat $ \r -> runReaderT r m
 
 app :: MVar State -> Application
-app = serve stateAPI . server
+app = serve mellonAPI . adaptServer
