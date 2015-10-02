@@ -1,37 +1,11 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "default" }:
-
 let
+  pkgs = import <nixpkgs> {};
 
-  inherit (nixpkgs) pkgs;
+  haskellPackages = pkgs.haskellPackages.override {
+    overrides = self: super: {
+      mellon = pkgs.haskell.lib.dontCheck (pkgs.haskell.lib.appendConfigureFlag (self.callPackage ../mellon {}) "--ghc-options=-Werror");
+      mellon-server = pkgs.haskell.lib.appendConfigureFlag (self.callPackage ./. {}) "--ghc-options=-Werror";
+    };
+  };
 
-  f = { mkDerivation, aeson, base, either, hspec, lucid
-      , optparse-applicative, servant, servant-docs, servant-lucid
-      , servant-server, stdenv, text, time, transformers, wai, warp
-      }:
-      mkDerivation {
-        pname = "mellon-server";
-        version = "0.0.1";
-        src = ./.;
-        isLibrary = true;
-        isExecutable = true;
-        libraryHaskellDepends = [
-          aeson base either lucid optparse-applicative servant servant-docs
-          servant-lucid servant-server text time transformers wai warp
-        ];
-        executableHaskellDepends = [
-          aeson base either lucid optparse-applicative servant servant-docs
-          servant-lucid servant-server text time transformers wai warp
-        ];
-        testHaskellDepends = [ base hspec ];
-        license = stdenv.lib.licenses.bsd3;
-      };
-
-  haskellPackages = if compiler == "default"
-                       then pkgs.haskellPackages
-                       else pkgs.haskell.packages.${compiler};
-
-  drv = haskellPackages.callPackage f {};
-
-in
-
-  if pkgs.lib.inNixShell then drv.env else drv
+in haskellPackages.mellon-server.env
