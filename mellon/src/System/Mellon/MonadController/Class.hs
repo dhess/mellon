@@ -6,6 +6,8 @@
 
 module System.Mellon.MonadController.Class
        ( MonadController(..)
+       -- * Re-exported for convenience.
+       , State(..)
        ) where
 
 import Control.Monad.Cont
@@ -21,7 +23,7 @@ import Control.Monad.Trans.Maybe
 import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
 import Data.Time (UTCTime)
-import System.Mellon.StateMachine (State)
+import System.Mellon.StateMachine (State(..))
 
 -- | A controller monad interface.
 class (Monad m) => MonadController m where
