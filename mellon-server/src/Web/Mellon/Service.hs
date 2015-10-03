@@ -74,23 +74,23 @@ type MellonAPI =
   "state" :> Get '[JSON, HTML] State :<|>
   "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] State
 
-type AppM l = ConcurrentControllerT l (EitherT ServantErr IO)
+type AppM = ConcurrentControllerT (EitherT ServantErr IO)
 
-serverT :: (LockDevice l) => ServerT MellonAPI (AppM l)
+serverT :: ServerT MellonAPI AppM
 serverT =
   getTime :<|>
   getState :<|>
   execCommand
   where
-    getTime :: (AppM l) Time
+    getTime :: AppM Time
     getTime =
       do now <- liftIO $ getCurrentTime
          return $ Time now
 
-    getState :: (LockDevice l) => (AppM l) State
+    getState :: AppM State
     getState = state >>= return
 
-    execCommand :: (LockDevice l) => Command -> (AppM l) State
+    execCommand :: Command -> AppM State
     execCommand LockNow = lockNow >>= return
 
     execCommand (UnlockUntil date) = unlockUntil date >>= return
@@ -98,11 +98,11 @@ serverT =
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: (LockDevice l) => ConcurrentController l -> AppM l :~> EitherT ServantErr IO
+serverToEither :: ConcurrentController -> AppM :~> EitherT ServantErr IO
 serverToEither cc = Nat $ \m -> runConcurrentControllerT cc m
 
-adaptServer :: (LockDevice l) => ConcurrentController l -> Server MellonAPI
+adaptServer :: ConcurrentController -> Server MellonAPI
 adaptServer cc = enter (serverToEither cc) serverT
 
-app :: (LockDevice l) => ConcurrentController l -> Application
+app :: ConcurrentController -> Application
 app = serve mellonAPI . adaptServer

@@ -6,7 +6,6 @@ import Control.Monad.Writer
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
 import System.Mellon.MonadController (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
-import System.Mellon.LockDevice
 import System.Mellon.MockLock (MockLockEvent(..), events, mockLock)
 import Test.Hspec
 
@@ -22,14 +21,14 @@ getCurrentTime = liftIO Time.getCurrentTime
 timePlusN :: UTCTime -> Integer -> UTCTime
 timePlusN time n = (fromInteger n) `addUTCTime` time
 
-type TestConcurrent l m a = WriterT [MockLockEvent] (ConcurrentControllerT l m) a
+type TestConcurrent m a = WriterT [MockLockEvent] (ConcurrentControllerT m) a
 
-testCC :: (MonadIO m, LockDevice l) => ConcurrentControllerT l m [MockLockEvent]
+testCC :: (MonadIO m) => ConcurrentControllerT m [MockLockEvent]
 testCC =
   do expectedResults <- execWriterT theTest
      return expectedResults
 
-  where theTest :: (MonadIO m, LockDevice l) => TestConcurrent l m ()
+  where theTest :: (MonadIO m) => TestConcurrent m ()
         theTest =
           do unlockWillExpire 5
              sleep 8
@@ -46,31 +45,31 @@ testCC =
              lockIt
              sleep 12
 
-        lockIt :: (MonadIO m, LockDevice l) => TestConcurrent l m ()
+        lockIt :: (MonadIO m) => TestConcurrent m ()
         lockIt =
           do now <- getCurrentTime
              _ <- lockNow
              tell [LockEvent now]
 
-        unlock_ :: (MonadIO m, LockDevice l) => Integer -> TestConcurrent l m (UTCTime, UTCTime)
+        unlock_ :: (MonadIO m) => Integer -> TestConcurrent m (UTCTime, UTCTime)
         unlock_ duration =
           do now <- getCurrentTime
              let expire = timePlusN now duration
              _ <- unlockUntil expire
              return (now, expire)
 
-        unlockWillExpire :: (MonadIO m, LockDevice l) => Integer -> TestConcurrent l m ()
+        unlockWillExpire :: (MonadIO m) => Integer -> TestConcurrent m ()
         unlockWillExpire duration =
           do (now, expire) <- unlock_ duration
              tell [UnlockEvent now]
              tell [LockEvent expire]
 
-        unlockWontExpire :: (MonadIO m, LockDevice l) => Integer -> TestConcurrent l m ()
+        unlockWontExpire :: (MonadIO m) => Integer -> TestConcurrent m ()
         unlockWontExpire duration =
           do (now, _) <- unlock_ duration
              tell [UnlockEvent now]
 
-        unlockWillBeIgnored :: (MonadIO m, LockDevice l) => Integer -> TestConcurrent l m ()
+        unlockWillBeIgnored :: (MonadIO m) => Integer -> TestConcurrent m ()
         unlockWillBeIgnored duration =
           do _ <- unlock_ duration
              return ()

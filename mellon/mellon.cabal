@@ -59,7 +59,8 @@ Library
                       , System.Mellon.MonadLock
                       , System.Mellon.MonadLock.Class
                       , System.Mellon.StateMachine
-  Other-Extensions:     FlexibleContexts
+  Other-Extensions:     ExistentialQuantification
+                      , FlexibleContexts
                       , FlexibleInstances
                       , GADTs
                       , GeneralizedNewtypeDeriving
