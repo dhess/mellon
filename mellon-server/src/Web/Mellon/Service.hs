@@ -8,8 +8,6 @@ module Web.Mellon.Service
          , app
          ) where
 
-import Control.Concurrent.MVar (MVar, readMVar, swapMVar)
-import Control.Monad.Trans.Reader
 import Control.Monad.Trans.Either (EitherT)
 import Control.Monad.IO.Class (liftIO)
 import Data.Aeson
@@ -20,6 +18,9 @@ import Lucid
 import Network.Wai
 import Servant
 import Servant.HTML.Lucid
+import System.Mellon.ConcurrentController
+import System.Mellon.LockDevice
+import System.Mellon.MonadController
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
@@ -38,8 +39,6 @@ commandJSONOptions = defaultOptions { sumEncoding = taggedObject }
 
 instance FromJSON Command where
   parseJSON = genericParseJSON commandJSONOptions
-
-data State = Locked | Unlocked !UTCTime deriving (Eq, Show, Generic)
 
 stateJSONOptions :: Options
 stateJSONOptions = defaultOptions { sumEncoding = taggedObject }
@@ -75,43 +74,35 @@ type MellonAPI =
   "state" :> Get '[JSON, HTML] State :<|>
   "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] State
 
-type AppM = ReaderT (MVar State) (EitherT ServantErr IO)
+type AppM l = ConcurrentControllerT l (EitherT ServantErr IO)
 
-serverT :: ServerT MellonAPI AppM
+serverT :: (LockDevice l) => ServerT MellonAPI (AppM l)
 serverT =
   getTime :<|>
   getState :<|>
   execCommand
   where
-    getTime :: AppM Time
+    getTime :: (AppM l) Time
     getTime =
       do now <- liftIO $ getCurrentTime
          return $ Time now
 
-    getState :: AppM State
-    getState =
-      do m <- ask
-         s <- liftIO $ readMVar m
-         return s
+    getState :: (LockDevice l) => (AppM l) State
+    getState = state >>= return
 
-    execCommand :: Command -> AppM State
-    execCommand LockNow =
-      do m <- ask
-         _ <- liftIO $ swapMVar m Locked
-         return Locked
-    execCommand (UnlockUntil date) =
-      do m <- ask
-         _ <- liftIO $ swapMVar m (Unlocked date)
-         return $ Unlocked date
+    execCommand :: (LockDevice l) => Command -> (AppM l) State
+    execCommand LockNow = lockNow >>= return
+
+    execCommand (UnlockUntil date) = unlockUntil date >>= return
 
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-adaptServer :: MVar State -> Server MellonAPI
-adaptServer m = enter serverToEither serverT
-  where
-    serverToEither :: AppM :~> EitherT ServantErr IO
-    serverToEither = Nat $ \r -> runReaderT r m
+serverToEither :: (LockDevice l) => ConcurrentController l -> AppM l :~> EitherT ServantErr IO
+serverToEither cc = Nat $ \m -> runConcurrentControllerT cc m
 
-app :: MVar State -> Application
+adaptServer :: (LockDevice l) => ConcurrentController l -> Server MellonAPI
+adaptServer cc = enter (serverToEither cc) serverT
+
+app :: (LockDevice l) => ConcurrentController l -> Application
 app = serve mellonAPI . adaptServer

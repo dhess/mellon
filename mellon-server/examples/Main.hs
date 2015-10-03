@@ -2,10 +2,11 @@
 
 module Main where
 
-import Control.Concurrent.MVar (newMVar)
 import Network.Wai.Handler.Warp
 import Options.Applicative
-import Web.Mellon.Service (State(..), app)
+import System.Mellon.ConcurrentController
+import System.Mellon.MockLock
+import Web.Mellon.Service (app)
 
 data Verbosity
   = Normal
@@ -54,8 +55,9 @@ runCmd _ = return ()
 
 serve :: Int -> IO ()
 serve port =
-  do state <- newMVar Locked
-     run port $ app state
+  do ml <- mockLock
+     cc <- concurrentController ml
+     run port $ app cc
 
 main :: IO ()
 main = execParser opts >>= runCmd
