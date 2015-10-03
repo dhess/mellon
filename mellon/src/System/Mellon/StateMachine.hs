@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -49,6 +50,7 @@ import Control.Monad.Trans.Free (FreeT, MonadFree, liftF)
 import Control.Monad.Free.TH (makeFreeCon)
 import Data.Functor.Identity (Identity)
 import Data.Time (UTCTime)
+import GHC.Generics
 
 -- | The states of a @mellon@ 'StateMachineT'.
 data State
@@ -58,7 +60,7 @@ data State
   -- time is in the past, then the state machine is unlocked
   -- indefinitely.
   | Unlocked UTCTime
-  deriving (Eq)
+  deriving (Eq, Show, Generic)
 
 -- | The 'StateMachineT' commands. These represent the transitions
 -- from one state to the next.
