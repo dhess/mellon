@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Web.Mellon.Service
+module Mellon.Server
          ( State(..)
          , app
          ) where
@@ -18,9 +18,8 @@ import Lucid
 import Network.Wai
 import Servant
 import Servant.HTML.Lucid
-import System.Mellon.ConcurrentController
-import System.Mellon.LockDevice
-import System.Mellon.MonadController
+import Mellon.ConcurrentController
+import Mellon.MonadController
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =

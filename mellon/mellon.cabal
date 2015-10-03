@@ -1,5 +1,5 @@
 Name:                   mellon
-Version:                0.2.0
+Version:                0.3.0
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
@@ -26,19 +26,19 @@ Description:
 
   @mellon@ is a low-level package that provides, among other things:
   .
-  * The 'System.Mellon.LockDevice' typeclass, for interfacing with a
+  * The 'Mellon.LockDevice' typeclass, for interfacing with a
     physical device driver or other low-level lock mechanism.
   .
-  * The 'System.Mellon.MonadController' typeclass, which provides a
+  * The 'Mellon.MonadController' typeclass, which provides a
     monadic interface for controlling a device from a user application
     or service.
   .
-  * 'System.Mellon.ConcurrentController', a controller implementation
+  * 'Mellon.ConcurrentController', a controller implementation
     that works with multiple simultaneous control threads. This is useful
     for controlling a lock from a network service, for example.
   .
   Note that @mellon@ does not provide any useful
-  'System.Mellon.LockDevice' implementations; that is the domain of
+  'Mellon.LockDevice' implementations; that is the domain of
   access device implementation-specific packages. Similarly, @mellon@
   does not provide authentication mechanisms or network services; that
   is the domain of higher-level packages which use the base @mellon@
@@ -50,15 +50,15 @@ Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
-  Exposed-Modules:      System.Mellon
-                      , System.Mellon.ConcurrentController
-                      , System.Mellon.LockDevice
-                      , System.Mellon.MockLock
-                      , System.Mellon.MonadController
-                      , System.Mellon.MonadController.Class
-                      , System.Mellon.MonadLock
-                      , System.Mellon.MonadLock.Class
-                      , System.Mellon.StateMachine
+  Exposed-Modules:      Mellon
+                      , Mellon.ConcurrentController
+                      , Mellon.LockDevice
+                      , Mellon.MockLock
+                      , Mellon.MonadController
+                      , Mellon.MonadController.Class
+                      , Mellon.MonadLock
+                      , Mellon.MonadLock.Class
+                      , Mellon.StateMachine
   Other-Extensions:     ExistentialQuantification
                       , FlexibleContexts
                       , FlexibleInstances
@@ -87,7 +87,7 @@ Test-Suite spec
                       , text
                       , time
                       , transformers
-  Other-Modules:        System.Mellon
+  Other-Modules:        Mellon
 
 Source-Repository head
   Type:                 git

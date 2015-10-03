@@ -4,9 +4,9 @@ module Main where
 
 import Network.Wai.Handler.Warp
 import Options.Applicative
-import System.Mellon.ConcurrentController
-import System.Mellon.MockLock
-import Web.Mellon.Service (app)
+import Mellon.ConcurrentController
+import Mellon.MockLock
+import Mellon.Server (app)
 
 data Verbosity
   = Normal

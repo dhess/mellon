@@ -6,7 +6,7 @@
 -- kernel-level GPIO API for controlling an electric strike.
 -- Therefore, the 'LockDevice' interface runs in the 'IO' monad.
 
-module System.Mellon.LockDevice
+module Mellon.LockDevice
          ( LockDevice(..)
          ) where
 

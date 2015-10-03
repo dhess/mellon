@@ -1,12 +1,12 @@
-module System.MellonSpec (main, spec) where
+module MellonSpec (main, spec) where
 
 import qualified Control.Concurrent as CC (threadDelay)
 import Control.Monad.IO.Class
 import Control.Monad.Writer
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
-import System.Mellon.MonadController (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
-import System.Mellon.MockLock (MockLockEvent(..), events, mockLock)
+import Mellon.MonadController (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
+import Mellon.MockLock (MockLockEvent(..), events, mockLock)
 import Test.Hspec
 
 main :: IO ()

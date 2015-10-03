@@ -1,5 +1,5 @@
 Name:                   mellon-server
-Version:                0.2.0
+Version:                0.3.0
 Author:                 Drew Hess <src@drewhess.com>
 Maintainer:             Drew Hess <src@drewhess.com>
 License:                BSD3
@@ -13,8 +13,7 @@ Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
-  Exposed-Modules:      Web.Mellon
-                      , Web.Mellon.Service
+  Exposed-Modules:      Mellon.Server
   Build-Depends:        base >= 4 && < 5
                       , aeson
                       , either
@@ -52,7 +51,7 @@ Executable mellon-server
                       , transformers
                       , wai
                       , warp
-  Other-Modules:        Web.Mellon
+  Other-Modules:        Mellon.Server
 
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
@@ -63,7 +62,7 @@ Test-Suite spec
   Main-Is:              Spec.hs
   Build-Depends:        base
                       , hspec
-  Other-Modules:        Web.Mellon
+  Other-Modules:        Mellon.Server
 
 Source-Repository head
   Type:                 git

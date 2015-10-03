@@ -1,4 +1,4 @@
-module Web.MellonSpec (main, spec) where
+module MellonSpec (main, spec) where
 
 import Test.Hspec
 
