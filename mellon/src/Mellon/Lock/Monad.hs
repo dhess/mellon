@@ -1,16 +1,16 @@
 -- | A lock monad.
 --
--- The interface is defined by
--- 'Mellon.MonadLock.Class.MonadLock'. Note that the interface
--- is not dependent on the 'LockDevice' interface; 'Lock' and 'LockT'
--- assume you will be wrapping a 'LockDevice' in a 'MonadLock' monad,
--- but other implementations of 'MonadLock' are possible.
+-- The interface is defined by the 'Mellon.Lock.Monad.Class.MonadLock'
+-- typeclass. Note that the typeclass interface is not dependent on
+-- the 'LockDevice' interface; 'Lock' and 'LockT' assume you will be
+-- wrapping a 'LockDevice' in a 'MonadLock' monad, but other
+-- implementations of 'MonadLock' are possible.
 
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Mellon.MonadLock
+module Mellon.Lock.Monad
        ( -- * Classes
-         module Mellon.MonadLock.Class
+         module Mellon.Lock.Monad.Class
          -- * Monads and monad transformers
        , LockT
        , liftLockT
@@ -23,8 +23,8 @@ module Mellon.MonadLock
 import Control.Applicative (Alternative)
 import Control.Monad.Identity
 import Control.Monad.Reader
-import Mellon.MonadLock.Class
-import Mellon.LockDevice
+import Mellon.Lock.Monad.Class
+import Mellon.Lock.Device
 
 -- | A monad transformer which adds a lock device to an existing
 -- monad.

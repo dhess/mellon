@@ -50,14 +50,14 @@ Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
-  Exposed-Modules:      Mellon
-                      , Mellon.ConcurrentController
-                      , Mellon.LockDevice
-                      , Mellon.MockLock
-                      , Mellon.MonadController
-                      , Mellon.MonadController.Class
-                      , Mellon.MonadLock
-                      , Mellon.MonadLock.Class
+  Exposed-Modules:      Mellon.Controller
+                      , Mellon.Controller.Concurrent
+                      , Mellon.Controller.Monad.Class
+                      , Mellon.Lock
+                      , Mellon.Lock.Device
+                      , Mellon.Lock.Mock
+                      , Mellon.Lock.Monad
+                      , Mellon.Lock.Monad.Class
                       , Mellon.StateMachine
   Other-Extensions:     ExistentialQuantification
                       , FlexibleContexts
@@ -87,7 +87,15 @@ Test-Suite spec
                       , text
                       , time
                       , transformers
-  Other-Modules:        Mellon
+  Other-Modules:        Mellon.Controller
+                      , Mellon.Controller.Concurrent
+                      , Mellon.Controller.Monad.Class
+                      , Mellon.Lock
+                      , Mellon.Lock.Device
+                      , Mellon.Lock.Mock
+                      , Mellon.Lock.Monad
+                      , Mellon.Lock.Monad.Class
+                      , Mellon.StateMachine
 
 Source-Repository head
   Type:                 git

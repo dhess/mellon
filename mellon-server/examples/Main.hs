@@ -4,8 +4,8 @@ module Main where
 
 import Network.Wai.Handler.Warp
 import Options.Applicative
-import Mellon.ConcurrentController
-import Mellon.MockLock
+import Mellon.Controller
+import Mellon.Lock.Mock
 import Mellon.Server (app)
 
 data Verbosity

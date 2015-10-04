@@ -4,7 +4,7 @@
 -- @mellon@ state machine. 'MonadController' defines the common
 -- controller interface implemented by all controllers.
 
-module Mellon.MonadController.Class
+module Mellon.Controller.Monad.Class
        ( MonadController(..)
        -- * Re-exported for convenience.
        , State(..)

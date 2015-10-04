@@ -18,8 +18,7 @@ import Lucid
 import Network.Wai
 import Servant
 import Servant.HTML.Lucid
-import Mellon.ConcurrentController
-import Mellon.MonadController
+import Mellon.Controller
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =

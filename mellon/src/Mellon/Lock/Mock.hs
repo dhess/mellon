@@ -3,7 +3,7 @@
 
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Mellon.MockLock
+module Mellon.Lock.Mock
        ( MockLock
        , MockLockEvent(..)
        , events
@@ -12,7 +12,7 @@ module Mellon.MockLock
 
 import Control.Concurrent (MVar, newMVar, putMVar, readMVar, takeMVar)
 import Data.Time (UTCTime, getCurrentTime)
-import Mellon.LockDevice
+import Mellon.Lock.Device
 
 -- | The locking events logged by 'MockLock'.
 data MockLockEvent

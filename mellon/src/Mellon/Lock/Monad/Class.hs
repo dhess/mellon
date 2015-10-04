@@ -1,9 +1,6 @@
--- | A typeclass for lock monads.
---
--- Instances of this typeclass include 'Mellon.MonadLock.Lock'
--- and monads created using 'Mellon.MonadLock.LockT'.
+-- | A typeclass for monadic lock devices.
 
-module Mellon.MonadLock.Class
+module Mellon.Lock.Monad.Class
          ( MonadLock(..)
          ) where
 

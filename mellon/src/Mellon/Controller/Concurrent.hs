@@ -4,7 +4,7 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Mellon.ConcurrentController
+module Mellon.Controller.Concurrent
          ( ConcurrentController
          , ConcurrentControllerT(..)
          , concurrentController
@@ -17,8 +17,8 @@ import Control.Monad.Trans.Free (iterT)
 import Control.Monad.IO.Class
 import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
-import Mellon.MonadController.Class
-import Mellon.LockDevice
+import Mellon.Controller.Monad.Class
+import Mellon.Lock.Device
 import Mellon.StateMachine (Cmd(..), StateMachineF(..), execCmdT)
 
 -- | Wraps a mutex around a 'LockDevice' so that it can be

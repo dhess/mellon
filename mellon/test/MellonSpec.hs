@@ -5,8 +5,8 @@ import Control.Monad.IO.Class
 import Control.Monad.Writer
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
-import Mellon.MonadController (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
-import Mellon.MockLock (MockLockEvent(..), events, mockLock)
+import Mellon.Controller (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
+import Mellon.Lock.Mock (MockLockEvent(..), events, mockLock)
 import Test.Hspec
 
 main :: IO ()
