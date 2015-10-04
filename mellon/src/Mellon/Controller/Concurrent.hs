@@ -6,8 +6,10 @@
 
 module Mellon.Controller.Concurrent
          ( ConcurrentControllerCtx
+         , ConcurrentController
          , ConcurrentControllerT(..)
          , concurrentControllerCtx
+         , runConcurrentController
          , runConcurrentControllerT
          ) where
 
@@ -105,6 +107,13 @@ runSM (RunUnlock next) =
 -- ignore this command. When the "unscheduled" lock fires, the
 -- state machine will simply ignore it.
 runSM (UnscheduleLock next) = next
+
+-- | The simplest useful 'ConcurrentControllerT' monad instance.
+type ConcurrentController = ConcurrentControllerT IO ()
+
+-- | Run an action inside the 'ConcurrentController' monad.
+runConcurrentController :: ConcurrentControllerCtx -> ConcurrentController -> IO ()
+runConcurrentController = runConcurrentControllerT
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be
