@@ -101,11 +101,11 @@ serverT =
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: ConcurrentController -> AppM :~> EitherT ServantErr IO
+serverToEither :: ConcurrentControllerCtx -> AppM :~> EitherT ServantErr IO
 serverToEither cc = Nat $ \m -> runConcurrentControllerT cc m
 
-adaptServer :: ConcurrentController -> Server MellonAPI
+adaptServer :: ConcurrentControllerCtx -> Server MellonAPI
 adaptServer cc = enter (serverToEither cc) serverT
 
-app :: ConcurrentController -> Application
+app :: ConcurrentControllerCtx -> Application
 app = serve mellonAPI . adaptServer

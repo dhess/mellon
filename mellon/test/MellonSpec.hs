@@ -5,7 +5,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Writer
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
-import Mellon.Controller (MonadController(..), ConcurrentControllerT(..), concurrentController, runConcurrentControllerT)
+import Mellon.Controller (MonadController(..), ConcurrentControllerT(..), concurrentControllerCtx, runConcurrentControllerT)
 import Mellon.Lock.Mock (MockLockEvent(..), events, mockLock)
 import Test.Hspec
 
@@ -96,7 +96,7 @@ checkResults expected actual epsilon = foldr compareResult (Right "No results to
 concurrentControllerTest :: IO CheckedResults
 concurrentControllerTest =
   do ml <- mockLock
-     cc <- concurrentController ml
+     cc <- concurrentControllerCtx ml
      ccEvents <- runConcurrentControllerT cc testCC
      -- Discard the first MockLock event, which happened when
      -- concurrentController initialized the lock.

@@ -56,7 +56,7 @@ runCmd _ = return ()
 serve :: Int -> IO ()
 serve port =
   do ml <- mockLock
-     cc <- concurrentController ml
+     cc <- concurrentControllerCtx ml
      run port $ app cc
 
 main :: IO ()
