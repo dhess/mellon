@@ -1,3 +1,5 @@
+-- | This module re-exports @mellon@ controller types.
+
 module Mellon.Controller
   ( module Mellon.Controller.Concurrent
   , module Mellon.Controller.Monad.Class
