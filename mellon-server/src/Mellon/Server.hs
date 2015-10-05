@@ -39,14 +39,6 @@ instance FromJSON Command where
 
 newtype ServerState = ServerState State deriving (Eq, Show, Generic)
 
--- instance ToJSON Coord where
---   toJSON (Coord xV yV) = object [ "x" .= xV,
---                                   "y" .= yV ]
-
---   toEncoding Coord{..} = pairs $
---     "x" .= x <>
---     "y" .= y
-
 instance ToJSON ServerState where
   toJSON (ServerState Locked) = object [ "state" .= String "Locked" ]
   toJSON (ServerState (Unlocked date)) = object [ "state" .= String "Unlocked"

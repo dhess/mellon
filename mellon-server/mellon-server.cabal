@@ -30,15 +30,19 @@ Library
                       , wai
                       , warp
 
-Executable mellon-server
-  Main-Is:              Main.hs
+Test-Suite spec
+  Type:                 exitcode-stdio-1.0
   Default-Language:     Haskell2010
-  HS-Source-Dirs:       examples
-                      , src
-  GHC-Options:          -Wall
-  Build-Depends:        base >= 4 && < 5
-                      , aeson
+  Hs-Source-Dirs:       src
+                      , test
+  Ghc-Options:          -Wall
+  Main-Is:              Spec.hs
+  Build-Depends:        aeson
+                      , base
                       , either
+                      , hspec
+                      , http-client
+                      , http-types
                       , lucid
                       , mellon
                       , optparse-applicative >= 0.11.0
@@ -51,17 +55,6 @@ Executable mellon-server
                       , transformers
                       , wai
                       , warp
-  Other-Modules:        Mellon.Server
-
-Test-Suite spec
-  Type:                 exitcode-stdio-1.0
-  Default-Language:     Haskell2010
-  Hs-Source-Dirs:       src
-                      , test
-  Ghc-Options:          -Wall
-  Main-Is:              Spec.hs
-  Build-Depends:        base
-                      , hspec
   Other-Modules:        Mellon.Server
 
 Source-Repository head
