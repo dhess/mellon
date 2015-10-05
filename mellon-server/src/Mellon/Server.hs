@@ -4,7 +4,9 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Mellon.Server
-         ( app
+         ( Command(..)
+         , State(..)
+         , app
          ) where
 
 import Control.Monad.Trans.Either (EitherT)
@@ -17,7 +19,7 @@ import Lucid
 import Network.Wai
 import Servant
 import Servant.HTML.Lucid
-import Mellon.Controller
+import qualified Mellon.Controller as MC
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
@@ -37,19 +39,32 @@ commandJSONOptions = defaultOptions { sumEncoding = taggedObject }
 instance FromJSON Command where
   parseJSON = genericParseJSON commandJSONOptions
 
-newtype ServerState = ServerState State deriving (Eq, Show, Generic)
+-- | Mimics 'Mellon.Controller.State', but provides JSON conversions.
+-- (Avoids orphan instances.)
+data State = Locked | Unlocked UTCTime deriving (Eq, Show, Generic)
 
-instance ToJSON ServerState where
-  toJSON (ServerState Locked) = object [ "state" .= String "Locked" ]
-  toJSON (ServerState (Unlocked date)) = object [ "state" .= String "Unlocked"
-                                                , "until" .= date ]
+stateToState :: MC.State -> State
+stateToState MC.Locked = Locked
+stateToState (MC.Unlocked date) = Unlocked date
+
+stateJSONOptions :: Options
+stateJSONOptions = defaultOptions { sumEncoding = taggedObject }
+  where
+    taggedObject = defaultTaggedObject { tagFieldName = "state"
+                                       , contentsFieldName = "until" }
+
+instance ToJSON State where
+  toJSON = genericToJSON stateJSONOptions
+
+instance FromJSON State where
+  parseJSON= genericParseJSON stateJSONOptions
 
 stateDocument :: Monad m => HtmlT m a -> HtmlT m a
 stateDocument = wrapBody "Mellon state"
 
-instance ToHtml ServerState where
-  toHtml (ServerState Locked) = stateDocument "Locked"
-  toHtml (ServerState (Unlocked time)) = stateDocument $ "Unlocked until " >> toHtml (show time)
+instance ToHtml State where
+  toHtml Locked = stateDocument "Locked"
+  toHtml (Unlocked time) = stateDocument $ "Unlocked until " >> toHtml (show time)
   toHtmlRaw = toHtml
 
 newtype Time = Time UTCTime deriving (Eq, Show, Generic)
@@ -66,10 +81,10 @@ instance ToHtml Time where
 
 type MellonAPI =
   "time" :> Get '[JSON, HTML] Time :<|>
-  "state" :> Get '[JSON, HTML] ServerState :<|>
-  "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] ServerState
+  "state" :> Get '[JSON, HTML] State :<|>
+  "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] State
 
-type AppM = ConcurrentControllerT (EitherT ServantErr IO)
+type AppM = MC.ConcurrentControllerT (EitherT ServantErr IO)
 
 serverT :: ServerT MellonAPI AppM
 serverT =
@@ -82,22 +97,22 @@ serverT =
       do now <- liftIO $ getCurrentTime
          return $ Time now
 
-    getState :: AppM ServerState
-    getState = state >>= return . ServerState
+    getState :: AppM State
+    getState = MC.state >>= return . stateToState
 
-    execCommand :: Command -> AppM ServerState
-    execCommand LockNow = lockNow >>= return . ServerState
+    execCommand :: Command -> AppM State
+    execCommand LockNow = MC.lockNow >>= return . stateToState
 
-    execCommand (UnlockUntil date) = unlockUntil date >>= return . ServerState
+    execCommand (UnlockUntil date) = MC.unlockUntil date >>= return . stateToState
 
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: ConcurrentControllerCtx -> AppM :~> EitherT ServantErr IO
-serverToEither cc = Nat $ \m -> runConcurrentControllerT cc m
+serverToEither :: MC.ConcurrentControllerCtx -> AppM :~> EitherT ServantErr IO
+serverToEither cc = Nat $ \m -> MC.runConcurrentControllerT cc m
 
-adaptServer :: ConcurrentControllerCtx -> Server MellonAPI
+adaptServer :: MC.ConcurrentControllerCtx -> Server MellonAPI
 adaptServer cc = enter (serverToEither cc) serverT
 
-app :: ConcurrentControllerCtx -> Application
+app :: MC.ConcurrentControllerCtx -> Application
 app = serve mellonAPI . adaptServer

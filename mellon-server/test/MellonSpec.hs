@@ -4,9 +4,9 @@ module MellonSpec (main, spec) where
 
 import Control.Concurrent (forkIO, threadDelay)
 import Data.Aeson
-import Mellon.Controller
+import qualified Mellon.Controller as MC
 import Mellon.Lock.Mock
-import Mellon.Server (app)
+import Mellon.Server (app, State(..))
 import Network.Wai.Handler.Warp
 import Network.HTTP.Client
 import Network.HTTP.Types.Status
@@ -21,14 +21,14 @@ main = hspec spec
 startServer :: IO Bool
 startServer =
   do ml <- mockLock
-     cc <- concurrentControllerCtx ml
+     cc <- MC.concurrentControllerCtx ml
      _ <- forkIO (run 8081 $ app cc)
      -- Give the server time to spin up, and the user a chance to
      -- accept connections on OS X.
      sleep 10
      return True
 
-initialState :: IO (Status, Maybe Value)
+initialState :: IO (Status, Maybe State)
 initialState =
   do manager <- newManager defaultManagerSettings
      initialRequest <- parseUrl "http://localhost:8081/state"
@@ -48,4 +48,4 @@ spec = do
 
   describe "Initial server state" $ do
     it "should be locked" $ do
-      initialState >>= (shouldBe (ok200, Just $ object ["state" .= String "Locked"]))
+      initialState >>= (shouldBe (ok200, Just Locked))
