@@ -4,6 +4,7 @@ module MellonSpec (main, spec) where
 
 import Control.Concurrent (forkIO, threadDelay)
 import Data.Aeson
+import Data.Time.Clock
 import qualified Mellon.Controller as MC
 import Mellon.Lock.Mock
 import Mellon.Server (app, State(..))
@@ -36,6 +37,14 @@ initialState =
      response <- httpLbs request manager
      return (responseStatus response, decode $ responseBody response)
 
+serverTime :: IO (Status, Maybe UTCTime)
+serverTime =
+  do manager <- newManager defaultManagerSettings
+     initialRequest <- parseUrl "http://localhost:8081/time"
+     let request = initialRequest { method = "GET" }
+     response <- httpLbs request manager
+     return (responseStatus response, decode $ responseBody response)
+
 spec :: Spec
 spec = do
   describe "Running app" $ do
@@ -49,3 +58,11 @@ spec = do
   describe "Initial server state" $ do
     it "should be locked" $ do
       initialState >>= (shouldBe (ok200, Just Locked))
+
+  describe "Server time" $ do
+    it "should be accurate" $ do
+      now <- getCurrentTime
+      (code, Just time) <- serverTime
+      code `shouldBe` ok200
+      let delta = 1.0 :: NominalDiffTime
+      ((time `diffUTCTime` now) < delta) `shouldBe` True
