@@ -1,21 +1,19 @@
 # mellon-server
 
-TODO: Write description here
+`mellon-server` wraps a `mellon` controller in a web service. Like the
+`mellon` controller interface, the `mellon-server` web API is quite
+simple. There are only 3 methods:
 
-## Installation
+* `GET /time` returns the system time on the server. This is made
+  available for diagnostic purposes, primarily to ensure the server
+  has an accurate clock.
 
-TODO: Write installation instructions here
+* `GET /state` returns the controller's current state (either `Locked`
+  or `Unlocked date` where `date` is the UTC time at which the
+  controller will automatically lock again).
 
-## Usage
+* `PUT /state` sets the controller's current state. Use this method to
+  lock and unlock the controller.
 
-TODO: Write usage instructions here
-
-## How to run tests
-
-```
-cabal configure --enable-tests && cabal build && cabal test
-```
-
-## Contributing
-
-TODO: Write contribution instructions here
+See the package documentation for details on the `Content-Type`s and
+response body formats.
