@@ -4,8 +4,7 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Mellon.Server
-         ( Command(..)
-         , State(..)
+         ( State(..)
          , app
          ) where
 
@@ -27,17 +26,6 @@ wrapBody title body =
     do head_ $
          do title_ title
        body_ body
-
-data Command = LockNow | UnlockUntil !UTCTime deriving (Eq, Show, Generic)
-
-commandJSONOptions :: Options
-commandJSONOptions = defaultOptions { sumEncoding = taggedObject }
-  where
-    taggedObject = defaultTaggedObject { tagFieldName = "command"
-                                       , contentsFieldName = "until" }
-
-instance FromJSON Command where
-  parseJSON = genericParseJSON commandJSONOptions
 
 -- | Mimics 'Mellon.Controller.State', but provides JSON conversions.
 -- (Avoids orphan instances.)
@@ -82,7 +70,7 @@ instance ToHtml Time where
 type MellonAPI =
   "time" :> Get '[JSON, HTML] Time :<|>
   "state" :> Get '[JSON, HTML] State :<|>
-  "command" :> ReqBody '[JSON] Command :> Post '[JSON, HTML] State
+  "state" :> ReqBody '[JSON] State :> Put '[JSON, HTML] ()
 
 type AppM = MC.ConcurrentControllerT (EitherT ServantErr IO)
 
@@ -90,7 +78,7 @@ serverT :: ServerT MellonAPI AppM
 serverT =
   getTime :<|>
   getState :<|>
-  execCommand
+  putState
   where
     getTime :: AppM Time
     getTime =
@@ -100,10 +88,9 @@ serverT =
     getState :: AppM State
     getState = MC.state >>= return . stateToState
 
-    execCommand :: Command -> AppM State
-    execCommand LockNow = MC.lockNow >>= return . stateToState
-
-    execCommand (UnlockUntil date) = MC.unlockUntil date >>= return . stateToState
+    putState :: State -> AppM ()
+    putState Locked = MC.lockNow >> return ()
+    putState (Unlocked date) = MC.unlockUntil date >> return ()
 
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
