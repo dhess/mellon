@@ -16,6 +16,7 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      Mellon.Server
+                      , Mellon.Server.API
   Build-Depends:        base >= 4 && < 5
                       , aeson
                       , either
@@ -56,6 +57,7 @@ Test-Suite spec
                       , wai
                       , warp
   Other-Modules:        Mellon.Server
+                      , Mellon.Server.API
 
 Source-Repository head
   Type:                 git
