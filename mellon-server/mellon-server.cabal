@@ -8,6 +8,8 @@ License-File:           LICENSE
 -- Description:            
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
+Extra-Source-Files:     examples/*.hs
+Extra-Doc-Files:        examples/*.hs
 
 Library
   Default-Language:     Haskell2010
@@ -19,7 +21,6 @@ Library
                       , either
                       , lucid
                       , mellon
-                      , optparse-applicative >= 0.11.0
                       , servant
                       , servant-docs
                       , servant-lucid
@@ -45,7 +46,6 @@ Test-Suite spec
                       , http-types
                       , lucid
                       , mellon
-                      , optparse-applicative >= 0.11.0
                       , servant
                       , servant-docs
                       , servant-lucid
