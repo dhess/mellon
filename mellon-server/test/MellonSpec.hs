@@ -29,8 +29,8 @@ startServer =
      sleep 10
      return True
 
-initialState :: IO (Status, Maybe State)
-initialState =
+serverState :: IO (Status, Maybe State)
+serverState =
   do manager <- newManager defaultManagerSettings
      initialRequest <- parseUrl "http://localhost:8081/state"
      let request = initialRequest { method = "GET" }
@@ -42,6 +42,26 @@ serverTime =
   do manager <- newManager defaultManagerSettings
      initialRequest <- parseUrl "http://localhost:8081/time"
      let request = initialRequest { method = "GET" }
+     response <- httpLbs request manager
+     return (responseStatus response, decode $ responseBody response)
+
+lockIt :: IO (Status, Maybe Value)
+lockIt =
+  do manager <- newManager defaultManagerSettings
+     initialRequest <- parseUrl "http://localhost:8081/state"
+     let request = initialRequest { method = "PUT"
+                                  , requestBody = RequestBodyLBS $ encode Locked
+                                  , requestHeaders = [("Content-Type", "application/json")] }
+     response <- httpLbs request manager
+     return (responseStatus response, decode $ responseBody response)
+
+unlockIt :: UTCTime -> IO (Status, Maybe Value)
+unlockIt untilTime =
+  do manager <- newManager defaultManagerSettings
+     initialRequest <- parseUrl "http://localhost:8081/state"
+     let request = initialRequest { method = "PUT"
+                                  , requestBody = RequestBodyLBS $ encode (Unlocked untilTime)
+                                  , requestHeaders = [("Content-Type", "application/json")] }
      response <- httpLbs request manager
      return (responseStatus response, decode $ responseBody response)
 
@@ -57,7 +77,7 @@ spec = do
 
   describe "Initial server state" $ do
     it "should be locked" $ do
-      initialState >>= (shouldBe (ok200, Just Locked))
+      serverState >>= (shouldBe (ok200, Just Locked))
 
   describe "Server time" $ do
     it "should be accurate" $ do
@@ -66,3 +86,43 @@ spec = do
       code `shouldBe` ok200
       let delta = 1.0 :: NominalDiffTime
       ((time `diffUTCTime` now) < delta) `shouldBe` True
+
+  describe "Locking when locked" $ do
+    it "is idempotent" $ do
+      lockIt >>= shouldBe (status204, Nothing)
+      serverState >>= shouldBe (ok200, Just Locked)
+
+  describe "Unlock" $ do
+    it "unlocks" $ do
+      now <- getCurrentTime
+      let untilTime = 3.0 `addUTCTime` now
+      unlockIt untilTime >>= shouldBe (status204, Nothing)
+      serverState >>= shouldBe (ok200, Just (Unlocked untilTime))
+
+    it "then locks when the unlock expires" $ do
+      sleep 3
+      serverState >>= shouldBe (ok200, Just Locked)
+
+    it "overrides unlocks that expire earlier" $ do
+      now <- getCurrentTime
+      let untilTime = 3.0 `addUTCTime` now
+      unlockIt untilTime >>= shouldBe (status204, Nothing)
+      sleep 1
+      let newUntilTime = 7.0 `addUTCTime` now
+      unlockIt newUntilTime >>= shouldBe (status204, Nothing)
+      serverState >>= shouldBe (ok200, Just (Unlocked newUntilTime))
+      sleep 3
+      serverState >>= shouldBe (ok200, Just (Unlocked newUntilTime))
+      sleep 4
+      serverState >>= shouldBe (ok200, Just Locked)
+
+  describe "Lock" $ do
+    it "overrides unlocks" $ do
+      now <- getCurrentTime
+      let untilTime = 20.0 `addUTCTime` now
+      unlockIt untilTime >>= shouldBe (status204, Nothing)
+      serverState >>= shouldBe (ok200, Just (Unlocked untilTime))
+      sleep 1
+      lockIt >>= shouldBe (status204, Nothing)
+      serverState >>= shouldBe (ok200, Just Locked)
+
