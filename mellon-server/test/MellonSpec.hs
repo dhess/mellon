@@ -45,7 +45,7 @@ serverTime =
      response <- httpLbs request manager
      return (responseStatus response, decode $ responseBody response)
 
-lockIt :: IO (Status, Maybe Value)
+lockIt :: IO (Status, Maybe State)
 lockIt =
   do manager <- newManager defaultManagerSettings
      initialRequest <- parseUrl "http://localhost:8081/state"
@@ -55,7 +55,7 @@ lockIt =
      response <- httpLbs request manager
      return (responseStatus response, decode $ responseBody response)
 
-unlockIt :: UTCTime -> IO (Status, Maybe Value)
+unlockIt :: UTCTime -> IO (Status, Maybe State)
 unlockIt untilTime =
   do manager <- newManager defaultManagerSettings
      initialRequest <- parseUrl "http://localhost:8081/state"
@@ -89,14 +89,14 @@ spec = do
 
   describe "Locking when locked" $ do
     it "is idempotent" $ do
-      lockIt >>= shouldBe (status204, Nothing)
+      lockIt >>= shouldBe (ok200, Just Locked)
       serverState >>= shouldBe (ok200, Just Locked)
 
   describe "Unlock" $ do
     it "unlocks" $ do
       now <- getCurrentTime
       let untilTime = 3.0 `addUTCTime` now
-      unlockIt untilTime >>= shouldBe (status204, Nothing)
+      unlockIt untilTime >>= shouldBe (ok200, Just (Unlocked untilTime))
       serverState >>= shouldBe (ok200, Just (Unlocked untilTime))
 
     it "then locks when the unlock expires" $ do
@@ -106,10 +106,10 @@ spec = do
     it "overrides unlocks that expire earlier" $ do
       now <- getCurrentTime
       let untilTime = 3.0 `addUTCTime` now
-      unlockIt untilTime >>= shouldBe (status204, Nothing)
+      unlockIt untilTime >>= shouldBe (ok200, Just (Unlocked untilTime))
       sleep 1
       let newUntilTime = 7.0 `addUTCTime` now
-      unlockIt newUntilTime >>= shouldBe (status204, Nothing)
+      unlockIt newUntilTime >>= shouldBe (ok200, Just (Unlocked newUntilTime))
       serverState >>= shouldBe (ok200, Just (Unlocked newUntilTime))
       sleep 3
       serverState >>= shouldBe (ok200, Just (Unlocked newUntilTime))
@@ -120,9 +120,9 @@ spec = do
     it "overrides unlocks" $ do
       now <- getCurrentTime
       let untilTime = 20.0 `addUTCTime` now
-      unlockIt untilTime >>= shouldBe (status204, Nothing)
+      unlockIt untilTime >>= shouldBe (ok200, Just (Unlocked untilTime))
       serverState >>= shouldBe (ok200, Just (Unlocked untilTime))
       sleep 1
-      lockIt >>= shouldBe (status204, Nothing)
+      lockIt >>= shouldBe (ok200, Just Locked)
       serverState >>= shouldBe (ok200, Just Locked)
 
