@@ -5,7 +5,7 @@ module Main where
 
 import Mellon.Controller
 import Mellon.Lock.Mock
-import Mellon.Server.Docs (app)
+import Mellon.Server.Docs (docsApp)
 import Network.Wai.Handler.Warp
 
 main :: IO ()
@@ -13,5 +13,5 @@ main =
   do ml <- mockLock
      cc <- concurrentControllerCtx ml
      putStrLn "Running on port 8081"
-     run 8081 $ app cc
+     run 8081 $ docsApp cc
 

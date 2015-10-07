@@ -10,9 +10,9 @@
 
 module Mellon.Server.Docs
          ( DocsAPI
-         , app
          , docsAPI
-         , server
+         , docsApp
+         , docsServer
          ) where
 
 import Data.ByteString.Lazy (ByteString)
@@ -44,10 +44,10 @@ docsBS = encodeUtf8 . pack . markdown $ docsWithIntros [intro] API.mellonAPI
 -- | A 'Server' which serves the 'DocsAPI' on the given
 -- 'Mellon.Controller.Concurrent.ConcurrentControllerCtx' instance.
 --
--- Normally you will just use 'app', but this function is exported so
+-- Normally you will just use 'docsApp', but this function is exported so
 -- that you can extend/wrap 'DocsAPI'.
-server :: MC.ConcurrentControllerCtx -> Server DocsAPI
-server cc = (API.server cc)  :<|> serveDocs
+docsServer :: MC.ConcurrentControllerCtx -> Server DocsAPI
+docsServer cc = (API.server cc)  :<|> serveDocs
   where
     serveDocs _ respond =
       respond $ responseLBS ok200 [plain] docsBS
@@ -57,5 +57,5 @@ server cc = (API.server cc)  :<|> serveDocs
 -- | An 'Network.Wai.Application' which runs the server, using the given
 -- 'Mellon.Controller.Concurrent.ConcurrentControllerCtx' instance for
 -- the controller.
-app :: MC.ConcurrentControllerCtx -> Application
-app = serve docsAPI . server
+docsApp :: MC.ConcurrentControllerCtx -> Application
+docsApp = serve docsAPI . docsServer
