@@ -2,23 +2,20 @@
 
 module MellonSpec (spec) where
 
-import Control.Concurrent (ThreadId, forkIO, killThread, threadDelay)
+import Control.Concurrent (forkIO)
 import qualified Mellon.Controller as MC
 import Mellon.Lock.Mock
 import Mellon.Server (app)
 import Network.Wai.Handler.Warp
-import qualified ServerTests as Tests (spec)
+import qualified ServerTests as Tests (spec, sleep)
 import Test.Hspec
-
-sleep :: Int -> IO ()
-sleep = threadDelay . (* 1000000)
 
 startServer :: IO ()
 startServer =
   do ml <- mockLock
      cc <- MC.concurrentControllerCtx ml
      _ <- forkIO (run 8081 $ app cc)
-     sleep 10
+     Tests.sleep 10
      return ()
 
 spec :: Spec

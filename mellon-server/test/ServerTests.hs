@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module ServerTests (spec) where
+module ServerTests (spec, sleep) where
 
-import Control.Concurrent (ThreadId, forkIO, killThread, threadDelay)
+import Control.Concurrent (threadDelay)
 import Data.Aeson
 import Data.Time.Clock
-import Mellon.Server (app, State(..))
-import Network.Wai.Handler.Warp
+import Mellon.Server (State(..))
 import Network.HTTP.Client
 import Network.HTTP.Types.Status
 import Test.Hspec
