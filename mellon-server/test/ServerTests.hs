@@ -1,12 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module ServerTests (spec, sleep) where
+module ServerTests (docsSpec, spec, sleep) where
 
 import Control.Concurrent (threadDelay)
 import Data.Aeson
+import Data.List
 import Data.Time.Clock
 import Mellon.Server (State(..))
 import Network.HTTP.Client
+import Network.HTTP.Types.Header
 import Network.HTTP.Types.Status
 import Test.Hspec
 
@@ -48,6 +50,22 @@ unlockIt untilTime =
                                   , requestHeaders = [("Content-Type", "application/json")] }
      response <- httpLbs request manager
      return (responseStatus response, decode $ responseBody response)
+
+getDocs :: IO (Status, Maybe Header)
+getDocs =
+  do manager <- newManager defaultManagerSettings
+     initialRequest <- parseUrl "http://localhost:8081/docs"
+     let request = initialRequest { method = "GET" }
+     response <- httpLbs request manager
+     let maybeCTHeader = find (\(h, _) -> h == hContentType) $ responseHeaders response
+     return (responseStatus response, maybeCTHeader)
+
+-- Tests specific to the docsApp.
+docsSpec :: Spec
+docsSpec = do
+  describe "Docs" $ do
+    it "are available via GET /docs" $ do
+      getDocs >>= shouldBe (ok200, Just (hContentType, "text/plain"))
 
 spec :: Spec
 spec = do
