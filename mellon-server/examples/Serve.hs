@@ -1,5 +1,4 @@
--- Compile from top-level with:
--- ghc -i src/Mellon/Server/API -i src/Mellon/Server/Docs examples/Serve
+-- Compile from top-level with "ghc -isrc"
 
 module Main where
 
