@@ -4,7 +4,7 @@
 }:
 mkDerivation {
   pname = "mellon-server";
-  version = "0.3.0";
+  version = "0.3.1";
   src = ./.;
   libraryHaskellDepends = [
     aeson base bytestring either http-types lucid mellon servant

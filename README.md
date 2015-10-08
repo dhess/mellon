@@ -12,6 +12,9 @@ of packages includes:
 * `mellon-server`, a web interface for interacting with
   Mellon controllers.
 
+* `mellon-client`, Haskell bindings for interacting with
+  `mellon-server`.
+
 ## Building from git
 
 You will need [bumper](https://hackage.haskell.org/package/bumper) in

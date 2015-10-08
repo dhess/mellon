@@ -1,0 +1,58 @@
+Name:                   mellon-client
+Version:                0.3.1
+Author:                 Drew Hess <src@drewhess.com>
+Maintainer:             Drew Hess <src@drewhess.com>
+License:                BSD3
+License-File:           LICENSE
+-- Synopsis:               
+-- Description:            
+Cabal-Version:          >= 1.10
+Build-Type:             Simple
+--Extra-Source-Files:     examples/*.hs
+--Extra-Doc-Files:        examples/*.hs
+
+Library
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       src
+  GHC-Options:          -Wall
+  Exposed-Modules:      Mellon.Client
+  Build-Depends:        base >= 4 && < 5
+                      , aeson
+                      , bytestring
+                      , either
+                      , http-types
+                      , lucid
+                      , mellon
+                      , mellon-server
+                      , servant
+                      , servant-client
+                      , text
+                      , time
+                      , transformers
+
+Test-Suite spec
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       src
+                      , test
+  Ghc-Options:          -Wall
+  Main-Is:              Spec.hs
+  Build-Depends:        aeson
+                      , base
+                      , bytestring
+                      , either
+                      , hspec
+                      , mellon
+                      , mellon-server
+                      , servant
+                      , servant-client
+                      , text
+                      , time
+                      , transformers
+                      , wai
+                      , warp
+  Other-Modules:        Mellon.Client
+
+Source-Repository head
+  Type:                 git
+  Location:             https://github.com/dhess/mellon.git

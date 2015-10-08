@@ -24,6 +24,7 @@ write-package-shell-nix () {
     echo -e "" >> $SHELLNIX
     echo -e "  haskellPackages = pkgs.haskellPackages.override {" >> $SHELLNIX
     echo -e "    overrides = self: super: {" >> $SHELLNIX
+    echo -e "      servant-client = if pkgs.stdenv.isDarwin then pkgs.haskell.lib.dontCheck super.servant-client else super.servant-client;" >> $SHELLNIX
     for n in ${SOURCES[@]} ; do
         if [[ $1 != $n ]]; then
             echo -e "      $n = pkgs.haskell.lib.dontCheck (pkgs.haskell.lib.appendConfigureFlag (self.callPackage ../$n {}) \"--ghc-options=-Werror\");" >> $SHELLNIX
