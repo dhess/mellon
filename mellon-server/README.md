@@ -16,3 +16,7 @@ quite simple. There are only 3 methods:
   lock and unlock the controller.
 
 See [API.md](API.md) for detailed documentation on the REST service.
+
+Note that `mellon-server` does not provide an authentication
+mechanism! You should proxy `mellon-server` behind a secure HTTPS
+server such as Nginx.

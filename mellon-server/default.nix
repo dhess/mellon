@@ -16,5 +16,6 @@ mkDerivation {
     mellon servant servant-docs servant-lucid servant-server text time
     transformers wai warp
   ];
+  description = "A REST web service for mellon";
   license = stdenv.lib.licenses.bsd3;
 }

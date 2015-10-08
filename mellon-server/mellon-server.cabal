@@ -4,12 +4,22 @@ Author:                 Drew Hess <src@drewhess.com>
 Maintainer:             Drew Hess <src@drewhess.com>
 License:                BSD3
 License-File:           LICENSE
--- Synopsis:               
--- Description:            
+Synopsis:               A REST web service for mellon
+Description:
+  @mellon-server@ wraps a @mellon@ controller in a REST web service.
+  .
+  See the included <API.md API.md> file for detailed documentation
+  on the REST service methods and document types.
+  .
+  Note that @mellon-server@ does not provide an authentication
+  mechanism! You should proxy @mellon-server@ behind a secure
+  HTTPS server such as Nginx.
+
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Extra-Source-Files:     examples/*.hs
 Extra-Doc-Files:        examples/*.hs
+                      , API.md
 
 Library
   Default-Language:     Haskell2010

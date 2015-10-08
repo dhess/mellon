@@ -14,5 +14,6 @@ mkDerivation {
     aeson base bytestring either hspec mellon mellon-server servant
     servant-client text time transformers wai warp
   ];
+  description = "Haskell client bindings for mellon-server";
   license = stdenv.lib.licenses.bsd3;
 }

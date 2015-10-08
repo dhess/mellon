@@ -4,12 +4,13 @@ Author:                 Drew Hess <src@drewhess.com>
 Maintainer:             Drew Hess <src@drewhess.com>
 License:                BSD3
 License-File:           LICENSE
--- Synopsis:               
--- Description:            
+Synopsis:               Haskell client bindings for mellon-server
+Description:
+  @mellon-client@ automatically generates Haskell client 
+  bindings for the @mellon-server@ REST API.
+
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
---Extra-Source-Files:     examples/*.hs
---Extra-Doc-Files:        examples/*.hs
 
 Library
   Default-Language:     Haskell2010
