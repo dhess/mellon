@@ -54,7 +54,7 @@ instance ToJSON State where
   toJSON = genericToJSON stateJSONOptions
 
 instance FromJSON State where
-  parseJSON= genericParseJSON stateJSONOptions
+  parseJSON = genericParseJSON stateJSONOptions
 
 sampleDate :: UTCTime
 sampleDate = UTCTime { utctDay = fromGregorian 2015 10 06, utctDayTime = 0 }
@@ -79,6 +79,9 @@ newtype Time = Time UTCTime deriving (Eq, Show, Generic)
 
 instance ToJSON Time where
   toJSON = genericToJSON defaultOptions
+
+instance FromJSON Time where
+  parseJSON = genericParseJSON defaultOptions
 
 instance ToSample Time Time where
   toSample _ = Just $ Time sampleDate
