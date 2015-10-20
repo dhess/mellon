@@ -1,0 +1,7 @@
+packages:
+- mellon/
+- mellon-server/
+- mellon-client/
+resolver: nightly-2015-10-19
+extra-deps:
+- servant-lucid-0.4.4.5
