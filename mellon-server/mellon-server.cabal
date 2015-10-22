@@ -57,6 +57,8 @@ Test-Suite spec
                       , bytestring
                       , either
                       , hspec
+                      , hspec-wai
+                      , hspec-wai-json
                       , http-client
                       , http-types
                       , lucid
