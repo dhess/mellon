@@ -8,42 +8,30 @@ import Control.Concurrent (threadDelay)
 import Data.Aeson (decode, encode)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB (ByteString)
-import Data.List
 import Data.Time.Clock
 import qualified Mellon.Controller as MC
 import Mellon.Lock.Mock
 import Mellon.Server (State(..), app, docsApp)
 import Network.HTTP.Types (hContentType, methodPut)
 import Network.Wai
-import Network.Wai.Handler.Warp
 import Network.Wai.Test (SResponse, simpleBody)
 import Test.Hspec
-import Test.Hspec.Wai (WaiSession, get, liftIO, request, shouldRespondWith, with)
+import Test.Hspec.Wai ((<:>), WaiSession, get, liftIO, matchHeaders, request, shouldRespondWith, with)
 
 sleep :: Int -> IO ()
 sleep = threadDelay . (* 1000000)
-
--- getDocs :: IO (Status, Maybe Header)
--- getDocs =
---   do manager <- newManager defaultManagerSettings
---      initialRequest <- parseUrl "http://localhost:8081/docs"
---      let request = initialRequest { method = "GET" }
---      response <- httpLbs request manager
---      let maybeCTHeader = find (\(h, _) -> h == hContentType) $ responseHeaders response
---      return (responseStatus response, maybeCTHeader)
-
--- -- Tests specific to the docsApp.
--- docsSpec :: Spec
--- docsSpec = do
---   describe "Docs" $ do
---     it "are available via GET /docs" $ do
---       getDocs >>= shouldBe (ok200, Just (hContentType, "text/plain"))
 
 runApp :: IO Application
 runApp =
   do ml <- mockLock
      cc <- MC.concurrentControllerCtx ml
      return (app cc)
+
+runDocsApp :: IO Application
+runDocsApp =
+  do ml <- mockLock
+     cc <- MC.concurrentControllerCtx ml
+     return (docsApp cc)
 
 putJSON :: ByteString -> LB.ByteString -> WaiSession SResponse
 putJSON path = request methodPut path [(hContentType, "application/json;charset=utf-8")]
@@ -85,29 +73,29 @@ spec =
             do it "should return the new state when locked->unlocked" $
                  do now <- liftIO getCurrentTime
                     let untilTime = 10.0 `addUTCTime` now
-                    response <- putJSON "/state" (encode $ Unlocked untilTime)
-                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
-                    response <- get "/state"
-                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
+                    firstResponse <- putJSON "/state" (encode $ Unlocked untilTime)
+                    liftIO $ decode (simpleBody firstResponse) `shouldBe` Just (Unlocked untilTime)
+                    secondResponse <- get "/state"
+                    liftIO $ decode (simpleBody secondResponse) `shouldBe` Just (Unlocked untilTime)
                it "should return the new state when unlocked->locked" $
-                 do response <- putJSON "/state" (encode Locked)
-                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
-                    response <- get "/state"
-                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
+                 do firstResponse <- putJSON "/state" (encode Locked)
+                    liftIO $ decode (simpleBody firstResponse) `shouldBe` Just Locked
+                    secondResponse <- get "/state"
+                    liftIO $ decode (simpleBody secondResponse) `shouldBe` Just Locked
 
      describe "Unlocking" $
        do with runApp $
             do it "expires at the specified date" $
                  do now <- liftIO getCurrentTime
                     let untilTime = 5.0 `addUTCTime` now
-                    response <- putJSON "/state" (encode $ Unlocked untilTime)
-                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
+                    firstResponse <- putJSON "/state" (encode $ Unlocked untilTime)
+                    liftIO $ decode (simpleBody firstResponse) `shouldBe` Just (Unlocked untilTime)
                     liftIO $ sleep 2
-                    response <- get "/state"
-                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
+                    secondResponse <- get "/state"
+                    liftIO $ decode (simpleBody secondResponse) `shouldBe` Just (Unlocked untilTime)
                     liftIO $ sleep 3
-                    response <- get "/state"
-                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
+                    thirdResponse <- get "/state"
+                    liftIO $ decode (simpleBody thirdResponse) `shouldBe` Just Locked
           with runApp $
             do it "overrides current unlocks that expire earlier" $
                  do now <- liftIO getCurrentTime
@@ -115,11 +103,11 @@ spec =
                     _ <- putJSON "/state" (encode $ Unlocked untilTime)
                     liftIO $ sleep 1
                     let laterUntilTime = 7.0 `addUTCTime` now
-                    response <- putJSON "/state" (encode $ Unlocked laterUntilTime)
-                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked laterUntilTime)
+                    firstResponse <- putJSON "/state" (encode $ Unlocked laterUntilTime)
+                    liftIO $ decode (simpleBody firstResponse) `shouldBe` Just (Unlocked laterUntilTime)
                     liftIO $ sleep 9
-                    response <- get "/state"
-                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
+                    secondResponse <- get "/state"
+                    liftIO $ decode (simpleBody secondResponse) `shouldBe` Just Locked
 
      describe "Locking" $
        do with runApp $
@@ -130,3 +118,8 @@ spec =
                     liftIO $ sleep 1
                     response <- putJSON "/state" (encode Locked)
                     liftIO $ decode (simpleBody response) `shouldBe` Just Locked
+
+     describe "Docs application" $
+       do with runDocsApp $
+            do it "serves docs" $
+                 get "/docs" `shouldRespondWith` 200 { matchHeaders = [hContentType <:> "text/plain"]}
