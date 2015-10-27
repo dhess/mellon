@@ -1,51 +1,27 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module MellonServerSpec (spec) where
 
 import Control.Concurrent (threadDelay)
-import Data.Aeson (decode)
+import Data.Aeson (decode, encode)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Lazy as LB (ByteString)
 import Data.List
 import Data.Time.Clock
 import qualified Mellon.Controller as MC
 import Mellon.Lock.Mock
 import Mellon.Server (State(..), app, docsApp)
+import Network.HTTP.Types (hContentType, methodPut)
 import Network.Wai
 import Network.Wai.Handler.Warp
+import Network.Wai.Test (SResponse, simpleBody)
 import Test.Hspec
-import Test.Hspec.Wai
-import Test.Hspec.Wai.JSON
+import Test.Hspec.Wai (WaiSession, get, liftIO, request, shouldRespondWith, with)
 
 sleep :: Int -> IO ()
 sleep = threadDelay . (* 1000000)
-
--- serverTime :: IO (Status, Maybe UTCTime)
--- serverTime =
---   do manager <- newManager defaultManagerSettings
---      initialRequest <- parseUrl "http://localhost:8081/time"
---      let request = initialRequest { method = "GET" }
---      response <- httpLbs request manager
---      return (responseStatus response, decode $ responseBody response)
-
--- lockIt :: IO (Status, Maybe State)
--- lockIt =
---   do manager <- newManager defaultManagerSettings
---      initialRequest <- parseUrl "http://localhost:8081/state"
---      let request = initialRequest { method = "PUT"
---                                   , requestBody = RequestBodyLBS $ encode Locked
---                                   , requestHeaders = [("Content-Type", "application/json")] }
---      response <- httpLbs request manager
---      return (responseStatus response, decode $ responseBody response)
-
--- unlockIt :: UTCTime -> IO (Status, Maybe State)
--- unlockIt untilTime =
---   do manager <- newManager defaultManagerSettings
---      initialRequest <- parseUrl "http://localhost:8081/state"
---      let request = initialRequest { method = "PUT"
---                                   , requestBody = RequestBodyLBS $ encode (Unlocked untilTime)
---                                   , requestHeaders = [("Content-Type", "application/json")] }
---      response <- httpLbs request manager
---      return (responseStatus response, decode $ responseBody response)
 
 -- getDocs :: IO (Status, Maybe Header)
 -- getDocs =
@@ -63,65 +39,94 @@ sleep = threadDelay . (* 1000000)
 --     it "are available via GET /docs" $ do
 --       getDocs >>= shouldBe (ok200, Just (hContentType, "text/plain"))
 
-runApp :: MC.ConcurrentControllerCtx -> IO Application
-runApp cc = return (app cc)
+runApp :: IO Application
+runApp =
+  do ml <- mockLock
+     cc <- MC.concurrentControllerCtx ml
+     return (app cc)
+
+putJSON :: ByteString -> LB.ByteString -> WaiSession SResponse
+putJSON path = request methodPut path [(hContentType, "application/json;charset=utf-8")]
 
 spec :: Spec
 spec =
-  do ml <- runIO $ mockLock
-     cc <- runIO $ MC.concurrentControllerCtx ml
-     with (runApp cc) $
-       describe "Server" $
-         do  it "should initially be locked" $
-                get "/state" `shouldRespondWith` [json|{state:"Locked", until:[]}|]
+  do describe "Server time" $
+       do with runApp $
+            do it "should be accurate" $
+                 do now <- liftIO getCurrentTime
+                    response <- get "/time"
+                    let Just (serverTime :: UTCTime) = decode $ simpleBody response
+                    let delta = 1.0 :: NominalDiffTime
+                    liftIO $ ((serverTime `diffUTCTime` now < delta)) `shouldBe` True
 
-  -- describe "Initial server state" $ do
-  --   it "should be locked" $ do
-  --     serverState >>= (shouldBe (ok200, Just Locked))
+     describe "Initial server state" $
+       do ml <- runIO $ mockLock
+          cc <- runIO $ MC.concurrentControllerCtx ml
+          now <- runIO $ getCurrentTime
+          let untilTime = 30.0 `addUTCTime` now
+          with (return $ app cc) $
+            do it "should reflect the controller state" $
+                 do response <- get "/state"
+                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
+                    putJSON "/state" (encode $ Unlocked untilTime) `shouldRespondWith` 200
+          with (return $ app cc) $
+            do it "even when reusing the same controller in a new server" $
+                 do response <- get "/state"
+                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
 
-  -- describe "Server time" $ do
-  --   it "should be accurate" $ do
-  --     now <- getCurrentTime
-  --     (code, Just time) <- serverTime
-  --     code `shouldBe` ok200
-  --     let delta = 1.0 :: NominalDiffTime
-  --     ((time `diffUTCTime` now) < delta) `shouldBe` True
+     describe "Locking when locked" $
+       do with runApp $
+            do it "should be idempotent" $
+                 do response <- putJSON "/state" (encode Locked)
+                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
 
-  -- describe "Locking when locked" $ do
-  --   it "is idempotent" $ do
-  --     lockIt >>= shouldBe (ok200, Just Locked)
-  --     serverState >>= shouldBe (ok200, Just Locked)
+     describe "PUT /state" $
+       do with runApp $
+            do it "should return the new state when locked->unlocked" $
+                 do now <- liftIO getCurrentTime
+                    let untilTime = 10.0 `addUTCTime` now
+                    response <- putJSON "/state" (encode $ Unlocked untilTime)
+                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
+                    response <- get "/state"
+                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
+               it "should return the new state when unlocked->locked" $
+                 do response <- putJSON "/state" (encode Locked)
+                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
+                    response <- get "/state"
+                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
 
-  -- describe "Unlock" $ do
-  --   it "unlocks" $ do
-  --     now <- getCurrentTime
-  --     let untilTime = 3.0 `addUTCTime` now
-  --     unlockIt untilTime >>= shouldBe (ok200, Just (Unlocked untilTime))
-  --     serverState >>= shouldBe (ok200, Just (Unlocked untilTime))
+     describe "Unlocking" $
+       do with runApp $
+            do it "expires at the specified date" $
+                 do now <- liftIO getCurrentTime
+                    let untilTime = 5.0 `addUTCTime` now
+                    response <- putJSON "/state" (encode $ Unlocked untilTime)
+                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
+                    liftIO $ sleep 2
+                    response <- get "/state"
+                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked untilTime)
+                    liftIO $ sleep 3
+                    response <- get "/state"
+                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
+          with runApp $
+            do it "overrides current unlocks that expire earlier" $
+                 do now <- liftIO getCurrentTime
+                    let untilTime = 3.0 `addUTCTime` now
+                    _ <- putJSON "/state" (encode $ Unlocked untilTime)
+                    liftIO $ sleep 1
+                    let laterUntilTime = 7.0 `addUTCTime` now
+                    response <- putJSON "/state" (encode $ Unlocked laterUntilTime)
+                    liftIO $ decode (simpleBody response) `shouldBe` Just (Unlocked laterUntilTime)
+                    liftIO $ sleep 9
+                    response <- get "/state"
+                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked
 
-  --   it "then locks when the unlock expires" $ do
-  --     sleep 3
-  --     serverState >>= shouldBe (ok200, Just Locked)
-
-  --   it "overrides unlocks that expire earlier" $ do
-  --     now <- getCurrentTime
-  --     let untilTime = 3.0 `addUTCTime` now
-  --     unlockIt untilTime >>= shouldBe (ok200, Just (Unlocked untilTime))
-  --     sleep 1
-  --     let newUntilTime = 7.0 `addUTCTime` now
-  --     unlockIt newUntilTime >>= shouldBe (ok200, Just (Unlocked newUntilTime))
-  --     serverState >>= shouldBe (ok200, Just (Unlocked newUntilTime))
-  --     sleep 3
-  --     serverState >>= shouldBe (ok200, Just (Unlocked newUntilTime))
-  --     sleep 4
-  --     serverState >>= shouldBe (ok200, Just Locked)
-
-  -- describe "Lock" $ do
-  --   it "overrides unlocks" $ do
-  --     now <- getCurrentTime
-  --     let untilTime = 20.0 `addUTCTime` now
-  --     unlockIt untilTime >>= shouldBe (ok200, Just (Unlocked untilTime))
-  --     serverState >>= shouldBe (ok200, Just (Unlocked untilTime))
-  --     sleep 1
-  --     lockIt >>= shouldBe (ok200, Just Locked)
-  --     serverState >>= shouldBe (ok200, Just Locked)
+     describe "Locking" $
+       do with runApp $
+            do it "overrides unlocks" $
+                 do now <- liftIO $ getCurrentTime
+                    let untilTime = 20.0 `addUTCTime` now
+                    _ <- putJSON "/state" (encode $ Unlocked untilTime)
+                    liftIO $ sleep 1
+                    response <- putJSON "/state" (encode Locked)
+                    liftIO $ decode (simpleBody response) `shouldBe` Just Locked

@@ -58,7 +58,6 @@ Test-Suite spec
                       , either
                       , hspec
                       , hspec-wai
-                      , hspec-wai-json
                       , http-client
                       , http-types
                       , lucid
@@ -71,6 +70,7 @@ Test-Suite spec
                       , time
                       , transformers
                       , wai
+                      , wai-extra
                       , warp
   Other-Modules:        Mellon.Server
                       , Mellon.Server.API
