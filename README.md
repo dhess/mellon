@@ -25,4 +25,7 @@ With `nix`:
 ./scripts/generate-nix-files.sh   # Get up-to-date shell.nix files
 ```
 
-`stack` support coming soon.
+With `stack`:
+```shell
+stack build
+```
