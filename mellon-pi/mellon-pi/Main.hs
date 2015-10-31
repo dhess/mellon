@@ -1,6 +1,6 @@
 module Main where
 
-import Mellon.Pi (runTCPServer)
+import Mellon.Pi (Pin(..), runTCPServer)
 import Options.Applicative
 
 data Verbosity
@@ -46,7 +46,7 @@ cmds =
 
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Start (StartOptions listenPort))) =
-  runTCPServer listenPort
+  runTCPServer Pin03 listenPort
 run _ = return ()
 
 main :: IO ()

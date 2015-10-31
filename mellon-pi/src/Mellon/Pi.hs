@@ -1,53 +1,39 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Mellon.Pi
-         ( runTCPServer
+         ( Pin(..)
+         , runTCPServer
          ) where
 
 import Data.Maybe (fromJust)
 import Data.Tuple (swap)
 import Mellon.Controller (concurrentControllerCtx)
 import Mellon.Lock (LockDevice(..))
-import Mellon.Lock.Mock (mockLock)
 import Mellon.Server.Docs (docsApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
 
 -- | Run the server on a TCP socket at the given port number. The
 -- server will listen on all interfaces.
-runTCPServer :: Int -> IO ()
-runTCPServer port =
-  do ml <- mockLock
-     cc <- concurrentControllerCtx ml
+--
+-- The server will control the physical access device by assering a
+-- high logic level on the specified GPIO pin when the device is
+-- unlocked, and a low logic level on the pin when the device is
+-- locked. The server will also perform all necessary GPIO setup and
+-- teardown for the specified pin (i.e., there is no need for the
+-- caller to wrap this function with the 'withGPIO' function).
+runTCPServer :: Pin -> Int -> IO ()
+runTCPServer pin port = withGPIO $
+  do setPinFunction pin Output
+     cc <- concurrentControllerCtx (PiLock pin)
      sock <- listenOn (PortNumber (fromIntegral port))
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
-
--- | A lock device which, when locked, asserts a high logic
--- level on a specified RPi/RPi2 GPIO pin (and low when unlocked).
 data PiLock = PiLock Pin deriving (Show, Eq)
 
--- | Adapt the 'LockDevice' interface to Raspberry Pi/Raspberry Pi 2
--- GPIO.
 instance LockDevice PiLock where
   lockDevice (PiLock p) = writePin p True
   unlockDevice (PiLock p) = writePin p False
-
-
--- | Any IO computation that uses a 'PiLock' instance should be
--- wrapped with this function, to ensure that the RPi's GPIO pins are
--- configured correctly and that exceptions are handled correctly.
---
--- You may mix other RPi GPIO computations in the same IO computation
--- as the 'PiLock' instance, so long as you use the GPIO functionality
--- provided by "System.RaspberryPi.GPIO". If you use this function to
--- wrap those additional GPIO computations, you do not need to call
--- 'withGPIO' separately, as this function wraps the action in
--- 'withGPIO' for its own purposes.
-withPiLock :: PiLock -> IO a -> IO a
-withPiLock (PiLock p) action = withGPIO $
-  do setPinFunction p Output
-     action
 
 
 -- Placeholders until I've integrated HPi.
