@@ -53,6 +53,7 @@ Library
                       , mellon-server
                       , network
                       , warp
+                      , HPi
 
 Executable mellon-pi
   Main-Is:              Main.hs
@@ -66,6 +67,7 @@ Executable mellon-pi
                       , network
                       , optparse-applicative
                       , warp
+                      , HPi
   Other-Modules:        Mellon.Pi
 
 Source-Repository head
