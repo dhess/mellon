@@ -35,5 +35,5 @@ runTCPServer pin port = withGPIO $
 data PiLock = PiLock Pin deriving (Show, Eq)
 
 instance LockDevice PiLock where
-  lockDevice (PiLock p) = writePin p True
-  unlockDevice (PiLock p) = writePin p False
+  lockDevice (PiLock p) = writePin p False
+  unlockDevice (PiLock p) = writePin p True
