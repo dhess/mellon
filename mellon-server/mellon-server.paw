@@ -5,7 +5,7 @@
     <databaseInfo>
         <version>134481920</version>
         <UUID>1E1D451C-4E87-4F1C-8A5D-6A76267CA5ED</UUID>
-        <nextObjectID>128</nextObjectID>
+        <nextObjectID>132</nextObjectID>
         <metadata>
             <plist version="1.0">
                 <dict>
@@ -62,7 +62,7 @@
     </databaseInfo>
     <object type="LMREQUEST" id="z102">
         <attribute name="uuid" type="string">48D5A84F-CA3A-4E31-B9A2-3E90E65179F5</attribute>
-        <attribute name="url" type="string">http://localhost:8081/state</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/state"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -86,23 +86,23 @@
         <attribute name="order" type="int64">0</attribute>
         <attribute name="name" type="string">Default Domain</attribute>
         <relationship name="environments" type="0/0" destination="LMENVIRONMENT" idrefs="z108"></relationship>
-        <relationship name="variables" type="0/0" destination="LMENVIRONMENTVARIABLE" idrefs="z105"></relationship>
+        <relationship name="variables" type="0/0" destination="LMENVIRONMENTVARIABLE" idrefs="z129 z131 z105"></relationship>
     </object>
     <object type="LMENVIRONMENTVARIABLE" id="z105">
         <attribute name="uuid" type="string">0F7D7E4D-E5E5-430F-90EB-E4617541F817</attribute>
         <attribute name="order" type="int64">0</attribute>
-        <attribute name="name" type="string"></attribute>
+        <attribute name="name" type="string">host</attribute>
         <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z104"></relationship>
         <relationship name="values" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z106"></relationship>
     </object>
     <object type="LMENVIRONMENTVARIABLEVALUE" id="z106">
-        <attribute name="value" type="string"></attribute>
+        <attribute name="value" type="string">localhost</attribute>
         <relationship name="environment" type="1/1" destination="LMENVIRONMENT" idrefs="z108"></relationship>
         <relationship name="variable" type="1/1" destination="LMENVIRONMENTVARIABLE" idrefs="z105"></relationship>
     </object>
     <object type="LMREQUEST" id="z107">
         <attribute name="uuid" type="string">08E692C2-8C79-4BF5-95E1-C7CBC9627D79</attribute>
-        <attribute name="url" type="string">http://localhost:8081/time</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/time"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -118,9 +118,9 @@
     <object type="LMENVIRONMENT" id="z108">
         <attribute name="uuid" type="string">806883AB-58E3-4D72-9C0B-FFF62CB0E228</attribute>
         <attribute name="order" type="int64">0</attribute>
-        <attribute name="name" type="string">Default Environment</attribute>
+        <attribute name="name" type="string">localhost</attribute>
         <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z104"></relationship>
-        <relationship name="variablesvalues" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z106"></relationship>
+        <relationship name="variablesvalues" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z130 z106 z132"></relationship>
     </object>
     <object type="LMKEYVALUE" id="z109">
         <attribute name="value" type="string"></attribute>
@@ -154,7 +154,7 @@
     </object>
     <object type="LMREQUEST" id="z112">
         <attribute name="uuid" type="string">949BC3B1-EE2E-40AB-A805-C59ACFA37E5A</attribute>
-        <attribute name="url" type="string">http://localhost:8081/state</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/state"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -169,7 +169,7 @@
     </object>
     <object type="LMREQUEST" id="z113">
         <attribute name="uuid" type="string">296FB78E-5DF8-427F-B0B3-87F36566B5AE</attribute>
-        <attribute name="url" type="string">http://localhost:8081/state</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/state"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -195,7 +195,7 @@
     </object>
     <object type="LMREQUEST" id="z115">
         <attribute name="uuid" type="string">63AA61F1-3718-458E-9ED7-BF94700EFE50</attribute>
-        <attribute name="url" type="string">http://localhost:8081/state</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/state"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -231,7 +231,7 @@
     </object>
     <object type="LMREQUEST" id="z118">
         <attribute name="uuid" type="string">18CAAEEC-FC1F-40A9-B000-71EF7965A35D</attribute>
-        <attribute name="url" type="string">http://localhost:8081/state</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/state"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -243,7 +243,7 @@
         <attribute name="name" type="string">Get state (accept HTML)</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z117 z120"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z120 z117"></relationship>
     </object>
     <object type="LMKEYVALUE" id="z119">
         <attribute name="value" type="string"></attribute>
@@ -287,7 +287,7 @@
     </object>
     <object type="LMREQUEST" id="z123">
         <attribute name="uuid" type="string">F4DDFE27-4F2E-4E50-8CD1-05C666C5B1A5</attribute>
-        <attribute name="url" type="string">http://localhost:8081/time</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/time"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -298,7 +298,7 @@
         <attribute name="name" type="string">Get time (accept HTML)</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z124 z122"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z122 z124"></relationship>
     </object>
     <object type="LMKEYVALUE" id="z124">
         <attribute name="value" type="string"></attribute>
@@ -322,7 +322,7 @@
     </object>
     <object type="LMREQUEST" id="z126">
         <attribute name="uuid" type="string">62F86462-ED46-4738-9877-86AD97E3535A</attribute>
-        <attribute name="url" type="string">http://localhost:8081/time</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/time"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -333,11 +333,11 @@
         <attribute name="name" type="string">Get time (accept JSON)</attribute>
         <relationship name="parent" type="0/1" destination="LMREQUESTTREEITEM"></relationship>
         <relationship name="children" type="0/0" destination="LMREQUESTTREEITEM"></relationship>
-        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z121 z125"></relationship>
+        <relationship name="headers" type="0/0" destination="LMKEYVALUE" idrefs="z125 z121"></relationship>
     </object>
     <object type="LMREQUEST" id="z127">
         <attribute name="uuid" type="string">A0AE2FB5-7F43-4C52-BFF7-0E922225030D</attribute>
-        <attribute name="url" type="string">http://localhost:8081/docs</attribute>
+        <attribute name="url" type="string">[{"data":{"environmentVariable":"CF638FE7-0A86-4129-B488-AF6225D53392"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":\\/\\/",{"data":{"environmentVariable":"0F7D7E4D-E5E5-430F-90EB-E4617541F817"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},":",{"data":{"environmentVariable":"7CB28DDF-2140-4675-A9FC-6DF2570EE218"},"identifier":"com.luckymarmot.EnvironmentVariableDynamicValue"},"\\/docs"]</attribute>
         <attribute name="storecookies" type="bool">1</attribute>
         <attribute name="sendcookies" type="bool">1</attribute>
         <attribute name="redirectmethod" type="bool">0</attribute>
@@ -359,5 +359,29 @@
         <relationship name="groupforheaders" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="groupforurlparameters" type="0/1" destination="LMREQUESTGROUP"></relationship>
         <relationship name="request" type="0/1" destination="LMREQUEST" idrefs="z127"></relationship>
+    </object>
+    <object type="LMENVIRONMENTVARIABLE" id="z129">
+        <attribute name="uuid" type="string">7CB28DDF-2140-4675-A9FC-6DF2570EE218</attribute>
+        <attribute name="order" type="int64">2</attribute>
+        <attribute name="name" type="string">port</attribute>
+        <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z104"></relationship>
+        <relationship name="values" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z130"></relationship>
+    </object>
+    <object type="LMENVIRONMENTVARIABLEVALUE" id="z130">
+        <attribute name="value" type="string">8081</attribute>
+        <relationship name="environment" type="1/1" destination="LMENVIRONMENT" idrefs="z108"></relationship>
+        <relationship name="variable" type="1/1" destination="LMENVIRONMENTVARIABLE" idrefs="z129"></relationship>
+    </object>
+    <object type="LMENVIRONMENTVARIABLE" id="z131">
+        <attribute name="uuid" type="string">CF638FE7-0A86-4129-B488-AF6225D53392</attribute>
+        <attribute name="order" type="int64">1</attribute>
+        <attribute name="name" type="string">protocol</attribute>
+        <relationship name="domain" type="0/1" destination="LMENVIRONMENTDOMAIN" idrefs="z104"></relationship>
+        <relationship name="values" type="0/0" destination="LMENVIRONMENTVARIABLEVALUE" idrefs="z132"></relationship>
+    </object>
+    <object type="LMENVIRONMENTVARIABLEVALUE" id="z132">
+        <attribute name="value" type="string">http</attribute>
+        <relationship name="environment" type="1/1" destination="LMENVIRONMENT" idrefs="z108"></relationship>
+        <relationship name="variable" type="1/1" destination="LMENVIRONMENTVARIABLE" idrefs="z131"></relationship>
     </object>
 </database>
