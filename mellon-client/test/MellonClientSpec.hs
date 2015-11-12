@@ -26,8 +26,8 @@ import Control.Monad.Trans.Either (runEitherT)
 import Data.Proxy
 import Data.Time.Clock
 import GHC.TypeLits
-import qualified Mellon.Controller as MC
-import Mellon.Lock.Mock
+import Mellon.Monad.Controller (controllerCtx)
+import Mellon.Device.MockLock
 import Mellon.Client
 import Mellon.Server (app)
 import Network.Socket
@@ -84,7 +84,7 @@ openTestSocket = do
 runApp :: IO (ThreadId, BaseUrl)
 runApp =
   do ml <- mockLock
-     cc <- MC.concurrentControllerCtx ml
+     cc <- controllerCtx ml
      (port, sock) <- openTestSocket
      let settings = setPort port $ defaultSettings
      threadId <- forkIO $ runSettingsSocket settings sock (app cc)

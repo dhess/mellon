@@ -4,7 +4,7 @@
 -- @mellon@ state machine. 'MonadController' defines the common
 -- controller interface implemented by all controllers.
 
-module Mellon.Controller.Monad.Class
+module Mellon.Monad.Controller.Class
        ( MonadController(..)
        -- * Re-exported for convenience.
        , State(..)
@@ -23,7 +23,7 @@ import Control.Monad.Trans.Maybe
 import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
 import Data.Time (UTCTime)
-import Mellon.StateMachine (State(..))
+import Mellon.Monad.StateMachine (State(..))
 
 -- | A controller monad interface.
 class (Monad m) => MonadController m where

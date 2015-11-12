@@ -7,17 +7,18 @@ such as electric strikes and other electronic locks.
 
 mellon is a low-level package that provides, among other things:
 
-* The <code>LockDevice</code> typeclass, for interfacing with a
+* The <code>Device</code> typeclass, for interfacing with a
 physical device driver or other low-level lock interface.
 
 * The <code>MonadController</code> typeclass, which provides a monadic
 interface for controlling a device from an application or service.
 
-* <code>ConcurrentController</code>, a controller implementation that
-  works with multiple simultaneous control threads. This is useful for
-  controlling a lock from a network service, for example.
+* <code>ControllerT</code>, a monad transformer controller
+implementation that works with multiple simultaneous control threads.
+This is useful for controlling a lock from a network service, for
+example.
 
-Note that mellon does not provide any useful <code>LockDevice</code>
+Note that mellon does not provide any useful <code>Device</code>
 implementations; that is the domain of access device
 implementation-specific packages. Similarly, mellon does not provide
 authentication mechanisms or network services; that is the domain of

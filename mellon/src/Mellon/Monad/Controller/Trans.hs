@@ -4,13 +4,13 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Mellon.Controller.Concurrent
-         ( ConcurrentControllerCtx
-         , ConcurrentController
-         , ConcurrentControllerT(..)
-         , concurrentControllerCtx
-         , runConcurrentController
-         , runConcurrentControllerT
+module Mellon.Monad.Controller.Trans
+         ( ControllerCtx
+         , Controller
+         , ControllerT(..)
+         , controllerCtx
+         , runController
+         , runControllerT
          ) where
 
 import Control.Applicative (Alternative)
@@ -19,20 +19,20 @@ import Control.Monad.Trans.Free (iterT)
 import Control.Monad.IO.Class
 import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
-import Mellon.Controller.Monad.Class
-import Mellon.Lock.Device
-import Mellon.StateMachine (Cmd(..), StateMachineF(..), execCmdT)
+import Mellon.Monad.Controller.Class
+import Mellon.Device.Class
+import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), execCmdT)
 
--- | Wraps a mutex around a 'LockDevice' (i.e., creates a context) so
+-- | Wraps a mutex around a 'Device' (i.e., creates a context) so
 -- that it can be manipulated atomically and concurrently from
 -- multiple threads.
 --
 -- Note that the constructor is not exported. Use
--- 'concurrentControllerCtx' to create a new instance.
-data ConcurrentControllerCtx = forall l. LockDevice l =>
-  ConcurrentControllerCtx (MVar State) l
+-- 'controllerCtx' to create a new instance.
+data ControllerCtx = forall l. Device l =>
+  ControllerCtx (MVar State) l
 
--- | Create a new 'ConcurrentControllerCtx' by wrapping a 'LockDevice'.
+-- | Create a new 'ControllerCtx' by wrapping a 'Device'.
 --
 -- Because it is thread-safe and guarantees atomicity, this controller
 -- context can be passed around to multiple threads and used
@@ -45,62 +45,62 @@ data ConcurrentControllerCtx = forall l. LockDevice l =>
 -- Note: the controller context assumes that the lock device is only
 -- managed by this controller context. Do not use the same lock device
 -- with multiple controller context instances.
-concurrentControllerCtx :: (LockDevice l) => l -> IO ConcurrentControllerCtx
-concurrentControllerCtx l =
-  do lockDevice l
+controllerCtx :: (Device d) => d -> IO ControllerCtx
+controllerCtx d =
+  do lockDevice d
      m <- newMVar Locked
-     return $ ConcurrentControllerCtx m l
+     return $ ControllerCtx m d
 
--- | A monad transformer which adds a concurrent controller monad to an
+-- | A monad transformer which adds a controller monad to an
 -- existing monad. Because the monad transformer is an instance of
 -- 'MonadController', you can use the 'MonadController' interface from
 -- the new monad to manipulate the controller.
-newtype ConcurrentControllerT m a =
-  ConcurrentControllerT (ReaderT ConcurrentControllerCtx m a)
+newtype ControllerT m a =
+  ControllerT (ReaderT ControllerCtx m a)
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
--- | Run an action inside the 'ConcurrentControllerT' transformer
--- using the supplied 'ConcurrentControllerCtx' and return the result.
-runConcurrentControllerT :: (MonadIO m) => ConcurrentControllerCtx -> ConcurrentControllerT m a -> m a
-runConcurrentControllerT c (ConcurrentControllerT action) = runReaderT action c
+-- | Run an action inside the 'ControllerT' transformer
+-- using the supplied 'ControllerCtx' and return the result.
+runControllerT :: (MonadIO m) => ControllerCtx -> ControllerT m a -> m a
+runControllerT c (ControllerT action) = runReaderT action c
 
-instance (MonadIO m) => MonadController (ConcurrentControllerT m) where
+instance (MonadIO m) => MonadController (ControllerT m) where
   lockNow = runInMutex LockNowCmd
   unlockUntil = runInMutex . UnlockCmd
   state =
-    do (ConcurrentControllerCtx c _) <- ConcurrentControllerT ask
+    do (ControllerCtx c _) <- ControllerT ask
        liftIO $ readMVar c
 
-runInMutex :: (MonadIO m) => Cmd -> ConcurrentControllerT m State
+runInMutex :: (MonadIO m) => Cmd -> ControllerT m State
 runInMutex cmd =
-  do (ConcurrentControllerCtx c _) <- ConcurrentControllerT ask
+  do (ControllerCtx c _) <- ControllerT ask
      st <- liftIO $ takeMVar c
      newState <- iterT runSM (execCmdT cmd st)
      liftIO $ putMVar c $! newState
      return newState
 
-lockAt :: (MonadIO m) => UTCTime -> ConcurrentControllerT m ()
+lockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
 lockAt date =
   do _ <- runInMutex (LockCmd date)
      return ()
 
-scheduleLockAt :: (MonadIO m) => UTCTime -> ConcurrentControllerT m ()
+scheduleLockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
 scheduleLockAt date =
-  do cc <- ConcurrentControllerT ask
-     _ <- liftIO $ forkIO (threadSleepUntil date >> runConcurrentControllerT cc (lockAt date))
+  do cc <- ControllerT ask
+     _ <- liftIO $ forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
      return ()
 
--- 'ConcurrentControllerT's implementation of the 'StateMachineF' EDSL.
-runSM :: (MonadIO m) => StateMachineF (ConcurrentControllerT m a) -> ConcurrentControllerT m a
+-- 'ControllerT's implementation of the 'StateMachineF' EDSL.
+runSM :: (MonadIO m) => StateMachineF (ControllerT m a) -> ControllerT m a
 runSM (RunLock next) =
-  do (ConcurrentControllerCtx _ l) <- ConcurrentControllerT ask
+  do (ControllerCtx _ l) <- ControllerT ask
      liftIO $ lockDevice l
      next
 runSM (ScheduleLock atDate next) =
   do scheduleLockAt atDate
      next
 runSM (RunUnlock next) =
-  do (ConcurrentControllerCtx _ l) <- ConcurrentControllerT ask
+  do (ControllerCtx _ l) <- ControllerT ask
      liftIO $ unlockDevice l
      next
 -- For this particular implementation, it's safe simply to
@@ -108,12 +108,12 @@ runSM (RunUnlock next) =
 -- state machine will simply ignore it.
 runSM (UnscheduleLock next) = next
 
--- | The simplest useful 'ConcurrentControllerT' monad instance.
-type ConcurrentController = ConcurrentControllerT IO ()
+-- | The simplest useful 'ControllerT' monad instance.
+type Controller = ControllerT IO ()
 
--- | Run an action inside the 'ConcurrentController' monad.
-runConcurrentController :: ConcurrentControllerCtx -> ConcurrentController -> IO ()
-runConcurrentController = runConcurrentControllerT
+-- | Run an action inside the 'Controller' monad.
+runController :: ControllerCtx -> Controller -> IO ()
+runController = runControllerT
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be

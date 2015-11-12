@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "mellon";
-  version = "0.3.2";
+  version = "0.4.0";
   src = ./.;
   libraryHaskellDepends = [ base free mtl text time transformers ];
   testHaskellDepends = [

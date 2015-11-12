@@ -1,4 +1,4 @@
-# Mellon v0.3.2
+# Mellon
 
 <em>"Speak, friend, and enter."</em>
 

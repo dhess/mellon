@@ -18,7 +18,7 @@ module Mellon.Server.Docs
 import Data.ByteString.Lazy (ByteString)
 import Data.Text.Lazy (pack)
 import Data.Text.Lazy.Encoding (encodeUtf8)
-import qualified Mellon.Controller as MC
+import Mellon.Monad.Controller
 import qualified Mellon.Server.API as API
 import Network.HTTP.Types
 import Network.Wai
@@ -42,11 +42,11 @@ docsBS = encodeUtf8 . pack . markdown $ docsWithIntros [intro] API.mellonAPI
     intro = DocIntro "Mellon API" []
 
 -- | A 'Server' which serves the 'DocsAPI' on the given
--- 'Mellon.Controller.Concurrent.ConcurrentControllerCtx' instance.
+-- 'Mellon.Monad.Controller.ControllerCtx' instance.
 --
 -- Normally you will just use 'docsApp', but this function is exported so
 -- that you can extend/wrap 'DocsAPI'.
-docsServer :: MC.ConcurrentControllerCtx -> Server DocsAPI
+docsServer :: ControllerCtx -> Server DocsAPI
 docsServer cc = (API.server cc)  :<|> serveDocs
   where
     serveDocs _ respond =
@@ -55,7 +55,7 @@ docsServer cc = (API.server cc)  :<|> serveDocs
     plain = ("Content-Type", "text/plain")
 
 -- | An 'Network.Wai.Application' which runs the server, using the given
--- 'Mellon.Controller.Concurrent.ConcurrentControllerCtx' instance for
+-- 'Mellon.Monad.Controller.ControllerCtx' instance for
 -- the controller.
-docsApp :: MC.ConcurrentControllerCtx -> Application
+docsApp :: ControllerCtx -> Application
 docsApp = serve docsAPI . docsServer

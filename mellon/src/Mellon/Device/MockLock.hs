@@ -1,9 +1,9 @@
--- | A dummy 'LockDevice' implementation that simply logs lock/unlock
+-- | A dummy 'Device' implementation that simply logs lock/unlock
 -- events, including timestamps. Useful for testing and debugging.
 
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Mellon.Lock.Mock
+module Mellon.Device.MockLock
        ( MockLock
        , MockLockEvent(..)
        , events
@@ -12,7 +12,7 @@ module Mellon.Lock.Mock
 
 import Control.Concurrent (MVar, newMVar, putMVar, readMVar, takeMVar)
 import Data.Time (UTCTime, getCurrentTime)
-import Mellon.Lock.Device
+import Mellon.Device.Class
 
 -- | The locking events logged by 'MockLock'.
 data MockLockEvent
@@ -38,7 +38,7 @@ mockLock =
   do m <- newMVar []
      return $ MockLock m
 
-instance LockDevice MockLock where
+instance Device MockLock where
   lockDevice (MockLock m) =
     do now <- getCurrentTime
        ev <- takeMVar m

@@ -8,8 +8,8 @@ import Data.Aeson (decode, encode)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB (ByteString)
 import Data.Time.Clock
-import qualified Mellon.Controller as MC
-import Mellon.Lock.Mock
+import Mellon.Monad.Controller (controllerCtx)
+import Mellon.Device.MockLock
 import Mellon.Server (State(..), app, docsApp)
 import Network.HTTP.Types (hContentType, methodPut)
 import Network.Wai
@@ -23,13 +23,13 @@ sleep = threadDelay . (* 1000000)
 runApp :: IO Application
 runApp =
   do ml <- mockLock
-     cc <- MC.concurrentControllerCtx ml
+     cc <- controllerCtx ml
      return (app cc)
 
 runDocsApp :: IO Application
 runDocsApp =
   do ml <- mockLock
-     cc <- MC.concurrentControllerCtx ml
+     cc <- controllerCtx ml
      return (docsApp cc)
 
 putJSON :: ByteString -> LB.ByteString -> WaiSession SResponse
@@ -48,7 +48,7 @@ spec =
 
      describe "Initial server state" $
        do ml <- runIO $ mockLock
-          cc <- runIO $ MC.concurrentControllerCtx ml
+          cc <- runIO $ controllerCtx ml
           now <- runIO $ getCurrentTime
           let untilTime = 30.0 `addUTCTime` now
           with (return $ app cc) $

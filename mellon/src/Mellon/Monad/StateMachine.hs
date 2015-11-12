@@ -9,7 +9,7 @@
 -- Typically, a user process does not interact directly with a
 -- 'StateMachineT'. That is the job of a controller. Generally
 -- speaking, you will only need to use 'StateMachineT' if you're
--- implementing a 'Mellon.MonadController.MonadController'
+-- implementing a 'Mellon.Monad.Controller.MonadController'
 -- instance.
 --
 -- The @mellon@ state machine model is shown in the following diagram:
@@ -37,7 +37,7 @@
 -- as it does not attempt to represent the flow of time, therefore it
 -- only needs the one lock command type.)
 
-module Mellon.StateMachine
+module Mellon.Monad.StateMachine
          ( Cmd(..)
          , StateMachine
          , StateMachineF(..)

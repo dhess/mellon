@@ -27,7 +27,8 @@ import Network.Wai
 import Servant
 import Servant.Docs
 import Servant.HTML.Lucid
-import qualified Mellon.Controller as MC
+import Mellon.Monad.Controller (ControllerCtx, ControllerT(..), MonadController(..), runControllerT)
+import qualified Mellon.Monad.Controller as Controller (State(..))
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
@@ -36,13 +37,13 @@ wrapBody title body =
          do title_ title
        body_ body
 
--- | Mimics 'Mellon.StateMachine.State', but provides JSON conversions.
+-- | Mimics 'Controller.State', but provides JSON conversions.
 -- (Avoids orphan instances.)
 data State = Locked | Unlocked UTCTime deriving (Eq, Show, Generic)
 
-stateToState :: MC.State -> State
-stateToState MC.Locked = Locked
-stateToState (MC.Unlocked date) = Unlocked date
+stateToState :: Controller.State -> State
+stateToState Controller.Locked = Locked
+stateToState (Controller.Unlocked date) = Unlocked date
 
 stateJSONOptions :: Options
 stateJSONOptions = defaultOptions { sumEncoding = taggedObject }
@@ -101,7 +102,7 @@ type MellonAPI =
   "state" :> Get '[JSON, HTML] State :<|>
   "state" :> ReqBody '[JSON] State :> Put '[JSON, HTML] State
 
-type AppM = MC.ConcurrentControllerT (EitherT ServantErr IO)
+type AppM = ControllerT (EitherT ServantErr IO)
 
 serverT :: ServerT MellonAPI AppM
 serverT =
@@ -115,30 +116,29 @@ serverT =
          return $ Time now
 
     getState :: AppM State
-    getState = MC.state >>= return . stateToState
+    getState = state >>= return . stateToState
 
     putState :: State -> AppM State
-    putState Locked = MC.lockNow >>= return . stateToState
-    putState (Unlocked date) = MC.unlockUntil date >>= return . stateToState
+    putState Locked = lockNow >>= return . stateToState
+    putState (Unlocked date) = unlockUntil date >>= return . stateToState
 
 -- | A 'Proxy' for 'MellonAPI', exported in order to make it possible
 -- to extend the API.
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: MC.ConcurrentControllerCtx -> AppM :~> EitherT ServantErr IO
-serverToEither cc = Nat $ \m -> MC.runConcurrentControllerT cc m
+serverToEither :: ControllerCtx -> AppM :~> EitherT ServantErr IO
+serverToEither cc = Nat $ \m -> runControllerT cc m
 
 -- | A 'Server' which serves the 'MellonAPI' on the given
--- 'Mellon.Controller.Concurrent.ConcurrentControllerCtx' instance.
+-- 'ControllerCtx' instance.
 --
 -- Normally you will just use 'app', but this function is exported so
 -- that you can extend/wrap 'MellonAPI'.
-server :: MC.ConcurrentControllerCtx -> Server MellonAPI
+server :: ControllerCtx -> Server MellonAPI
 server cc = enter (serverToEither cc) serverT
 
 -- | An 'Network.Wai.Application' which runs the server, using the given
--- 'Mellon.Controller.Concurrent.ConcurrentControllerCtx' instance for
--- the controller.
-app :: MC.ConcurrentControllerCtx -> Application
+-- 'ControllerCtx' instance for the controller.
+app :: ControllerCtx -> Application
 app = serve mellonAPI . server

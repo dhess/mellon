@@ -9,8 +9,8 @@ module Mellon.Pi
 
 import Data.Maybe (fromJust)
 import Data.Tuple (swap)
-import Mellon.Controller (concurrentControllerCtx)
-import Mellon.Lock (LockDevice(..))
+import Mellon.Monad.Controller (controllerCtx)
+import Mellon.Device.Class (Device(..))
 import Mellon.Server.Docs (docsApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
@@ -28,12 +28,12 @@ import System.RaspberryPi.GPIO (Pin(..), PinMode(..), setPinFunction, withGPIO, 
 runTCPServer :: Pin -> Int -> IO ()
 runTCPServer pin port = withGPIO $
   do setPinFunction pin Output
-     cc <- concurrentControllerCtx (PiLock pin)
+     cc <- controllerCtx (PiLock pin)
      sock <- listenOn (PortNumber (fromIntegral port))
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
 data PiLock = PiLock Pin deriving (Show, Eq)
 
-instance LockDevice PiLock where
+instance Device PiLock where
   lockDevice (PiLock p) = writePin p False
   unlockDevice (PiLock p) = writePin p True
