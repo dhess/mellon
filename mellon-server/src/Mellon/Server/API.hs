@@ -16,7 +16,7 @@ module Mellon.Server.API
          ) where
 
 import Control.Monad.Trans.Either (EitherT)
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Aeson
 import Data.Aeson.Types
 import Data.Time.Calendar
@@ -102,23 +102,23 @@ type MellonAPI =
   "state" :> Get '[JSON, HTML] State :<|>
   "state" :> ReqBody '[JSON] State :> Put '[JSON, HTML] State
 
-type AppM = ControllerT (EitherT ServantErr IO)
+type AppM m = ControllerT (EitherT ServantErr m)
 
-serverT :: ServerT MellonAPI AppM
+serverT :: (MonadIO m) => ServerT MellonAPI (AppM m)
 serverT =
   getTime :<|>
   getState :<|>
   putState
   where
-    getTime :: AppM Time
+    getTime :: (MonadIO m) => AppM m Time
     getTime =
       do now <- liftIO $ getCurrentTime
          return $ Time now
 
-    getState :: AppM State
+    getState :: (MonadIO m) => AppM m State
     getState = state >>= return . stateToState
 
-    putState :: State -> AppM State
+    putState :: (MonadIO m) => State -> AppM m State
     putState Locked = lockNow >>= return . stateToState
     putState (Unlocked date) = unlockUntil date >>= return . stateToState
 
@@ -127,7 +127,7 @@ serverT =
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: ControllerCtx -> AppM :~> EitherT ServantErr IO
+serverToEither :: (MonadIO m) => ControllerCtx -> AppM m :~> EitherT ServantErr m
 serverToEither cc = Nat $ \m -> runControllerT cc m
 
 -- | A 'Server' which serves the 'MellonAPI' on the given
