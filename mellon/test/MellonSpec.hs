@@ -5,7 +5,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Writer
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
-import Mellon.Monad.Controller (MonadController(..), ControllerT(..), controllerCtx, runControllerT)
+import Mellon.Monad.Controller (MonadController(..), ControllerT, controllerCtx, runControllerT)
 import Mellon.Device.MockLock (MockLockEvent(..), events, mockLock)
 import Test.Hspec
 

@@ -9,19 +9,20 @@ module Mellon.Monad.Controller.Trans
          , Controller
          , ControllerT(..)
          , controllerCtx
+         , lockNow
          , runController
          , runControllerT
+         , state
+         , unlockUntil
          ) where
 
 import Control.Applicative (Alternative)
 import Control.Concurrent (MVar, forkIO, newMVar, putMVar, readMVar, takeMVar, threadDelay)
 import Control.Monad.Trans.Free (iterT)
-import Control.Monad.IO.Class
 import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
-import Mellon.Monad.Controller.Class
 import Mellon.Device.Class
-import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), execCmdT)
+import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), State(..), execCmdT)
 
 -- | Wraps a mutex around a 'Device' (i.e., creates a context) so
 -- that it can be manipulated atomically and concurrently from
@@ -64,10 +65,17 @@ newtype ControllerT m a =
 runControllerT :: (MonadIO m) => ControllerCtx -> ControllerT m a -> m a
 runControllerT c (ControllerT action) = runReaderT action c
 
-instance (MonadIO m) => MonadController (ControllerT m) where
-  lockNow = runInMutex LockNowCmd
-  unlockUntil = runInMutex . UnlockCmd
-  state =
+-- | Lock the controller immediately.
+lockNow :: (MonadIO m) => ControllerT m State
+lockNow = runInMutex LockNowCmd
+
+-- | Unlock the controller until the specified date.
+unlockUntil :: (MonadIO m) => UTCTime -> ControllerT m State
+unlockUntil = runInMutex . UnlockCmd
+
+-- | Get the current conroller state.
+state :: (MonadIO m) => ControllerT m State
+state =
     do (ControllerCtx c _) <- ControllerT ask
        liftIO $ readMVar c
 

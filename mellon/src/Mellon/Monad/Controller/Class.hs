@@ -23,6 +23,8 @@ import Control.Monad.Trans.Maybe
 import qualified Control.Monad.Writer.Lazy as WL
 import qualified Control.Monad.Writer.Strict as WS
 import Data.Time (UTCTime)
+import Mellon.Monad.Controller.Trans (ControllerT(..))
+import qualified Mellon.Monad.Controller.Trans as Controller (lockNow, state, unlockUntil)
 import Mellon.Monad.StateMachine (State(..))
 
 -- | A controller monad interface.
@@ -37,6 +39,11 @@ class (Monad m) => MonadController m where
   unlockUntil :: UTCTime -> m State
   -- | Get the current state of the controller.
   state :: m State
+
+instance (MonadIO m) => MonadController (ControllerT m) where
+  lockNow = Controller.lockNow
+  unlockUntil = Controller.unlockUntil
+  state = Controller.state
 
 instance (MonadController m) => MonadController (IdentityT m) where
   lockNow = lift lockNow

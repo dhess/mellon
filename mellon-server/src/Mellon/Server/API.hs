@@ -27,7 +27,7 @@ import Network.Wai
 import Servant
 import Servant.Docs
 import Servant.HTML.Lucid
-import Mellon.Monad.Controller (ControllerCtx, ControllerT(..), MonadController(..), runControllerT)
+import Mellon.Monad.Controller (ControllerCtx, ControllerT, MonadController(..), runControllerT)
 import qualified Mellon.Monad.Controller as Controller (State(..))
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
