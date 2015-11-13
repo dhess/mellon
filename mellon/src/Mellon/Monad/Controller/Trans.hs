@@ -30,8 +30,8 @@ import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), State(..), execCmd
 --
 -- Note that the constructor is not exported. Use
 -- 'controllerCtx' to create a new instance.
-data ControllerCtx = forall l. Device l =>
-  ControllerCtx (MVar State) l
+data ControllerCtx = forall d. Device d =>
+  ControllerCtx (MVar State) d
 
 -- | Create a new 'ControllerCtx' by wrapping a 'Device'.
 --
@@ -60,6 +60,14 @@ newtype ControllerT m a =
   ControllerT (ReaderT ControllerCtx m a)
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
+mvar :: (Monad m) => ControllerT m (MVar State)
+mvar =
+  do (ControllerCtx c _) <- ctx
+     return c
+
+ctx :: (Monad m) => ControllerT m ControllerCtx
+ctx = ControllerT ask
+
 -- | Run an action inside the 'ControllerT' transformer
 -- using the supplied 'ControllerCtx' and return the result.
 runControllerT :: (MonadIO m) => ControllerCtx -> ControllerT m a -> m a
@@ -67,48 +75,44 @@ runControllerT c (ControllerT action) = runReaderT action c
 
 -- | Lock the controller immediately.
 lockNow :: (MonadIO m) => ControllerT m State
-lockNow = runInMutex LockNowCmd
+lockNow = runAtomically LockNowCmd
 
 -- | Unlock the controller until the specified date.
 unlockUntil :: (MonadIO m) => UTCTime -> ControllerT m State
-unlockUntil = runInMutex . UnlockCmd
+unlockUntil = runAtomically . UnlockCmd
 
 -- | Get the current conroller state.
 state :: (MonadIO m) => ControllerT m State
-state =
-    do (ControllerCtx c _) <- ControllerT ask
-       liftIO $ readMVar c
-
-runInMutex :: (MonadIO m) => Cmd -> ControllerT m State
-runInMutex cmd =
-  do (ControllerCtx c _) <- ControllerT ask
-     st <- liftIO $ takeMVar c
-     newState <- iterT runSM (execCmdT cmd st)
-     liftIO $ putMVar c $! newState
-     return newState
+state = mvar >>= liftIO . readMVar
 
 lockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
-lockAt date =
-  do _ <- runInMutex (LockCmd date)
-     return ()
+lockAt date = runAtomically (LockCmd date) >> return ()
+
+runAtomically :: (MonadIO m) => Cmd -> ControllerT m State
+runAtomically cmd =
+  do mv <- mvar
+     st <- liftIO $ takeMVar mv
+     newState <- iterT runSM (execCmdT cmd st)
+     liftIO $ putMVar mv $! newState
+     return newState
 
 scheduleLockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
 scheduleLockAt date =
-  do cc <- ControllerT ask
+  do cc <- ctx
      _ <- liftIO $ forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
      return ()
 
 -- 'ControllerT's implementation of the 'StateMachineF' EDSL.
 runSM :: (MonadIO m) => StateMachineF (ControllerT m a) -> ControllerT m a
 runSM (RunLock next) =
-  do (ControllerCtx _ l) <- ControllerT ask
+  do (ControllerCtx _ l) <- ctx
      liftIO $ lockDevice l
      next
 runSM (ScheduleLock atDate next) =
   do scheduleLockAt atDate
      next
 runSM (RunUnlock next) =
-  do (ControllerCtx _ l) <- ControllerT ask
+  do (ControllerCtx _ l) <- ctx
      liftIO $ unlockDevice l
      next
 -- For this particular implementation, it's safe simply to
