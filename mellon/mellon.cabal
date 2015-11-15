@@ -55,9 +55,12 @@ Library
   Exposed-Modules:      Mellon.Monad.Controller
                       , Mellon.Monad.Controller.Trans
                       , Mellon.Monad.Controller.Class
+                      , Mellon.Monad.Lock
+                      , Mellon.Monad.Lock.Class
+                      , Mellon.Monad.Lock.Trans
+                      , Mellon.Monad.StateMachine
                       , Mellon.Device.Class
                       , Mellon.Device.MockLock
-                      , Mellon.Monad.StateMachine
   Other-Extensions:     ExistentialQuantification
                       , FlexibleContexts
                       , FlexibleInstances
@@ -89,9 +92,12 @@ Test-Suite spec
   Other-Modules:        Mellon.Monad.Controller
                       , Mellon.Monad.Controller.Trans
                       , Mellon.Monad.Controller.Class
+                      , Mellon.Monad.Lock
+                      , Mellon.Monad.Lock.Class
+                      , Mellon.Monad.Lock.Trans
+                      , Mellon.Monad.StateMachine
                       , Mellon.Device.Class
                       , Mellon.Device.MockLock
-                      , Mellon.Monad.StateMachine
 
 Source-Repository head
   Type:                 git
