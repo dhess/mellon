@@ -19,7 +19,8 @@ module Mellon.Monad.Controller.Trans
          ) where
 
 import Control.Applicative (Alternative)
-import Control.Concurrent (MVar, forkIO, newMVar, putMVar, readMVar, takeMVar, threadDelay)
+import Control.Concurrent (MVar, ThreadId, newMVar, threadDelay)
+import qualified Control.Concurrent as C (forkIO, putMVar, readMVar, takeMVar)
 import Control.Monad.Trans.Free (iterT)
 import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
@@ -77,7 +78,7 @@ unlockUntil = runMachine . UnlockCmd
 
 -- | Get the current conroller state.
 state :: (MonadIO m) => ControllerT d m State
-state = mvar >>= liftIO . readMVar
+state = mvar >>= readMVar
 
 -- | The simplest useful 'ControllerT' monad instance.
 type Controller d = ControllerT d IO ()
@@ -90,16 +91,28 @@ runController = runControllerT
 
 -- Internal ControllerT actions.
 --
+readMVar :: (MonadIO m) => MVar a -> ControllerT d m a
+readMVar = liftIO . C.readMVar
+
+putMVar :: (MonadIO m) => MVar a -> a -> ControllerT d m ()
+putMVar mv = liftIO . (C.putMVar mv)
+
+takeMVar :: (MonadIO m) => MVar a -> ControllerT d m a
+takeMVar = liftIO . C.takeMVar
+
+forkIO :: (MonadIO m) => IO () -> m ThreadId
+forkIO action = liftIO $ C.forkIO action
+
 mvar :: (Monad m) => ControllerT d m (MVar State)
 mvar = asks statemv
 
 acquireState :: (MonadIO m) => ControllerT d m State
-acquireState = mvar >>= liftIO . takeMVar >>= return
+acquireState = mvar >>= takeMVar
 
 releaseState :: (MonadIO m) => State -> ControllerT d m State
 releaseState st =
   do mv <- mvar
-     liftIO $ putMVar mv $! st
+     putMVar mv $! st
      return st
 
 runMachine :: (MonadIO m, Device d) => Cmd -> ControllerT d m State
@@ -122,7 +135,7 @@ runMachine cmd =
     scheduleLockAt :: (MonadIO m, Device d) => UTCTime -> ControllerT d m ()
     scheduleLockAt date =
       do cc <- ask
-         _ <- liftIO $ forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
+         _ <- forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
          return ()
 
     lockAt :: (MonadIO m, Device d) => UTCTime -> ControllerT d m ()
