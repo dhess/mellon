@@ -59,6 +59,8 @@ if $DRY_RUN ; then
    ( cd "$ROOT" && bumper --dry-run -"$POSITION" $(join , ${SOURCES[@]}) )
 else
    ( cd "$ROOT" && bumper -"$POSITION" $(join , ${SOURCES[@]}) )
+   echo "Generating new Nix files."
+   . "${DIR}/generate-nix-files.sh"
 fi
 
 # Trailing newline, bumper does not ship with its own.
