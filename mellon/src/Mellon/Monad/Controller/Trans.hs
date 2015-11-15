@@ -25,8 +25,8 @@ import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import Mellon.Device.Class (Device)
 import qualified Mellon.Device.Class as D (lockDevice)
+import Mellon.Monad.Lock.Class (MonadLock(..))
 import Mellon.Monad.Lock.Trans (LockT, runLockT)
-import qualified Mellon.Monad.Lock.Trans as L (lockDevice, unlockDevice)
 import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), State(..), transition)
 
 -- | Wraps a mutex around a 'Device' (i.e., creates a context) so
@@ -60,7 +60,7 @@ controllerCtx d =
 -- existing monad.
 newtype ControllerT d m a =
   ControllerT { unControllerT :: ReaderT (ControllerCtx d) (LockT d m) a }
-  deriving (Alternative,Applicative,Functor,Monad,MonadIO,MonadFix,MonadPlus)
+  deriving (Alternative,Applicative,Functor,Monad,MonadLock,MonadIO,MonadFix,MonadPlus)
 
 -- | Run an action inside the 'ControllerT' transformer
 -- using the supplied 'ControllerCtx' and return the result.
@@ -90,12 +90,6 @@ runController = runControllerT
 
 -- Internal ControllerT actions.
 --
-lockDevice :: (MonadIO m, Device d) => ControllerT d m ()
-lockDevice = ControllerT $ lift L.lockDevice
-
-unlockDevice :: (MonadIO m, Device d) => ControllerT d m ()
-unlockDevice = ControllerT $ lift L.unlockDevice
-
 mvar :: (Monad m) => ControllerT d m (MVar State)
 mvar = ctx >>= return . statemv
 
