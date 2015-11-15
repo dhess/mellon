@@ -60,7 +60,7 @@ controllerCtx d =
 -- existing monad.
 newtype ControllerT d m a =
   ControllerT { unControllerT :: ReaderT (ControllerCtx d) (LockT d m) a }
-  deriving (Alternative,Applicative,Functor,Monad,MonadLock,MonadIO,MonadFix,MonadPlus)
+  deriving (Alternative,Applicative,Functor,Monad,MonadReader (ControllerCtx d), MonadLock,MonadIO,MonadFix,MonadPlus)
 
 -- | Run an action inside the 'ControllerT' transformer
 -- using the supplied 'ControllerCtx' and return the result.
@@ -91,10 +91,7 @@ runController = runControllerT
 -- Internal ControllerT actions.
 --
 mvar :: (Monad m) => ControllerT d m (MVar State)
-mvar = ctx >>= return . statemv
-
-ctx :: (Monad m) => ControllerT d m (ControllerCtx d)
-ctx = ControllerT ask
+mvar = asks statemv
 
 acquireState :: (MonadIO m) => ControllerT d m State
 acquireState = mvar >>= liftIO . takeMVar >>= return
@@ -124,7 +121,7 @@ runMachine cmd =
 
     scheduleLockAt :: (MonadIO m, Device d) => UTCTime -> ControllerT d m ()
     scheduleLockAt date =
-      do cc <- ctx
+      do cc <- ask
          _ <- liftIO $ forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
          return ()
 
