@@ -43,7 +43,7 @@ module Mellon.Monad.StateMachine
          , StateMachineF(..)
          , StateMachineT
          , State(..)
-         , execCmdT
+         , transition
          ) where
 
 import Control.Monad.Trans.Free (FreeT, MonadFree, liftF)
@@ -107,21 +107,21 @@ makeFreeCon 'UnscheduleLock
 
 -- | The pure 'StateMachineT' interpreter.
 --
--- 'execCmdT' provides an abstract, pure model of the core @mellon@
+-- 'transition' provides an abstract, pure model of the core @mellon@
 -- state machine. The state machine is the same for all
 -- implementations; what changes from one implementation to the next
 -- is the specific machinery for locking and scheduling, which is
 -- provided by a controller.
-execCmdT :: (Monad m) => Cmd -> State -> StateMachineT m State
+transition :: (Monad m) => Cmd -> State -> StateMachineT m State
 
-execCmdT LockNowCmd Locked = return Locked
-execCmdT LockNowCmd (Unlocked _) =
+transition LockNowCmd Locked = return Locked
+transition LockNowCmd (Unlocked _) =
   do unscheduleLock
      runLock
      return Locked
 
-execCmdT (LockCmd _) (Locked) = return Locked
-execCmdT (LockCmd lockDate) (Unlocked untilDate) =
+transition (LockCmd _) (Locked) = return Locked
+transition (LockCmd lockDate) (Unlocked untilDate) =
   -- Only execute the lock command if its date matches the current
   -- outstanding unlock request's expiration date, i.e., if the lock
   -- command is the one that was scheduled by the current outstanding
@@ -160,14 +160,14 @@ execCmdT (LockCmd lockDate) (Unlocked untilDate) =
      then runLock >> return Locked
      else return (Unlocked untilDate)
 
-execCmdT (UnlockCmd untilDate) Locked = unlockUntilT untilDate
-execCmdT (UnlockCmd untilDate) (Unlocked scheduledDate) =
+transition (UnlockCmd untilDate) Locked = unlockUntil untilDate
+transition (UnlockCmd untilDate) (Unlocked scheduledDate) =
   if untilDate > scheduledDate
-     then unlockUntilT untilDate
+     then unlockUntil untilDate
      else return $ Unlocked scheduledDate
 
-unlockUntilT :: (Monad m) => UTCTime -> StateMachineT m State
-unlockUntilT date =
+unlockUntil :: (Monad m) => UTCTime -> StateMachineT m State
+unlockUntil date =
   do scheduleLock date
      runUnlock
      return $ Unlocked date

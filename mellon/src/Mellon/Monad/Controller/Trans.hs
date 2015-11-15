@@ -22,7 +22,7 @@ import Control.Monad.Trans.Free (iterT)
 import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 import Mellon.Device.Class
-import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), State(..), execCmdT)
+import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), State(..), transition)
 
 -- | Wraps a mutex around a 'Device' (i.e., creates a context) so
 -- that it can be manipulated atomically and concurrently from
@@ -92,7 +92,7 @@ runAtomically :: (MonadIO m) => Cmd -> ControllerT m State
 runAtomically cmd =
   do mv <- mvar
      st <- liftIO $ takeMVar mv
-     newState <- iterT runSM (execCmdT cmd st)
+     newState <- iterT runSM (transition cmd st)
      liftIO $ putMVar mv $! newState
      return newState
 
