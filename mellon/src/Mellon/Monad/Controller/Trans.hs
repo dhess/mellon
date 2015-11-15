@@ -55,9 +55,7 @@ controllerCtx d =
      return $ ControllerCtx m d
 
 -- | A monad transformer which adds a controller monad to an
--- existing monad. Because the monad transformer is an instance of
--- 'MonadController', you can use the 'MonadController' interface from
--- the new monad to manipulate the controller.
+-- existing monad.
 newtype ControllerT m a =
   ControllerT { unControllerT :: ReaderT ControllerCtx m a }
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
