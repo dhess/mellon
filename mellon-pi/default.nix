@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "mellon-pi";
-  version = "0.5";
+  version = "0.5.1";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
