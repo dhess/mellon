@@ -6,7 +6,7 @@ import Control.Monad.Writer
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
 import Mellon.Monad.Controller (MonadController(..), ControllerT, controllerCtx, runControllerT)
-import Mellon.Device.MockLock (MockLockEvent(..), events, mockLock)
+import Mellon.Device.MockLock (MockLock, MockLockEvent(..), events, mockLock)
 import Test.Hspec
 
 main :: IO ()
@@ -21,9 +21,9 @@ getCurrentTime = liftIO Time.getCurrentTime
 timePlusN :: UTCTime -> Integer -> UTCTime
 timePlusN time n = (fromInteger n) `addUTCTime` time
 
-type TestController m a = WriterT [MockLockEvent] (ControllerT m) a
+type TestController m a = WriterT [MockLockEvent] (ControllerT MockLock m) a
 
-testController :: (MonadIO m) => ControllerT m [MockLockEvent]
+testController :: (MonadIO m) => ControllerT MockLock m [MockLockEvent]
 testController =
   do expectedResults <- execWriterT theTest
      return expectedResults

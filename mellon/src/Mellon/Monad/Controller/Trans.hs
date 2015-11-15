@@ -23,7 +23,10 @@ import Control.Concurrent (MVar, forkIO, newMVar, putMVar, readMVar, takeMVar, t
 import Control.Monad.Trans.Free (iterT)
 import Control.Monad.Reader
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
-import Mellon.Device.Class
+import Mellon.Device.Class (Device)
+import qualified Mellon.Device.Class as D (lockDevice)
+import Mellon.Monad.Lock.Trans (LockT, runLockT)
+import qualified Mellon.Monad.Lock.Trans as L (lockDevice, unlockDevice)
 import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), State(..), transition)
 
 -- | Wraps a mutex around a 'Device' (i.e., creates a context) so
@@ -32,8 +35,7 @@ import Mellon.Monad.StateMachine (Cmd(..), StateMachineF(..), State(..), transit
 --
 -- Note that the constructor is not exported. Use
 -- 'controllerCtx' to create a new instance.
-data ControllerCtx = forall d. Device d =>
-  ControllerCtx (MVar State) d
+data ControllerCtx d = ControllerCtx { statemv :: MVar State, device :: d }
 
 -- | Create a new 'ControllerCtx' by wrapping a 'Device'.
 --
@@ -48,91 +50,91 @@ data ControllerCtx = forall d. Device d =>
 -- Note: the controller context assumes that the lock device is only
 -- managed by this controller context. Do not use the same lock device
 -- with multiple controller context instances.
-controllerCtx :: (Device d) => d -> IO ControllerCtx
+controllerCtx :: (Device d) => d -> IO (ControllerCtx d)
 controllerCtx d =
-  do lockDevice d
+  do D.lockDevice d
      m <- newMVar Locked
      return $ ControllerCtx m d
 
 -- | A monad transformer which adds a controller monad to an
 -- existing monad.
-newtype ControllerT m a =
-  ControllerT { unControllerT :: ReaderT ControllerCtx m a }
-  deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
+newtype ControllerT d m a =
+  ControllerT { unControllerT :: ReaderT (ControllerCtx d) (LockT d m) a }
+  deriving (Alternative,Applicative,Functor,Monad,MonadIO,MonadFix,MonadPlus)
 
 -- | Run an action inside the 'ControllerT' transformer
 -- using the supplied 'ControllerCtx' and return the result.
-runControllerT :: (MonadIO m) => ControllerCtx -> ControllerT m a -> m a
-runControllerT c action = runReaderT (unControllerT action) c
+runControllerT :: (MonadIO m, Device d) => ControllerCtx d -> ControllerT d m a -> m a
+runControllerT c action = runLockT (device c) (runReaderT (unControllerT action) c)
 
 -- | Lock the controller immediately.
-lockNow :: (MonadIO m) => ControllerT m State
+lockNow :: (MonadIO m, Device d) => ControllerT d m State
 lockNow = runMachine LockNowCmd
 
 -- | Unlock the controller until the specified date.
-unlockUntil :: (MonadIO m) => UTCTime -> ControllerT m State
+unlockUntil :: (MonadIO m, Device d) => UTCTime -> ControllerT d m State
 unlockUntil = runMachine . UnlockCmd
 
 -- | Get the current conroller state.
-state :: (MonadIO m) => ControllerT m State
+state :: (MonadIO m) => ControllerT d m State
 state = mvar >>= liftIO . readMVar
 
 -- | The simplest useful 'ControllerT' monad instance.
-type Controller = ControllerT IO ()
+type Controller d = ControllerT d IO ()
 
 -- | Run an action inside the 'Controller' monad using the supplied
 -- 'ControllerCtx'.
-runController :: ControllerCtx -> Controller -> IO ()
+runController :: (Device d) => ControllerCtx d -> Controller d -> IO ()
 runController = runControllerT
 
 
 -- Internal ControllerT actions.
 --
-mvar :: (Monad m) => ControllerT m (MVar State)
-mvar = ctx >>= \(ControllerCtx c _) -> return c
+lockDevice :: (MonadIO m, Device d) => ControllerT d m ()
+lockDevice = ControllerT $ lift L.lockDevice
 
-ctx :: (Monad m) => ControllerT m ControllerCtx
+unlockDevice :: (MonadIO m, Device d) => ControllerT d m ()
+unlockDevice = ControllerT $ lift L.unlockDevice
+
+mvar :: (Monad m) => ControllerT d m (MVar State)
+mvar = ctx >>= return . statemv
+
+ctx :: (Monad m) => ControllerT d m (ControllerCtx d)
 ctx = ControllerT ask
 
-acquireState :: (MonadIO m) => ControllerT m State
+acquireState :: (MonadIO m) => ControllerT d m State
 acquireState = mvar >>= liftIO . takeMVar >>= return
 
-releaseState :: (MonadIO m) => State -> ControllerT m State
+releaseState :: (MonadIO m) => State -> ControllerT d m State
 releaseState st =
   do mv <- mvar
      liftIO $ putMVar mv $! st
      return st
 
-runMachine :: (MonadIO m) => Cmd -> ControllerT m State
+runMachine :: (MonadIO m, Device d) => Cmd -> ControllerT d m State
 runMachine cmd =
   do currentState <- acquireState
      newState <- iterT runSM (transition cmd currentState)
      releaseState newState
   where
-    runSM :: (MonadIO m) => StateMachineF (ControllerT m a) -> ControllerT m a
-    runSM (RunLock next) =
-      do (ControllerCtx _ l) <- ctx
-         liftIO $ lockDevice l
-         next
+    runSM :: (MonadIO m, Device d) => StateMachineF (ControllerT d m a) -> ControllerT d m a
+    runSM (RunLock next) = lockDevice >> next
     runSM (ScheduleLock atDate next) =
       do scheduleLockAt atDate
          next
-    runSM (RunUnlock next) =
-      do (ControllerCtx _ l) <- ctx
-         liftIO $ unlockDevice l
-         next
+    runSM (RunUnlock next) = unlockDevice >> next
     -- For this particular implementation, it's safe simply to
     -- ignore this command. When the "unscheduled" lock fires, the
     -- state machine will simply ignore it.
     runSM (UnscheduleLock next) = next
 
-    scheduleLockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
+    scheduleLockAt :: (MonadIO m, Device d) => UTCTime -> ControllerT d m ()
     scheduleLockAt date =
       do cc <- ctx
          _ <- liftIO $ forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
          return ()
 
-    lockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
+    lockAt :: (MonadIO m, Device d) => UTCTime -> ControllerT d m ()
     lockAt date = runMachine (LockCmd date) >> return ()
 
 -- 'threadDelay' takes an 'Int' argument which is measured in

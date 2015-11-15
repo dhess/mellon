@@ -27,6 +27,7 @@ import Network.Wai
 import Servant
 import Servant.Docs
 import Servant.HTML.Lucid
+import Mellon.Device.Class (Device)
 import Mellon.Monad.Controller (ControllerCtx, ControllerT, MonadController(..), runControllerT)
 import qualified Mellon.Monad.Controller as Controller (State(..))
 
@@ -102,23 +103,23 @@ type MellonAPI =
   "state" :> Get '[JSON, HTML] State :<|>
   "state" :> ReqBody '[JSON] State :> Put '[JSON, HTML] State
 
-type AppM m = ControllerT (EitherT ServantErr m)
+type AppM d m = ControllerT d (EitherT ServantErr m)
 
-serverT :: (MonadIO m) => ServerT MellonAPI (AppM m)
+serverT :: (MonadIO m, Device d) => ServerT MellonAPI (AppM d m)
 serverT =
   getTime :<|>
   getState :<|>
   putState
   where
-    getTime :: (MonadIO m) => AppM m Time
+    getTime :: (MonadIO m, Device d) => AppM d m Time
     getTime =
       do now <- liftIO $ getCurrentTime
          return $ Time now
 
-    getState :: (MonadIO m) => AppM m State
+    getState :: (MonadIO m, Device d) => AppM d m State
     getState = state >>= return . stateToState
 
-    putState :: (MonadIO m) => State -> AppM m State
+    putState :: (MonadIO m, Device d) => State -> AppM d m State
     putState Locked = lockNow >>= return . stateToState
     putState (Unlocked date) = unlockUntil date >>= return . stateToState
 
@@ -127,7 +128,7 @@ serverT =
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: (MonadIO m) => ControllerCtx -> AppM m :~> EitherT ServantErr m
+serverToEither :: (MonadIO m, Device d) => ControllerCtx d -> AppM d m :~> EitherT ServantErr m
 serverToEither cc = Nat $ \m -> runControllerT cc m
 
 -- | A 'Server' which serves the 'MellonAPI' on the given
@@ -135,10 +136,10 @@ serverToEither cc = Nat $ \m -> runControllerT cc m
 --
 -- Normally you will just use 'app', but this function is exported so
 -- that you can extend/wrap 'MellonAPI'.
-server :: ControllerCtx -> Server MellonAPI
+server :: (Device d) => ControllerCtx d -> Server MellonAPI
 server cc = enter (serverToEither cc) serverT
 
 -- | An 'Network.Wai.Application' which runs the server, using the given
 -- 'ControllerCtx' instance for the controller.
-app :: ControllerCtx -> Application
+app :: (Device d) => ControllerCtx d -> Application
 app = serve mellonAPI . server

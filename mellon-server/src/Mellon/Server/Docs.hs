@@ -18,6 +18,7 @@ module Mellon.Server.Docs
 import Data.ByteString.Lazy (ByteString)
 import Data.Text.Lazy (pack)
 import Data.Text.Lazy.Encoding (encodeUtf8)
+import Mellon.Device.Class (Device)
 import Mellon.Monad.Controller
 import qualified Mellon.Server.API as API
 import Network.HTTP.Types
@@ -46,7 +47,7 @@ docsBS = encodeUtf8 . pack . markdown $ docsWithIntros [intro] API.mellonAPI
 --
 -- Normally you will just use 'docsApp', but this function is exported so
 -- that you can extend/wrap 'DocsAPI'.
-docsServer :: ControllerCtx -> Server DocsAPI
+docsServer :: (Device d) => ControllerCtx d -> Server DocsAPI
 docsServer cc = (API.server cc)  :<|> serveDocs
   where
     serveDocs _ respond =
@@ -57,5 +58,5 @@ docsServer cc = (API.server cc)  :<|> serveDocs
 -- | An 'Network.Wai.Application' which runs the server, using the given
 -- 'Mellon.Monad.Controller.ControllerCtx' instance for
 -- the controller.
-docsApp :: ControllerCtx -> Application
+docsApp :: (Device d) => ControllerCtx d -> Application
 docsApp = serve docsAPI . docsServer
