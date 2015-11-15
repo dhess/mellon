@@ -5,13 +5,15 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Mellon.Monad.Controller.Trans
-         ( ControllerCtx
+         ( -- * Controller context
+           ControllerCtx
+         , controllerCtx
+           -- * The Controller monad
          , Controller
          , ControllerT(..)
-         , controllerCtx
-         , lockNow
          , runController
          , runControllerT
+         , lockNow
          , state
          , unlockUntil
          ) where
@@ -60,14 +62,6 @@ newtype ControllerT m a =
   ControllerT { unControllerT :: ReaderT ControllerCtx m a }
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
-mvar :: (Monad m) => ControllerT m (MVar State)
-mvar =
-  do (ControllerCtx c _) <- ctx
-     return c
-
-ctx :: (Monad m) => ControllerT m ControllerCtx
-ctx = ControllerT ask
-
 -- | Run an action inside the 'ControllerT' transformer
 -- using the supplied 'ControllerCtx' and return the result.
 runControllerT :: (MonadIO m) => ControllerCtx -> ControllerT m a -> m a
@@ -75,57 +69,73 @@ runControllerT c action = runReaderT (unControllerT action) c
 
 -- | Lock the controller immediately.
 lockNow :: (MonadIO m) => ControllerT m State
-lockNow = runAtomically LockNowCmd
+lockNow = runMachine LockNowCmd
 
 -- | Unlock the controller until the specified date.
 unlockUntil :: (MonadIO m) => UTCTime -> ControllerT m State
-unlockUntil = runAtomically . UnlockCmd
+unlockUntil = runMachine . UnlockCmd
 
 -- | Get the current conroller state.
 state :: (MonadIO m) => ControllerT m State
 state = mvar >>= liftIO . readMVar
 
-lockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
-lockAt date = runAtomically (LockCmd date) >> return ()
-
-runAtomically :: (MonadIO m) => Cmd -> ControllerT m State
-runAtomically cmd =
-  do mv <- mvar
-     st <- liftIO $ takeMVar mv
-     newState <- iterT runSM (transition cmd st)
-     liftIO $ putMVar mv $! newState
-     return newState
-
-scheduleLockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
-scheduleLockAt date =
-  do cc <- ctx
-     _ <- liftIO $ forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
-     return ()
-
--- 'ControllerT's implementation of the 'StateMachineF' EDSL.
-runSM :: (MonadIO m) => StateMachineF (ControllerT m a) -> ControllerT m a
-runSM (RunLock next) =
-  do (ControllerCtx _ l) <- ctx
-     liftIO $ lockDevice l
-     next
-runSM (ScheduleLock atDate next) =
-  do scheduleLockAt atDate
-     next
-runSM (RunUnlock next) =
-  do (ControllerCtx _ l) <- ctx
-     liftIO $ unlockDevice l
-     next
--- For this particular implementation, it's safe simply to
--- ignore this command. When the "unscheduled" lock fires, the
--- state machine will simply ignore it.
-runSM (UnscheduleLock next) = next
-
 -- | The simplest useful 'ControllerT' monad instance.
 type Controller = ControllerT IO ()
 
--- | Run an action inside the 'Controller' monad.
+-- | Run an action inside the 'Controller' monad using the supplied
+-- 'ControllerCtx'.
 runController :: ControllerCtx -> Controller -> IO ()
 runController = runControllerT
+
+
+-- Internal ControllerT actions.
+--
+mvar :: (Monad m) => ControllerT m (MVar State)
+mvar = ctx >>= \(ControllerCtx c _) -> return c
+
+ctx :: (Monad m) => ControllerT m ControllerCtx
+ctx = ControllerT ask
+
+acquireState :: (MonadIO m) => ControllerT m State
+acquireState = mvar >>= liftIO . takeMVar >>= return
+
+releaseState :: (MonadIO m) => State -> ControllerT m State
+releaseState st =
+  do mv <- mvar
+     liftIO $ putMVar mv $! st
+     return st
+
+runMachine :: (MonadIO m) => Cmd -> ControllerT m State
+runMachine cmd =
+  do currentState <- acquireState
+     newState <- iterT runSM (transition cmd currentState)
+     releaseState newState
+  where
+    runSM :: (MonadIO m) => StateMachineF (ControllerT m a) -> ControllerT m a
+    runSM (RunLock next) =
+      do (ControllerCtx _ l) <- ctx
+         liftIO $ lockDevice l
+         next
+    runSM (ScheduleLock atDate next) =
+      do scheduleLockAt atDate
+         next
+    runSM (RunUnlock next) =
+      do (ControllerCtx _ l) <- ctx
+         liftIO $ unlockDevice l
+         next
+    -- For this particular implementation, it's safe simply to
+    -- ignore this command. When the "unscheduled" lock fires, the
+    -- state machine will simply ignore it.
+    runSM (UnscheduleLock next) = next
+
+    scheduleLockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
+    scheduleLockAt date =
+      do cc <- ctx
+         _ <- liftIO $ forkIO (threadSleepUntil date >> runControllerT cc (lockAt date))
+         return ()
+
+    lockAt :: (MonadIO m) => UTCTime -> ControllerT m ()
+    lockAt date = runMachine (LockCmd date) >> return ()
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be
