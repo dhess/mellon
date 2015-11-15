@@ -57,7 +57,7 @@ controllerCtx d =
 -- 'MonadController', you can use the 'MonadController' interface from
 -- the new monad to manipulate the controller.
 newtype ControllerT m a =
-  ControllerT (ReaderT ControllerCtx m a)
+  ControllerT { unControllerT :: ReaderT ControllerCtx m a }
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
 mvar :: (Monad m) => ControllerT m (MVar State)
@@ -71,7 +71,7 @@ ctx = ControllerT ask
 -- | Run an action inside the 'ControllerT' transformer
 -- using the supplied 'ControllerCtx' and return the result.
 runControllerT :: (MonadIO m) => ControllerCtx -> ControllerT m a -> m a
-runControllerT c (ControllerT action) = runReaderT action c
+runControllerT c action = runReaderT (unControllerT action) c
 
 -- | Lock the controller immediately.
 lockNow :: (MonadIO m) => ControllerT m State
