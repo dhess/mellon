@@ -23,7 +23,7 @@ SOURCES=$(awk -F= '{print $1}' "$SOURCES_TXT")
 join () { local IFS="$1"; shift; echo "$*"; }
 
 versions_equal () {
-    local NUM=$(cd "$ROOT" && find . -name 'mellon*.cabal' | xargs grep "^version:" | awk '{ print $2 }' | uniq -c | wc -l)
+    local NUM=$(cd "$ROOT" && find . -name 'mellon*.cabal' | xargs grep -i "^version:" | awk '{ print $2 }' | uniq -c | wc -l)
     if [ 1 -eq $NUM ] ; then
         return 0
     else
