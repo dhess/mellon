@@ -21,7 +21,7 @@ import qualified Mellon.Device.Class as D (lockDevice, unlockDevice)
 -- monad.
 newtype LockT d m a =
   LockT { unLockT :: ReaderT d m a }
-  deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
+  deriving (Alternative,Applicative,Functor,Monad,MonadReader d,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
 -- | Run an action inside the 'LockT' transformer using the specified 'Device'
 -- and return the result.
@@ -48,5 +48,4 @@ unlockDevice = device >>= liftIO . D.unlockDevice
 -- Internal actions.
 --
 device :: (Monad m) => LockT d m d
-device = LockT ask
-
+device = ask
