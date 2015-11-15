@@ -23,10 +23,6 @@ newtype LockT d m a =
   LockT { unLockT :: ReaderT d m a }
   deriving (Alternative,Applicative,Functor,Monad,MonadTrans,MonadIO,MonadFix,MonadPlus)
 
---instance (Device d) => MonadLock (LockT d m) where
---  lockDevice = LockT ask >>= liftIO . lockDevice
---  unlockDevice = LockT ask >>= liftIO . unlockDevice
-
 -- | Run an action inside the 'LockT' transformer using the specified 'Device'
 -- and return the result.
 runLockT :: (Monad m, Device d) => d -> LockT d m a -> m a
