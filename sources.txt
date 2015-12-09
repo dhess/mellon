@@ -1,4 +1,4 @@
 mellon
 mellon-server
 mellon-client
-mellon-pi
+mellon-gpio

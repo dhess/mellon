@@ -15,6 +15,9 @@ of packages includes:
 * `mellon-client`, Haskell bindings for interacting with
   `mellon-server`.
 
+* `mellon-gpio`, a service which connects the `mellon-server` web
+  interface to a GPIO-controlled access device.
+
 ## Building from git
 
 You will need [bumper](https://hackage.haskell.org/package/bumper) in

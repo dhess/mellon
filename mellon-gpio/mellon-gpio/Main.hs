@@ -1,7 +1,8 @@
 module Main where
 
-import Mellon.Pi (Pin(..), runTCPServer)
+import Mellon.Gpio (runTCPServerSysfs)
 import Options.Applicative
+import System.GPIO.Free (Pin(..))
 
 data Verbosity
   = Normal
@@ -46,7 +47,7 @@ cmds =
 
 run :: GlobalOptions -> IO ()
 run (GlobalOptions False _ (Start (StartOptions listenPort))) =
-  runTCPServer Pin03 listenPort
+  runTCPServerSysfs (Pin 65) listenPort
 run _ = return ()
 
 main :: IO ()
