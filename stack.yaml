@@ -2,14 +2,10 @@ packages:
 - mellon/
 - mellon-server/
 - mellon-client/
-- mellon-pi/
-resolver: nightly-2015-10-19
+- mellon-gpio/
+- location:
+    git: git@github.com:dhess/gpio.git
+    commit: eaa10c3e3d744bf8b44adef3dec18d11b068db16
+resolver: lts-3.17
 extra-deps:
 - servant-lucid-0.4.4.5
-- HPi-0.5.1
-
-# Use these for the local libbcm2835 install path.
-extra-include-dirs:
-- /usr/local/include
-extra-lib-dirs:
-- /usr/local/lib
