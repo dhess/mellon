@@ -5,7 +5,7 @@ packages:
 - mellon-gpio/
 - location:
     git: git@github.com:dhess/gpio.git
-    commit: eaa10c3e3d744bf8b44adef3dec18d11b068db16
+    commit: 8983ba88412aab63c9c566ebc91a1a592f7ebf5e
 resolver: lts-3.17
 extra-deps:
 - servant-lucid-0.4.4.5
