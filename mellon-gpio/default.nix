@@ -1,5 +1,5 @@
 { mkDerivation, base, gpio, mellon, mellon-server, mtl, network
-, optparse-applicative, stdenv, warp
+, optparse-applicative, stdenv, transformers, warp
 }:
 mkDerivation {
   pname = "mellon-gpio";
@@ -8,11 +8,11 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base gpio mellon mellon-server mtl network warp
+    base gpio mellon mellon-server mtl network transformers warp
   ];
   executableHaskellDepends = [
     base gpio mellon mellon-server mtl network optparse-applicative
-    warp
+    transformers warp
   ];
   homepage = "https://github.com/dhess/mellon/";
   description = "Run a mellon controller using GPIO";

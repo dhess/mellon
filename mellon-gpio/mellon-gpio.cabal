@@ -33,7 +33,7 @@ Library
   GHC-Options:          -Wall
   Exposed-Modules:      Mellon.Gpio
   Build-Depends:        base >= 4 && < 5
-                      , gpio >= 0.4
+                      , gpio >= 0.5.1
                       , mellon
                       , mellon-server
                       , mtl

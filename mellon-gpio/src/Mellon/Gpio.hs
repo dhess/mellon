@@ -7,12 +7,13 @@ module Mellon.Gpio
          ) where
 
 import Control.Monad.Except (MonadError, throwError)
+import Control.Monad.IO.Class (liftIO)
 import Mellon.Monad.Controller (controllerCtx)
 import Mellon.Device.Class (Device(..))
 import Mellon.Server.Docs (docsApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
-import System.GPIO.Free (GpioT, Pin(..), PinDirection(..), PinValue(..), openPin, closePin, getPinDirection, setPinDirection, writePin)
+import System.GPIO.Free (GpioT, Pin(..), PinValue(..), getPinDirection, withPin, writePin, writePin')
 import System.GPIO.Linux.Sysfs (PinDescriptor)
 import System.GPIO.Linux.SysfsIO (runSysfsIO)
 
@@ -26,10 +27,9 @@ import System.GPIO.Linux.SysfsIO (runSysfsIO)
 -- teardown for the specified pin (i.e., there is no need for the
 -- caller to wrap this function with the 'withGPIO' function).
 runTCPServerSysfs :: Pin -> Int -> IO ()
-runTCPServerSysfs pin port =
-  do pd <- runSysfsIO $ prepPin pin
-     runTCPServer (UnsafeSysfsLock pd) port
-     runSysfsIO $ closePin pd
+runTCPServerSysfs pin port = runSysfsIO $ withPin pin $ \d ->
+  do prepPin d
+     liftIO $ runTCPServer (UnsafeSysfsLock d) port
 
 runTCPServer :: (Device d) => d -> Int -> IO ()
 runTCPServer device port =
@@ -37,20 +37,13 @@ runTCPServer device port =
      sock <- listenOn (PortNumber (fromIntegral port))
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
-prepPin :: (MonadError String m) => Pin -> GpioT String h m m h
-prepPin pin =
-  do result <- openPin pin
-     case result of
-       Left e -> throwError e
-       Right h ->
-         do maybeDir <- getPinDirection h
-            case maybeDir of
-              Nothing ->
-                do closePin h
-                   throwError $ "Can't set direction of " ++ show pin
-              Just _ ->
-                do setPinDirection h Out
-                   return h
+prepPin :: (MonadError String m) => h -> GpioT String h m m ()
+prepPin h =
+  do maybeDir <- getPinDirection h
+     case maybeDir of
+       Nothing -> throwError $ "Can't set pin direction"
+       Just _ ->
+         do writePin' h Low
 
 data UnsafeSysfsLock = UnsafeSysfsLock PinDescriptor deriving (Show, Eq)
 
