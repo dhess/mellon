@@ -1,21 +1,26 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Mellon.Gpio
          ( -- * Servers
            runTCPServerSysfs
+           -- * Exceptions
+         , ServerException(..)
          ) where
 
-import Control.Monad.Except (MonadError, throwError)
+import Control.Monad.Catch (MonadThrow, Exception, throwM)
 import Control.Monad.IO.Class (liftIO)
+import Data.Typeable (Typeable)
 import Mellon.Monad.Controller (controllerCtx)
 import Mellon.Device.Class (Device(..))
 import Mellon.Server.Docs (docsApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
-import System.GPIO.Free (GpioT, Pin(..), PinValue(..), getPinDirection, withPin, writePin, writePin')
+import System.GPIO.Free (GpioT, getPinDirection, withPin, writePin, writePin')
 import System.GPIO.Linux.Sysfs (PinDescriptor)
-import System.GPIO.Linux.SysfsIO (runSysfsIO)
+import System.GPIO.Linux.Sysfs.IO (runSysfsIO)
+import System.GPIO.Types (Pin(..), PinValue(..))
 
 -- | Run the server on a TCP socket at the given port number. The
 -- server will listen on all interfaces.
@@ -28,7 +33,7 @@ import System.GPIO.Linux.SysfsIO (runSysfsIO)
 -- caller to wrap this function with the 'withGPIO' function).
 runTCPServerSysfs :: Pin -> Int -> IO ()
 runTCPServerSysfs pin port = runSysfsIO $ withPin pin $ \d ->
-  do prepPin d
+  do prepPin pin d
      liftIO $ runTCPServer (UnsafeSysfsLock d) port
 
 runTCPServer :: (Device d) => d -> Int -> IO ()
@@ -37,11 +42,11 @@ runTCPServer device port =
      sock <- listenOn (PortNumber (fromIntegral port))
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
-prepPin :: (MonadError String m) => h -> GpioT String h m m ()
-prepPin h =
+prepPin :: (MonadThrow m) => Pin -> h -> GpioT h m m ()
+prepPin pin h =
   do maybeDir <- getPinDirection h
      case maybeDir of
-       Nothing -> throwError $ "Can't set pin direction"
+       Nothing -> throwM $ NotAnOutputPin pin
        Just _ ->
          do writePin' h Low
 
@@ -52,3 +57,10 @@ data UnsafeSysfsLock = UnsafeSysfsLock PinDescriptor deriving (Show, Eq)
 instance Device UnsafeSysfsLock where
   lockDevice (UnsafeSysfsLock pd) = runSysfsIO $ writePin pd Low
   unlockDevice (UnsafeSysfsLock pd) = runSysfsIO $ writePin pd High
+
+-- | Exceptions that can be thrown by the server.
+data ServerException
+  = NotAnOutputPin Pin
+  deriving (Show,Typeable)
+
+instance Exception ServerException

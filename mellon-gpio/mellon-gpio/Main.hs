@@ -2,7 +2,7 @@ module Main where
 
 import Mellon.Gpio (runTCPServerSysfs)
 import Options.Applicative
-import System.GPIO.Free (Pin(..))
+import System.GPIO.Types (Pin(..))
 
 data Verbosity
   = Normal
