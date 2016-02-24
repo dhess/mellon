@@ -17,7 +17,8 @@ data Command
   = Start StartOptions
 
 data StartOptions =
-  StartOptions {port :: Int}
+  StartOptions {port :: Int
+               ,pin :: Int}
 
 startCmd :: Parser Command
 startCmd = Start <$> startOptions
@@ -29,7 +30,9 @@ startOptions =
                short 'p' <>
                metavar "INT" <>
                value 8000 <>
-               help "Listen on port")
+               help "Listen on port") <*>
+  argument auto (metavar "PIN" <>
+                 help "GPIO pin number")
 
 cmds :: Parser GlobalOptions
 cmds =
@@ -46,8 +49,8 @@ cmds =
     (command "start" (info startCmd (progDesc "Start the server")))
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions False _ (Start (StartOptions listenPort))) =
-  runTCPServerSysfs (Pin 65) listenPort
+run (GlobalOptions False _ (Start (StartOptions listenPort pinNumber))) =
+  runTCPServerSysfs (Pin pinNumber) listenPort
 run _ = return ()
 
 main :: IO ()
