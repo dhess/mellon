@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "mellon-gpio";
-  version = "0.6";
+  version = "0.6.0.1";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
