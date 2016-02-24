@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Mellon.Gpio
@@ -17,7 +18,7 @@ import Mellon.Device.Class (Device(..))
 import Mellon.Server.Docs (docsApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
-import System.GPIO.Free (GpioT, getPinDirection, withPin, writePin, writePin')
+import System.GPIO.Free (GpioT, getPinDirection, writePin, writePin')
 import System.GPIO.Linux.Sysfs (PinDescriptor)
 import System.GPIO.Linux.Sysfs.IO (runSysfsIO)
 import System.GPIO.Types (Pin(..), PinValue(..))
@@ -31,10 +32,10 @@ import System.GPIO.Types (Pin(..), PinValue(..))
 -- locked. The server will also perform all necessary GPIO setup and
 -- teardown for the specified pin (i.e., there is no need for the
 -- caller to wrap this function with the 'withGPIO' function).
-runTCPServerSysfs :: Pin -> Int -> IO ()
-runTCPServerSysfs pin port = runSysfsIO $ withPin pin $ \d ->
-  do prepPin pin d
-     liftIO $ runTCPServer (UnsafeSysfsLock d) port
+runTCPServerSysfs :: Pin -> PinDescriptor -> Int -> IO ()
+runTCPServerSysfs pin pd port = runSysfsIO $
+  do prepPin pin pd
+     liftIO $ runTCPServer (UnsafeSysfsLock pd) port
 
 runTCPServer :: (Device d) => d -> Int -> IO ()
 runTCPServer device port =
@@ -44,11 +45,9 @@ runTCPServer device port =
 
 prepPin :: (MonadThrow m) => Pin -> h -> GpioT h m m ()
 prepPin pin h =
-  do maybeDir <- getPinDirection h
-     case maybeDir of
-       Nothing -> throwM $ NotAnOutputPin pin
-       Just _ ->
-         do writePin' h Low
+  getPinDirection h >>= \case
+    Nothing -> throwM $ NotAnOutputPin pin
+    Just _ -> writePin' h Low
 
 data UnsafeSysfsLock = UnsafeSysfsLock PinDescriptor deriving (Show, Eq)
 
