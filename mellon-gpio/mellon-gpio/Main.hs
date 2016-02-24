@@ -11,26 +11,20 @@ data Verbosity
 data GlobalOptions =
   GlobalOptions {quiet :: Bool
                 ,verbose :: Verbosity
+                ,port :: Int
                 ,cmd :: Command}
 
 data Command
-  = Start StartOptions
+  = Sysfs SysfsOptions
 
-data StartOptions =
-  StartOptions {port :: Int
-               ,pin :: Int}
+data SysfsOptions = SysfsOptions {pin :: Int}
 
-startCmd :: Parser Command
-startCmd = Start <$> startOptions
+sysfsCmd :: Parser Command
+sysfsCmd = Sysfs <$> sysfsOptions
 
-startOptions :: Parser StartOptions
-startOptions =
-  StartOptions <$>
-  option auto (long "port" <>
-               short 'p' <>
-               metavar "INT" <>
-               value 8000 <>
-               help "Listen on port") <*>
+sysfsOptions :: Parser SysfsOptions
+sysfsOptions =
+  SysfsOptions <$>
   argument auto (metavar "PIN" <>
                  help "GPIO pin number")
 
@@ -45,11 +39,16 @@ cmds =
        (long "verbose" <>
         short 'v' <>
         help "Enable verbose mode") <*>
+  option auto (long "port" <>
+               short 'p' <>
+               metavar "INT" <>
+               value 8000 <>
+               help "Listen on port") <*>
   hsubparser
-    (command "start" (info startCmd (progDesc "Start the server")))
+    (command "sysfs" (info sysfsCmd (progDesc "Use the Linux sysfs GPIO interpreter")))
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions False _ (Start (StartOptions listenPort pinNumber))) =
+run (GlobalOptions False _ listenPort (Sysfs (SysfsOptions pinNumber))) =
   runTCPServerSysfs (Pin pinNumber) listenPort
 run _ = return ()
 
@@ -59,4 +58,4 @@ main = execParser opts >>= run
           info (helper <*> cmds)
                (fullDesc <>
                 progDesc "A server for controlling physical access devices" <>
-                header "mellon-pi")
+                header "mellon-gpio")
