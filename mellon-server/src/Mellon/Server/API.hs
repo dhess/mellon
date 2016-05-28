@@ -15,7 +15,7 @@ module Mellon.Server.API
          , server
          ) where
 
-import Control.Monad.Trans.Either (EitherT)
+import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Aeson
 import Data.Aeson.Types
@@ -61,7 +61,7 @@ instance FromJSON State where
 sampleDate :: UTCTime
 sampleDate = UTCTime { utctDay = fromGregorian 2015 10 06, utctDayTime = 0 }
 
-instance ToSample State State where
+instance ToSample State where
   toSamples _ =
     [ ("Locked", Locked)
     , ("Unlocked until a given date", Unlocked sampleDate)
@@ -85,8 +85,8 @@ instance ToJSON Time where
 instance FromJSON Time where
   parseJSON = genericParseJSON defaultOptions
 
-instance ToSample Time Time where
-  toSample _ = Just $ Time sampleDate
+instance ToSample Time where
+  toSamples _ = [("2015-10-06",Time sampleDate)]
 
 timeDocument :: Monad m => HtmlT m a -> HtmlT m a
 timeDocument = wrapBody "Server time"
@@ -103,7 +103,7 @@ type MellonAPI =
   "state" :> Get '[JSON, HTML] State :<|>
   "state" :> ReqBody '[JSON] State :> Put '[JSON, HTML] State
 
-type AppM d m = ControllerT d (EitherT ServantErr m)
+type AppM d m = ControllerT d (ExceptT ServantErr m)
 
 serverT :: (MonadIO m, Device d) => ServerT MellonAPI (AppM d m)
 serverT =
@@ -128,7 +128,7 @@ serverT =
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: (MonadIO m, Device d) => ControllerCtx d -> AppM d m :~> EitherT ServantErr m
+serverToEither :: (MonadIO m, Device d) => ControllerCtx d -> AppM d m :~> ExceptT ServantErr m
 serverToEither cc = Nat $ \m -> runControllerT cc m
 
 -- | A 'Server' which serves the 'MellonAPI' on the given
