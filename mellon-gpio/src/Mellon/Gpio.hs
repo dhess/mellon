@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -15,8 +16,8 @@ import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
 import System.GPIO.Monad
        (Pin(..), PinActiveLevel(..), PinValue(..), PinOutputMode(..),
-        withOutputPin)
-import System.GPIO.Linux.Sysfs (runSysfsGpioIO)
+        OutputPin, withOutputPin, writeOutputPin)
+import System.GPIO.Linux.Sysfs (PinDescriptor, runSysfsGpioIO)
 
 -- | Run the server on a TCP socket at the given port number. The
 -- server will listen on all interfaces.
@@ -26,9 +27,9 @@ import System.GPIO.Linux.Sysfs (runSysfsGpioIO)
 -- unlocked, and a low logic level on the pin when the device is
 -- locked.
 runTCPServerSysfs :: Pin -> Int -> IO ()
-runTCPServerSysfs pin port =
-  do prepPin pin
-     liftIO $ runTCPServer (UnsafeSysfsLock pin) port
+runTCPServerSysfs pin port = runSysfsGpioIO $
+  withOutputPin pin OutputDefault (Just ActiveHigh) Low $ \p ->
+     liftIO $ runTCPServer (UnsafeSysfsLock p) port
 
 runTCPServer :: (Device d) => d -> Int -> IO ()
 runTCPServer device port =
@@ -36,16 +37,12 @@ runTCPServer device port =
      sock <- listenOn (PortNumber (fromIntegral port))
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
-prepPin :: Pin -> IO ()
-prepPin pin = runSysfsGpioIO $
-  withOutputPin pin OutputDefault (Just ActiveHigh) Low (const $ return ())
-
-data UnsafeSysfsLock = UnsafeSysfsLock Pin deriving (Show, Eq)
+data UnsafeSysfsLock p = UnsafeSysfsLock p deriving (Show, Eq)
 
 -- Note: this will throw an exception if there's a problem writing to
 -- the pin.
-instance Device UnsafeSysfsLock where
+instance Device (UnsafeSysfsLock (OutputPin PinDescriptor)) where
   lockDevice (UnsafeSysfsLock pin) = runSysfsGpioIO $
-    withOutputPin pin OutputDefault (Just ActiveHigh) Low (const $ return ())
+    writeOutputPin pin Low
   unlockDevice (UnsafeSysfsLock pin) = runSysfsGpioIO $
-    withOutputPin pin OutputDefault (Just ActiveHigh) High (const $ return ())
+    writeOutputPin pin High
