@@ -14,7 +14,7 @@ Tested-With:            GHC == 7.10.1
 Synopsis:               Run a mellon controller using GPIO
 Description:
   @mellon-gpio@ mixes @mellon@ and @mellon-server@ together with the
-  @gpio@ package to create a turnkey physical access controller.
+  @hpio@ package to create a turnkey physical access controller.
   Simply connect a properly-designed physical access device (e.g., an
   electric strike driven by a relay circuit such as the one shown
   <http://www.petervis.com/Raspberry_PI/Driving_Relays_with_CMOS_and_TTL_Outputs/Driving_Relays_with_CMOS_and_TTL_Outputs.html
@@ -34,7 +34,7 @@ Library
   Exposed-Modules:      Mellon.Gpio
   Build-Depends:        base >= 4 && < 5
                       , exceptions
-                      , gpio >= 0.5.1
+                      , hpio >= 0.8.0.1
                       , mellon
                       , mellon-server
                       , mtl
@@ -50,7 +50,7 @@ Executable mellon-gpio
   GHC-Options:          -Wall
   Build-Depends:        base >= 4 && < 5
                       , exceptions
-                      , gpio
+                      , hpio
                       , mellon
                       , mellon-server
                       , mtl

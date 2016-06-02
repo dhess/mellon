@@ -1,4 +1,4 @@
-{ mkDerivation, base, exceptions, gpio, mellon, mellon-server, mtl
+{ mkDerivation, base, exceptions, hpio, mellon, mellon-server, mtl
 , network, optparse-applicative, stdenv, transformers, warp
 }:
 mkDerivation {
@@ -8,11 +8,11 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base exceptions gpio mellon mellon-server mtl network transformers
+    base exceptions hpio mellon mellon-server mtl network transformers
     warp
   ];
   executableHaskellDepends = [
-    base exceptions gpio mellon mellon-server mtl network
+    base exceptions hpio mellon mellon-server mtl network
     optparse-applicative transformers warp
   ];
   homepage = "https://github.com/dhess/mellon/";
