@@ -1,8 +1,6 @@
 -- | A dummy 'Device' implementation that simply logs lock/unlock
 -- events, including timestamps. Useful for testing and debugging.
 
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-
 module Mellon.Device.MockLock
        ( MockLock
        , MockLockEvent(..)

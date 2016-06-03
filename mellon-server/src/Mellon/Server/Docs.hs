@@ -48,7 +48,7 @@ docsBS = encodeUtf8 . pack . markdown $ docsWithIntros [intro] API.mellonAPI
 -- Normally you will just use 'docsApp', but this function is exported so
 -- that you can extend/wrap 'DocsAPI'.
 docsServer :: (Device d) => ControllerCtx d -> Server DocsAPI
-docsServer cc = (API.server cc)  :<|> serveDocs
+docsServer cc = API.server cc  :<|> serveDocs
   where
     serveDocs _ respond =
       respond $ responseLBS ok200 [plain] docsBS

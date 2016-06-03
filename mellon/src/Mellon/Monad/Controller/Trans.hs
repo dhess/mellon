@@ -95,7 +95,7 @@ readMVar :: (MonadIO m) => MVar a -> ControllerT d m a
 readMVar = liftIO . C.readMVar
 
 putMVar :: (MonadIO m) => MVar a -> a -> ControllerT d m ()
-putMVar mv = liftIO . (C.putMVar mv)
+putMVar mv = liftIO . C.putMVar mv
 
 takeMVar :: (MonadIO m) => MVar a -> ControllerT d m a
 takeMVar = liftIO . C.takeMVar
@@ -139,7 +139,7 @@ runMachine cmd =
          return ()
 
     lockAt :: (MonadIO m, Device d) => UTCTime -> ControllerT d m ()
-    lockAt date = runMachine (LockCmd date) >> return ()
+    lockAt date = void $ runMachine (LockCmd date)
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be

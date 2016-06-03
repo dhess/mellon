@@ -35,7 +35,7 @@ wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
   doctypehtml_ $
     do head_ $
-         do title_ title
+         title_ title
        body_ body
 
 -- | Mimics 'Controller.State', but provides JSON conversions.
@@ -92,7 +92,7 @@ timeDocument :: Monad m => HtmlT m a -> HtmlT m a
 timeDocument = wrapBody "Server time"
 
 instance ToHtml Time where
-  toHtml (Time time) = timeDocument $ toHtml $ "Server time is " ++ (show time)
+  toHtml (Time time) = timeDocument $ toHtml $ "Server time is " ++ show time
   toHtmlRaw = toHtml
 
 -- | A "Servant" API for interacting with a @mellon@ controller. The API also
@@ -113,15 +113,15 @@ serverT =
   where
     getTime :: (MonadIO m, Device d) => AppM d m Time
     getTime =
-      do now <- liftIO $ getCurrentTime
+      do now <- liftIO getCurrentTime
          return $ Time now
 
     getState :: (MonadIO m, Device d) => AppM d m State
-    getState = state >>= return . stateToState
+    getState = fmap stateToState state
 
     putState :: (MonadIO m, Device d) => State -> AppM d m State
-    putState Locked = lockNow >>= return . stateToState
-    putState (Unlocked date) = unlockUntil date >>= return . stateToState
+    putState Locked = fmap stateToState lockNow
+    putState (Unlocked date) = fmap stateToState (unlockUntil date)
 
 -- | A 'Proxy' for 'MellonAPI', exported in order to make it possible
 -- to extend the API.

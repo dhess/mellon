@@ -120,7 +120,7 @@ transition LockNowCmd (Unlocked _) =
      runLock
      return Locked
 
-transition (LockCmd _) (Locked) = return Locked
+transition (LockCmd _) Locked = return Locked
 transition (LockCmd lockDate) (Unlocked untilDate) =
   -- Only execute the lock command if its date matches the current
   -- outstanding unlock request's expiration date, i.e., if the lock
