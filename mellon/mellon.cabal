@@ -46,7 +46,8 @@ Description:
   is the domain of higher-level packages which use the base @mellon@
   package (e.g., @mellon-server@).
 
-Extra-Doc-Files:   images/*.svg
+Extra-Doc-Files:        images/*.svg
+Extra-Source-Files:     changelog.md
 
 Library
   Default-Language:     Haskell2010

@@ -11,6 +11,7 @@ Description:
 
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
+Extra-Source-Files:     changelog.md
 
 Library
   Default-Language:     Haskell2010

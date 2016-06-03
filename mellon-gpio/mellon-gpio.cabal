@@ -26,6 +26,7 @@ Description:
   security/authentication for your access control device! You should
   always run @mellon-gpio@ behind a secure proxy web service or
   equivalent HTTP(S)-based authentication mechanism.
+Extra-Source-Files:     changelog.md
 
 Library
   Default-Language:     Haskell2010
