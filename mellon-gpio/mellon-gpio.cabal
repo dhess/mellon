@@ -9,7 +9,7 @@ Bug-Reports:            https://github.com/dhess/mellon/issues/
 Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
-Copyright:              Copyright (c) 2015, Drew Hess
+Copyright:              Copyright (c) 2016, Drew Hess
 Tested-With:            GHC == 7.10.1
 Synopsis:               Run a mellon controller using GPIO
 Description:
