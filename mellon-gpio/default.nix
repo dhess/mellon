@@ -1,5 +1,6 @@
-{ mkDerivation, base, exceptions, hpio, mellon, mellon-server, mtl
-, network, optparse-applicative, stdenv, transformers, warp
+{ mkDerivation, base, doctest, exceptions, hlint, hpio, mellon
+, mellon-server, mtl, network, optparse-applicative, stdenv
+, transformers, warp
 }:
 mkDerivation {
   pname = "mellon-gpio";
@@ -15,6 +16,7 @@ mkDerivation {
     base exceptions hpio mellon mellon-server mtl network
     optparse-applicative transformers warp
   ];
+  testHaskellDepends = [ base doctest hlint ];
   homepage = "https://github.com/dhess/mellon/";
   description = "Run a mellon controller using GPIO";
   license = stdenv.lib.licenses.bsd3;

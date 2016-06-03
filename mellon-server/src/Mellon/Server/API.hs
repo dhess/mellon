@@ -47,10 +47,10 @@ stateToState Controller.Locked = Locked
 stateToState (Controller.Unlocked date) = Unlocked date
 
 stateJSONOptions :: Options
-stateJSONOptions = defaultOptions { sumEncoding = taggedObject }
-  where
-    taggedObject = defaultTaggedObject { tagFieldName = "state"
-                                       , contentsFieldName = "until" }
+stateJSONOptions = defaultOptions {sumEncoding = taggedObject}
+  where taggedObject =
+          TaggedObject {tagFieldName = "state"
+                       ,contentsFieldName = "until"}
 
 instance ToJSON State where
   toJSON = genericToJSON stateJSONOptions

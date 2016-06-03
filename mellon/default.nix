@@ -1,5 +1,5 @@
-{ mkDerivation, base, free, hspec, mtl, stdenv, text, time
-, transformers
+{ mkDerivation, base, doctest, free, hlint, hspec, mtl, stdenv
+, text, time, transformers
 }:
 mkDerivation {
   pname = "mellon";
@@ -7,7 +7,7 @@ mkDerivation {
   src = ./.;
   libraryHaskellDepends = [ base free mtl text time transformers ];
   testHaskellDepends = [
-    base free hspec mtl text time transformers
+    base doctest free hlint hspec mtl text time transformers
   ];
   homepage = "https://github.com/dhess/mellon/";
   description = "Control physical access devices";

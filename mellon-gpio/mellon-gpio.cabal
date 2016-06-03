@@ -10,7 +10,8 @@ Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
 Copyright:              Copyright (c) 2016, Drew Hess
-Tested-With:            GHC == 7.10.1
+Tested-With:            GHC == 7.10.3
+Category:               Web, System
 Synopsis:               Run a mellon controller using GPIO
 Description:
   @mellon-gpio@ mixes @mellon@ and @mellon-server@ together with the
@@ -26,13 +27,34 @@ Description:
   security/authentication for your access control device! You should
   always run @mellon-gpio@ behind a secure proxy web service or
   equivalent HTTP(S)-based authentication mechanism.
+Extra-Doc-Files:        README.md
 Extra-Source-Files:     changelog.md
 
+-- Build doctests
+Flag test-doctests
+  Default: True
+  Manual: True
+
+-- Build hlint test
+Flag test-hlint
+  Default: True
+  Manual: True
+
+-- Build executable
+Flag executable
+  Default: True
+  Manual: True
+          
 Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
-  GHC-Options:          -Wall
+  GHC-Options:          -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  If impl(ghc > 8)
+    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
   Exposed-Modules:      Mellon.Gpio
+  Other-Extensions:     FlexibleContexts
+                      , FlexibleInstances
+                      , OverloadedStrings
   Build-Depends:        base >= 4 && < 5
                       , exceptions
                       , hpio >= 0.8.0.1
@@ -48,19 +70,53 @@ Executable mellon-gpio
   Default-Language:     Haskell2010
   HS-Source-Dirs:       mellon-gpio
                       , src
-  GHC-Options:          -Wall
-  Build-Depends:        base >= 4 && < 5
+  GHC-Options:          -Wall -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  If impl(ghc > 8)
+    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
+  If !flag(executable)
+    Buildable:         False
+  Else                        
+    Build-Depends:      base >= 4 && < 5
                       , exceptions
                       , hpio
                       , mellon
                       , mellon-server
+                      , mellon-gpio
                       , mtl
                       , network
                       , optparse-applicative
                       , transformers
                       , warp
-  Other-Modules:        Mellon.Gpio
+
+Test-Suite hlint
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       test
+  Ghc-Options:          -w -threaded -rtsopts -with-rtsopts=-N
+  Main-Is:              hlint.hs
+  If !flag(test-hlint)
+    Buildable:          False
+  Else
+    Build-Depends:      base
+                      , hlint
+
+Test-Suite doctest
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       test
+  Ghc-Options:          -Wall -threaded
+  Main-Is:              doctest.hs
+  If !flag(test-doctests)
+    Buildable:          False
+  Else
+    Build-Depends:      base
+                      , doctest
 
 Source-Repository head
   Type:                 git
   Location:             git://github.com/dhess/mellon.git
+
+Source-Repository this
+  Type:                 git
+  Location:             git://github.com/dhess/mellon.git
+  Tag:                  v0.6.0.1

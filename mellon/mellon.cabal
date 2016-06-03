@@ -10,7 +10,8 @@ Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
 Copyright:              Copyright (c) 2016, Drew Hess
-Tested-With:            GHC == 7.10.1
+Tested-With:            GHC == 7.10.3
+Category:               System
 Synopsis:               Control physical access devices
 Description:
   "Speak, friend, and enter."
@@ -45,14 +46,26 @@ Description:
   does not provide authentication mechanisms or network services; that
   is the domain of higher-level packages which use the base @mellon@
   package (e.g., @mellon-server@).
-
-Extra-Doc-Files:        images/*.svg
+Extra-Doc-Files:        README.md
+                      , images/*.svg
 Extra-Source-Files:     changelog.md
+
+-- Build doctests
+Flag test-doctests
+  Default: True
+  Manual: True
+
+-- Build hlint test
+Flag test-hlint
+  Default: True
+  Manual: True
 
 Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
-  GHC-Options:          -Wall
+  GHC-Options:          -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  If impl(ghc > 8)
+    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
   Exposed-Modules:      Mellon.Monad.Controller
                       , Mellon.Monad.Controller.Trans
                       , Mellon.Monad.Controller.Class
@@ -62,12 +75,12 @@ Library
                       , Mellon.Monad.StateMachine
                       , Mellon.Device.Class
                       , Mellon.Device.MockLock
-  Other-Extensions:     ExistentialQuantification
+  Other-Extensions:     DeriveGeneric
+                      , ExistentialQuantification
                       , FlexibleContexts
                       , FlexibleInstances
                       , GADTs
                       , GeneralizedNewtypeDeriving
-                      , ScopedTypeVariables
                       , TemplateHaskell
   Build-Depends:        base >= 4 && < 5
                       , free
@@ -76,12 +89,36 @@ Library
                       , time
                       , transformers
 
+Test-Suite hlint
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       test
+  Ghc-Options:          -w -threaded -rtsopts -with-rtsopts=-N
+  Main-Is:              hlint.hs
+  If !flag(test-hlint)
+    Buildable:          False
+  Else
+    Build-Depends:      base
+                      , hlint
+
+Test-Suite doctest
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       test
+  Ghc-Options:          -Wall -threaded
+  Main-Is:              doctest.hs
+  If !flag(test-doctests)
+    Buildable:          False
+  Else
+    Build-Depends:      base
+                      , doctest
+
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
   Default-Language:     Haskell2010
   Hs-Source-Dirs:       src
                       , test
-  Ghc-Options:          -Wall
+  Ghc-Options:          -w -threaded -rtsopts -with-rtsopts=-N
   Main-Is:              Spec.hs
   Build-Depends:        base
                       , free
@@ -99,7 +136,13 @@ Test-Suite spec
                       , Mellon.Monad.StateMachine
                       , Mellon.Device.Class
                       , Mellon.Device.MockLock
+                      , MellonSpec
 
 Source-Repository head
   Type:                 git
   Location:             git://github.com/dhess/mellon.git
+
+Source-Repository this
+  Type:                 git
+  Location:             git://github.com/dhess/mellon.git
+  Tag:                  v0.6.0.1

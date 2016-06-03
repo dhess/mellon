@@ -1,6 +1,7 @@
-{ mkDerivation, aeson, base, bytestring, either, hspec, http-client
-, http-types, lucid, mellon, mellon-server, network, servant
-, servant-client, stdenv, text, time, transformers, wai, warp
+{ mkDerivation, aeson, base, bytestring, doctest, either, hlint
+, hspec, http-client, http-types, lucid, mellon, mellon-server
+, network, servant, servant-client, stdenv, text, time
+, transformers, wai, warp
 }:
 mkDerivation {
   pname = "mellon-client";
@@ -11,9 +12,11 @@ mkDerivation {
     mellon-server servant servant-client text time transformers
   ];
   testHaskellDepends = [
-    aeson base bytestring either hspec http-client mellon mellon-server
-    network servant servant-client text time transformers wai warp
+    aeson base bytestring doctest either hlint hspec http-client mellon
+    mellon-server network servant servant-client text time transformers
+    wai warp
   ];
+  homepage = "https://github.com/dhess/mellon/";
   description = "Haskell client bindings for mellon-server";
   license = stdenv.lib.licenses.bsd3;
 }
