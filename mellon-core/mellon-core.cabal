@@ -94,6 +94,8 @@ Test-Suite doctest
     Buildable:          False
   Else
     Build-Depends:      base
+                      , QuickCheck
+                      , quickcheck-instances
                       , doctest
 
 Test-Suite spec

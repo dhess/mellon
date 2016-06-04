@@ -49,6 +49,13 @@ import Data.Data
 import Data.Time (UTCTime)
 import GHC.Generics
 
+{- $setup
+
+>>> import Test.QuickCheck
+>>> import Test.QuickCheck.Instances
+
+-}
+
 -- | The machine's states.
 data State
   = StateLocked
@@ -104,31 +111,17 @@ data Output
 -- hence the first element of the returned pair (the 'Output' value)
 -- is wrapped in 'Maybe'.
 --
--- >>> import Data.Time.Clock (UTCTime(..), addUTCTime, secondsToDiffTime)
--- >>> import Data.Time.Calendar (fromGregorian)
--- >>> let zeroHour = UTCTime (fromGregorian 2016 06 02) 0
--- >>> let oneMinuteLater = 60 `addUTCTime` zeroHour
--- >>> let oneMinuteEarlier = (-60) `addUTCTime` zeroHour
--- >>> transition StateLocked InputLockNow
--- (Nothing,StateLocked)
--- >>> transition StateLocked (InputLock zeroHour)
--- (Nothing,StateLocked)
--- >>> transition StateLocked (InputUnlock zeroHour)
--- (Just (OutputUnlock 2016-06-02 00:00:00 UTC),StateUnlocked 2016-06-02 00:00:00 UTC)
--- >>> transition (StateUnlocked zeroHour) InputLockNow
--- (Just OutputCancelLock,StateLocked)
--- >>> transition (StateUnlocked zeroHour) (InputUnlock oneMinuteLater)
--- (Just (OutputUnlock 2016-06-02 00:01:00 UTC),StateUnlocked 2016-06-02 00:01:00 UTC)
--- >>> transition (StateUnlocked zeroHour) (InputUnlock zeroHour) -- no change
--- (Nothing,StateUnlocked 2016-06-02 00:00:00 UTC)
--- >>> transition (StateUnlocked zeroHour) (InputUnlock oneMinuteEarlier) -- use later expiration
--- (Nothing,StateUnlocked 2016-06-02 00:00:00 UTC)
--- >>> transition (StateUnlocked zeroHour) (InputLock zeroHour)
--- (Just OutputLock,StateLocked)
--- >>> transition (StateUnlocked zeroHour) (InputLock oneMinuteEarlier) -- only possible in a race condition
--- (Nothing,StateUnlocked 2016-06-02 00:00:00 UTC)
--- >>> transition (StateUnlocked zeroHour) (InputLock oneMinuteLater) -- should never happen, but handled gracefully anyway
--- (Nothing,StateUnlocked 2016-06-02 00:00:00 UTC)
+-- == Properties
+--
+-- prop> transition StateLocked InputLockNow == (Nothing,StateLocked)
+-- prop> \date -> transition StateLocked (InputLock date) == (Nothing,StateLocked)
+-- prop> \date -> transition StateLocked (InputUnlock date) == (Just $ OutputUnlock date,StateUnlocked date)
+-- prop> \date -> transition (StateUnlocked date) InputLockNow == (Just OutputCancelLock,StateLocked)
+-- prop> \date -> transition (StateUnlocked date) (InputLock date) == (Just OutputLock,StateLocked)
+-- prop> \(date1, date2) -> date1 /= date2 ==> transition (StateUnlocked date1) (InputLock date2) == (Nothing,StateUnlocked date1)
+-- prop> \date -> transition (StateUnlocked date) (InputUnlock date) == (Nothing,StateUnlocked date)
+-- prop> \(date1, date2) -> date2 > date1 ==> transition (StateUnlocked date1) (InputUnlock date2) == (Just $ OutputUnlock date2,StateUnlocked date2)
+-- prop> \(date1, date2) -> not (date2 > date1) ==> transition (StateUnlocked date1) (InputUnlock date2) == (Nothing,StateUnlocked date1)
 transition :: State -> Input -> (Maybe Output, State)
 
 -- Locked state transitions.
