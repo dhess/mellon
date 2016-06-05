@@ -7,6 +7,14 @@ Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental
 Portability : non-portable
 
+In the @mellon-core@ state machine, physical access devices have only
+two states: locked and unlocked.
+
+This module provides both a parameterized type for devices, which acts
+as the interface used by a @mellon-core@ controller to control the
+device; and a "mock lock" device implementation, which can be used for
+testing.
+
 -}
 
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -14,7 +22,15 @@ Portability : non-portable
 {-# LANGUAGE Safe #-}
 
 module Mellon.Device
-       ( Device(..)
+       ( -- * The mellon-core device type
+         Device(..)
+
+         -- * A mock lock implementation
+         --
+         -- | The mock lock type provided here logs lock / unlock
+         -- events along with a timestamp. It is useful for testing
+         -- but doesn't have any facility to control an actual
+         -- physical access device.
        , MockLock
        , mockLock
        , MockLockEvent(..)
@@ -24,28 +40,55 @@ module Mellon.Device
        , mockLockDevice
        ) where
 
-import Control.Concurrent (MVar, newMVar, putMVar, readMVar, takeMVar)
+import Control.Concurrent
+       (MVar, newMVar, putMVar, readMVar, takeMVar)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Data
 import Data.Time (UTCTime, getCurrentTime)
 import GHC.Generics
 
+-- | A parametric device type which provides two "methods," one to
+-- lock the device, and the other to unlock it.
+--
+-- The parameter @d@ is the concrete device type and is used during
+-- construction to create the two methods and bind them to actions on
+-- the specific device instance that will be used.
+--
+-- For example, the implementation of the 'mockLockDevice' function,
+-- which wraps a 'MockLock' in a generic 'Device' @d@ value, looks
+-- like this:
+--
+-- > mockLockDevice :: MockLock -> Device MockLock
+-- > mockLockDevice l =
+-- >   Device (liftIO $ lockMockLock l)
+-- >          (liftIO $ unlockMockLock l)
+--
+-- A program can construct such a device and use it like so:
+--
+-- >>> ml <- mockLock
+-- >>> let mld = mockLockDevice ml
+-- >>> events ml
+-- []
+-- >>> lockDevice mld
+-- >>> events ml
+-- [LockEvent ... UTC]
+-- >>> unlockDevice mld
+-- >>> events ml
+-- [LockEvent ... UTC,UnlockEvent ... UTC]
 data Device d =
   Device {lockDevice :: IO ()
          ,unlockDevice :: IO ()}
 
--- | The locking events logged by 'MockLock'.
+-- | Events logged by 'MockLock' are of this type.
 data MockLockEvent
   = LockEvent !UTCTime
   | UnlockEvent !UTCTime
   deriving (Eq,Show,Read,Generic,Data,Typeable)
 
--- | A mock lock device that logs lock/unlock events.
+-- | A mock lock device that logs lock / unlock events.
 --
 -- No constructor is exported. Use 'mockLock' to create a new
--- instance.
---
--- XXX TODO: parameterize this on Monoid?
+-- instance and 'events' to extract the log.
 data MockLock =
   MockLock (MVar [MockLockEvent])
   deriving (Eq)
@@ -60,12 +103,16 @@ events (MockLock m) = liftIO $ readMVar m
 
 data MLE = MLL | MLU deriving (Eq)
 
+-- | Lock the mock lock.
 lockMockLock :: (MonadIO m) => MockLock -> m ()
 lockMockLock = updateMockLock MLL
 
+-- | Unlock the mock lock.
 unlockMockLock :: (MonadIO m) => MockLock -> m ()
 unlockMockLock = updateMockLock MLU
 
+-- | Wrap a 'MockLock' value with a 'Device' value, for use with a
+-- @mellon-core@ controller.
 mockLockDevice :: MockLock -> Device MockLock
 mockLockDevice l =
   Device (liftIO $ lockMockLock l)
