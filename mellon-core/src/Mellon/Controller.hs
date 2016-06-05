@@ -46,7 +46,7 @@ import Data.Time
        (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime,
         picosecondsToDiffTime)
 
-import Mellon.Device (Device, lockDevice, unlockDevice)
+import Mellon.Device (Device(..))
 import Mellon.StateMachine
        (Input(..), Output(..), State(..), transition)
 
@@ -81,7 +81,7 @@ runMachine i c =
   where
     go :: (MonadIO m) => Maybe Output -> m ()
     go Nothing = return ()
-    go (Just OutputLock) = lockDevice (_device c)
+    go (Just OutputLock) = liftIO $ lockDevice (_device c)
     go (Just (OutputUnlock date)) = liftIO $
       do unlockDevice (_device c)
          void $

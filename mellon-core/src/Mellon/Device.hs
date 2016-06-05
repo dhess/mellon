@@ -15,8 +15,6 @@ Portability : non-portable
 
 module Mellon.Device
        ( Device(..)
-       , lockDevice
-       , unlockDevice
        , MockLock
        , mockLock
        , MockLockEvent(..)
@@ -33,14 +31,8 @@ import Data.Time (UTCTime, getCurrentTime)
 import GHC.Generics
 
 data Device d =
-  Device {_lockDevice :: IO ()
-         ,_unlockDevice :: IO ()}
-
-lockDevice :: (MonadIO m) => Device d -> m ()
-lockDevice = liftIO . _lockDevice
-
-unlockDevice :: (MonadIO m) => Device d -> m ()
-unlockDevice = liftIO . _unlockDevice
+  Device {lockDevice :: IO ()
+         ,unlockDevice :: IO ()}
 
 -- | The locking events logged by 'MockLock'.
 data MockLockEvent
