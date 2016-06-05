@@ -56,14 +56,14 @@ import Mellon.StateMachine
 -- The controller is parameterized on its device type.
 --
 -- Note that the type's constructor is not exported. You must use the
--- 'controller' constructor to create a new instance of this type; it
+-- 'controller' constructor to create a new value of this type; it
 -- ensures that the controller is initialized properly.
 data Controller d =
   Controller {_state :: MVar State
              ,_device :: Device d}
 
--- | Create a new instance of a 'Controller', parameterized on the
--- device type 'Device' @d@.
+-- | Create a new 'Controller' value, parameterized on the device type
+-- 'Device' @d@.
 --
 -- Controllers created by this constructor are thread-safe and may be
 -- passed around and controlled simultaneously on multiple threads.
@@ -75,10 +75,15 @@ data Controller d =
 -- this device has already been initialized and is ready for
 -- operation. It also assumes that it exclusively owns the device; do
 -- not pass the device to any other controllers or otherwise attempt
--- to control the device while this controller instance is live.
+-- to control the device while this controller value is live.
 --
 -- The controller treats the device as a critical section; only one
 -- thread at a time will issue operations to the device.
+--
+-- In order to synchronize the current device state with the state
+-- machine, the constructor will lock the device and set the state
+-- machine's initial state to 'StateLocked' before returning the new
+-- 'Controller' value.
 --
 -- N.B. The controller makes no guarantees about the period between
 -- invoking actions on the device. If your device requires a delay
