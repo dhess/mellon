@@ -23,7 +23,7 @@ import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
 
-import Mellon.Device (Device(..))
+import Mellon.Device (Device, lockDevice, unlockDevice)
 import Mellon.StateMachine (Input(..), Output(..), State(..), transition)
 
 data ControllerEnv d =
@@ -32,8 +32,8 @@ data ControllerEnv d =
 
 controllerEnv :: (MonadIO m) => Device d -> m (ControllerEnv d)
 controllerEnv device =
-  do liftIO $ _lockDevice device
-     mvar <- liftIO $ newMVar StateLocked
+  do lockDevice device
+     mvar <- newMVar StateLocked
      return $ ControllerEnv mvar device
 
 controllerLock :: (MonadIO m) => ControllerEnv d -> m State
@@ -56,13 +56,13 @@ runMachine i c =
   where
     go :: (MonadIO m) => Maybe Output -> m ()
     go Nothing = return ()
-    go (Just OutputLock) = liftIO $ _lockDevice (_device c)
+    go (Just OutputLock) = lockDevice (_device c)
     go (Just (OutputUnlock date)) =
-      do liftIO $ _unlockDevice (_device c)
+      do unlockDevice (_device c)
          void $
            forkIO $
              do threadSleepUntil date
-                void $ liftIO $ runMachine (InputLock date) c
+                void $ runMachine (InputLock date) c
     -- For this particular implementation, it's safe simply to
     -- ignore this command. When the "unscheduled" lock fires, the
     -- state machine will simply ignore it.
