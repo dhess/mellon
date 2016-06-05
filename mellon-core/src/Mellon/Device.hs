@@ -19,11 +19,11 @@ module Mellon.Device
        , unlockDevice
        , MockLock
        , mockLock
+       , MockLockEvent(..)
        , lockMockLock
        , unlockMockLock
        , events
        , mockLockDevice
-       , MockLockEvent(..)
        ) where
 
 import Control.Concurrent (MVar, newMVar, putMVar, readMVar, takeMVar)
@@ -66,19 +66,28 @@ mockLock = liftIO $ MockLock <$> newMVar []
 events :: (MonadIO m) => MockLock -> m [MockLockEvent]
 events (MockLock m) = liftIO $ readMVar m
 
+data MLE = MLL | MLU deriving (Eq)
+
 lockMockLock :: (MonadIO m) => MockLock -> m ()
-lockMockLock (MockLock m) = liftIO $
-  do now <- getCurrentTime
-     ev <- takeMVar m
-     putMVar m (ev ++ [LockEvent now])
+lockMockLock = updateMockLock MLL
 
 unlockMockLock :: (MonadIO m) => MockLock -> m ()
-unlockMockLock (MockLock m) = liftIO $
-  do now <- getCurrentTime
-     ev <- takeMVar m
-     putMVar m (ev ++ [UnlockEvent now])
+unlockMockLock = updateMockLock MLU
 
 mockLockDevice :: MockLock -> Device MockLock
 mockLockDevice l =
   Device (liftIO $ lockMockLock l)
          (liftIO $ unlockMockLock l)
+
+-- | Helpers
+updateMockLock :: (MonadIO m) =>  MLE -> MockLock -> m ()
+updateMockLock mle (MockLock m) = liftIO $
+  do now <- getCurrentTime
+     ev <- takeMVar m
+     putMVar m (mappend ev [event now])
+  where
+    event :: UTCTime -> MockLockEvent
+    event =
+      case mle of
+        MLL -> LockEvent
+        MLU -> UnlockEvent
