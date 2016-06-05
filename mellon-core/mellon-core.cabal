@@ -108,7 +108,7 @@ Test-Suite spec
   Hs-Source-Dirs:       src
                       , test
   Ghc-Options:          -w -threaded -rtsopts -with-rtsopts=-N
-  Main-Is:              Spec.hs
+  Main-Is:              Main.hs
   Build-Depends:        base
                       , hspec
                       , mtl
@@ -117,6 +117,8 @@ Test-Suite spec
   Other-Modules:        Mellon.Controller
                       , Mellon.Device
                       , Mellon.StateMachine
+                      , Spec
+                      , Mellon.ControllerSpec
 
 Source-Repository head
   Type:                 git
