@@ -37,6 +37,10 @@ module Mellon.Controller
        , lockController
        , unlockController
        , queryController
+
+         -- * Re-exported types
+       , Device(..)
+       , State(..)
        ) where
 
 import Control.Concurrent

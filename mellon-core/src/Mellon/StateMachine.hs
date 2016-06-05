@@ -63,7 +63,7 @@ import GHC.Generics
 
 -}
 
--- | The machine's states.
+-- | The state machine's states.
 data State
   = StateLocked
     -- ^ The state machine is in the locked state
@@ -73,9 +73,9 @@ data State
     -- indefinitely.
   deriving (Eq,Show,Read,Generic,Data,Typeable)
 
--- | The machine's inputs, i.e., commands sent to the machine by a
--- controller, either in response to a user's command, or in response
--- to an expired timer.
+-- | The state machine's inputs, i.e., commands sent to the machine by
+-- a controller, either in response to a user's command, or in
+-- response to an expired timer.
 data Input
   = InputLockNow
     -- ^ Lock immediately, canceling any unlock currently in effect
@@ -93,7 +93,7 @@ data Input
     -- (i.e., when the unlock expires).
   deriving (Eq,Show,Read,Generic,Data,Typeable)
 
--- | The machine's outputs, i.e., commands to be performed by a
+-- | The state machine's outputs, i.e., commands to be performed by a
 -- controller.
 --
 -- It's reasonable to wonder why the 'OutputUnlock' value takes a
