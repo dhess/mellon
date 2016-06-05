@@ -80,7 +80,7 @@ mockLockDevice l =
          (liftIO $ unlockMockLock l)
 
 -- | Helpers
-updateMockLock :: (MonadIO m) =>  MLE -> MockLock -> m ()
+updateMockLock :: (MonadIO m) => MLE -> MockLock -> m ()
 updateMockLock mle (MockLock m) = liftIO $
   do now <- getCurrentTime
      ev <- takeMVar m
