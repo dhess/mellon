@@ -13,29 +13,30 @@ who wants to control the device. The user interacts directly only with
 the controller, not with the physical access device or the state
 machine.
 
-A controller takes two commands from the user: /lock/ and /unlock/.
-User lock commands go into effect immediately. User unlock commands
-take a 'UTCTime' argument which specifies the date at which the
-controller will automatically lock the device again, if it hasn't been
-overridden by a subsequent unlock command with a later expiration
-date.
+A controller provides two commands to the user: /lock/ and /unlock/.
+User lock commands are effective immediately, and the device remains
+locked until the user runs a subsequent unlock command.
 
-The controller uses the @mellon-core@ state machine to sequence
-events, and to determine the next state after a user command or
-expiring unlock. The controller uses the physical access device to
-lock and unlock the device.
+User unlock commands are effective immediately, but also take a
+'UTCTime' argument which specifies the date at which the controller
+will automatically lock the device again, if it hasn't subsequently
+been overridden by the user via an unlock command with a later
+expiration date.
 
-This module provides a concurrent, thread-safe controller
-implementation.
+The controller uses the @mellon-core@ state machine via the
+'transition' function. The output of that function determines both the
+controller's next state, and also what actions, if any, the controller
+should take in response to a state transition.
 
 -}
 
 module Mellon.Controller
-       ( ControllerEnv
-       , controllerEnv
-       , controllerLock
-       , controllerUnlock
-       , controllerState
+       ( -- * The mellon-core controller
+         Controller
+       , controller
+       , lockController
+       , unlockController
+       , queryController
        ) where
 
 import Control.Concurrent
@@ -50,26 +51,68 @@ import Mellon.Device (Device(..))
 import Mellon.StateMachine
        (Input(..), Output(..), State(..), transition)
 
-data ControllerEnv d =
-  ControllerEnv {_state :: MVar State
-                ,_device :: Device d}
+-- | A concurrent, thread-safe controller type.
+--
+-- The controller is parameterized on its device type.
+--
+-- Note that the type's constructor is not exported. You must use the
+-- 'controller' constructor to create a new instance of this type; it
+-- ensures that the controller is initialized properly.
+data Controller d =
+  Controller {_state :: MVar State
+             ,_device :: Device d}
 
-controllerEnv :: (MonadIO m) => Device d -> m (ControllerEnv d)
-controllerEnv device = liftIO $
+-- | Create a new instance of a 'Controller', parameterized on the
+-- device type 'Device' @d@.
+--
+-- Controllers created by this constructor are thread-safe and may be
+-- passed around and controlled simultaneously on multiple threads.
+-- All actions exported by this module which act on a 'Controller'
+-- value are thread-safe.
+--
+-- The controller locks and unlocks the given device in response to
+-- user commands and expiring unlocks. The controller assumes that
+-- this device has already been initialized and is ready for
+-- operation. It also assumes that it exclusively owns the device; do
+-- not pass the device to any other controllers or otherwise attempt
+-- to control the device while this controller instance is live.
+--
+-- The controller treats the device as a critical section; only one
+-- thread at a time will issue operations to the device.
+--
+-- N.B. The controller makes no guarantees about the period between
+-- invoking actions on the device. If your device requires a delay
+-- bewtween successive operations, you should build that delay into
+-- your 'Device' @d@ implementation.
+controller :: (MonadIO m) => Device d -> m (Controller d)
+controller device = liftIO $
   do lockDevice device
      mvar <- newMVar StateLocked
-     return $ ControllerEnv mvar device
+     return $ Controller mvar device
 
-controllerLock :: (MonadIO m) => ControllerEnv d -> m State
-controllerLock = runMachine InputLockNow
+-- | Lock the device controlled by the controller immediately.
+--
+-- Returns the new state of the controller.
+lockController :: (MonadIO m) => Controller d -> m State
+lockController = runMachine InputLockNow
 
-controllerUnlock :: (MonadIO m) => UTCTime -> ControllerEnv d -> m State
-controllerUnlock date = runMachine (InputUnlock date)
+-- | Unlock the device controlled by the controller immediately, and
+-- keep it unlocked until the specified 'UTCTime'.
+--
+-- If the specified time is in the past, then the device will remain
+-- unlocked until it is locked via an explicit 'lockController'
+-- action, or until this action is called again with a 'UTCTime' in
+-- the future.
+--
+-- Returns the new state of the controller.
+unlockController :: (MonadIO m) => UTCTime -> Controller d -> m State
+unlockController date = runMachine (InputUnlock date)
 
-controllerState :: (MonadIO m) => ControllerEnv d -> m State
-controllerState c = liftIO $ readMVar (_state c)
+-- | Query the controller's current state.
+queryController :: (MonadIO m) => Controller d -> m State
+queryController c = liftIO $ readMVar (_state c)
 
-runMachine :: (MonadIO m) => Input -> ControllerEnv d -> m State
+runMachine :: (MonadIO m) => Input -> Controller d -> m State
 runMachine i c =
   let state = _state c
   in liftIO $

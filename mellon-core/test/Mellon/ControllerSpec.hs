@@ -9,8 +9,7 @@ import qualified Data.Time as Time (getCurrentTime)
 import Test.Hspec
 
 import Mellon.Controller
-       (ControllerEnv, controllerEnv, controllerLock, controllerUnlock,
-        controllerState)
+       (Controller, controller, lockController, unlockController)
 import Mellon.Device
        (MockLock, MockLockEvent(..), events, mockLock, mockLockDevice)
 
@@ -25,12 +24,12 @@ timePlusN time n = (fromInteger n) `addUTCTime` time
 
 type TestController a = WriterT [MockLockEvent] IO a
 
-testController :: ControllerEnv d -> IO [MockLockEvent]
+testController :: Controller d -> IO [MockLockEvent]
 testController env =
   do expectedResults <- execWriterT $ theTest env
      return expectedResults
 
-  where theTest :: ControllerEnv d -> TestController ()
+  where theTest :: Controller d -> TestController ()
         theTest env =
           do unlockWillExpire 5 env
              sleep 8
@@ -47,31 +46,31 @@ testController env =
              lockIt env
              sleep 12
 
-        lockIt :: ControllerEnv d -> TestController ()
+        lockIt :: Controller d -> TestController ()
         lockIt c =
           do now <- getCurrentTime
-             void $ controllerLock c
+             void $ lockController c
              tell [LockEvent now]
 
-        unlockIt :: Integer -> ControllerEnv d -> TestController (UTCTime, UTCTime)
+        unlockIt :: Integer -> Controller d -> TestController (UTCTime, UTCTime)
         unlockIt duration c =
           do now <- getCurrentTime
              let expire = timePlusN now duration
-             void $ controllerUnlock expire c
+             void $ unlockController expire c
              return (now, expire)
 
-        unlockWillExpire :: Integer -> ControllerEnv d -> TestController ()
+        unlockWillExpire :: Integer -> Controller d -> TestController ()
         unlockWillExpire duration c =
           do (now, expire) <- unlockIt duration c
              tell [UnlockEvent now]
              tell [LockEvent expire]
 
-        unlockWontExpire :: Integer -> ControllerEnv d -> TestController ()
+        unlockWontExpire :: Integer -> Controller d -> TestController ()
         unlockWontExpire duration c =
           do (now, _) <- unlockIt duration c
              tell [UnlockEvent now]
 
-        unlockWillBeIgnored :: Integer -> ControllerEnv d -> TestController ()
+        unlockWillBeIgnored :: Integer -> Controller d -> TestController ()
         unlockWillBeIgnored duration c =
           do _ <- unlockIt duration c
              return ()
@@ -98,7 +97,7 @@ checkResults expected actual epsilon = foldr compareResult (Right "No results to
 controllerTest :: IO CheckedResults
 controllerTest =
   do ml <- mockLock
-     cc <- controllerEnv $ mockLockDevice ml
+     cc <- controller $ mockLockDevice ml
      ccEvents <- testController cc
      -- Discard the first MockLock event, which happened when
      -- concurrentController initialized the lock.
