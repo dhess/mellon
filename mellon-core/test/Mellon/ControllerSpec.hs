@@ -3,7 +3,7 @@ module Mellon.ControllerSpec (spec) where
 import Control.Concurrent (threadDelay)
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Control.Monad.Writer.Strict (WriterT(..), execWriterT, tell)
+import Control.Monad.RWS.Strict (RWST, execRWST, ask, tell)
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
 import Test.Hspec
@@ -22,57 +22,59 @@ getCurrentTime = liftIO Time.getCurrentTime
 timePlusN :: UTCTime -> Integer -> UTCTime
 timePlusN time n = (fromInteger n) `addUTCTime` time
 
-type TestController a = WriterT [MockLockEvent] IO a
+type TestController d a = RWST (Controller d) [MockLockEvent] () IO a
 
 testController :: Controller d -> IO [MockLockEvent]
-testController env =
-  do expectedResults <- execWriterT $ theTest env
+testController cc =
+  do (_, expectedResults) <- execRWST theTest cc ()
      return expectedResults
 
-  where theTest :: Controller d -> TestController ()
-        theTest env =
-          do unlockWillExpire 5 env
+  where theTest :: TestController d ()
+        theTest =
+          do unlockWillExpire 5
              sleep 8
-             unlockWontExpire 3 env
+             unlockWontExpire 3
              sleep 1
-             unlockWillExpire 10 env
+             unlockWillExpire 10
              sleep 14
-             unlockWillExpire 8 env
+             unlockWillExpire 8
              sleep 2
-             unlockWillBeIgnored 1 env
+             unlockWillBeIgnored 1
              sleep 13
-             unlockWontExpire 8 env
+             unlockWontExpire 8
              sleep 3
-             lockIt env
+             lockIt
              sleep 12
 
-        lockIt :: Controller d -> TestController ()
-        lockIt c =
+        lockIt :: TestController d ()
+        lockIt =
           do now <- getCurrentTime
-             void $ lockController c
+             cc <- ask
+             void $ lockController cc
              tell [LockEvent now]
 
-        unlockIt :: Integer -> Controller d -> TestController (UTCTime, UTCTime)
-        unlockIt duration c =
+        unlockIt :: Integer -> TestController d (UTCTime, UTCTime)
+        unlockIt duration =
           do now <- getCurrentTime
+             cc <- ask
              let expire = timePlusN now duration
-             void $ unlockController expire c
+             void $ unlockController expire cc
              return (now, expire)
 
-        unlockWillExpire :: Integer -> Controller d -> TestController ()
-        unlockWillExpire duration c =
-          do (now, expire) <- unlockIt duration c
+        unlockWillExpire :: Integer -> TestController d ()
+        unlockWillExpire duration =
+          do (now, expire) <- unlockIt duration
              tell [UnlockEvent now]
              tell [LockEvent expire]
 
-        unlockWontExpire :: Integer -> Controller d -> TestController ()
-        unlockWontExpire duration c =
-          do (now, _) <- unlockIt duration c
+        unlockWontExpire :: Integer -> TestController d ()
+        unlockWontExpire duration =
+          do (now, _) <- unlockIt duration
              tell [UnlockEvent now]
 
-        unlockWillBeIgnored :: Integer -> Controller d -> TestController ()
-        unlockWillBeIgnored duration c =
-          do _ <- unlockIt duration c
+        unlockWillBeIgnored :: Integer -> TestController d ()
+        unlockWillBeIgnored duration =
+          do _ <- unlockIt duration
              return ()
 
 type CheckedResults = Either ((MockLockEvent, MockLockEvent), String) String
