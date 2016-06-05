@@ -79,7 +79,8 @@ data Controller d =
 -- this device has already been initialized and is ready for
 -- operation. It also assumes that it exclusively owns the device; do
 -- not pass the device to any other controllers or otherwise attempt
--- to control the device while this controller value is live.
+-- to control the device while the returned 'Controller' value is
+-- live.
 --
 -- The controller treats the device as a critical section; only one
 -- thread at a time will issue operations to the device.
