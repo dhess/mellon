@@ -1,11 +1,32 @@
 {-|
 Module      : Mellon.Controller
-Description : The @mellon-core@ concurrent controller
+Description : The @mellon-core@ controller
 Copyright   : (c) 2016, Drew Hess
 License     : BSD3
 Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental
 Portability : non-portable
+
+In @mellon-core@, controllers are the intermediary between the
+@mellon-core@ state machine, the physical access device, and the user
+who wants to control the device. The user interacts directly only with
+the controller, not with the physical access device or the state
+machine.
+
+A controller takes two commands from the user: /lock/ and /unlock/.
+User lock commands go into effect immediately. User unlock commands
+take a 'UTCTime' argument which specifies the date at which the
+controller will automatically lock the device again, if it hasn't been
+overridden by a subsequent unlock command with a later expiration
+date.
+
+The controller uses the @mellon-core@ state machine to sequence
+events, and to determine the next state after a user command or
+expiring unlock. The controller uses the physical access device to
+lock and unlock the device.
+
+This module provides a concurrent, thread-safe controller
+implementation.
 
 -}
 
@@ -17,21 +38,24 @@ module Mellon.Controller
        , controllerState
        ) where
 
-import Control.Concurrent (MVar, ThreadId, threadDelay)
-import qualified Control.Concurrent as C (forkIO, newMVar, putMVar, readMVar, takeMVar)
+import Control.Concurrent
+       (MVar, forkIO, newMVar, putMVar, readMVar, takeMVar, threadDelay)
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.Time (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime, picosecondsToDiffTime)
+import Data.Time
+       (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime,
+        picosecondsToDiffTime)
 
 import Mellon.Device (Device, lockDevice, unlockDevice)
-import Mellon.StateMachine (Input(..), Output(..), State(..), transition)
+import Mellon.StateMachine
+       (Input(..), Output(..), State(..), transition)
 
 data ControllerEnv d =
   ControllerEnv {_state :: MVar State
                 ,_device :: Device d}
 
 controllerEnv :: (MonadIO m) => Device d -> m (ControllerEnv d)
-controllerEnv device =
+controllerEnv device = liftIO $
   do lockDevice device
      mvar <- newMVar StateLocked
      return $ ControllerEnv mvar device
@@ -43,21 +67,22 @@ controllerUnlock :: (MonadIO m) => UTCTime -> ControllerEnv d -> m State
 controllerUnlock date = runMachine (InputUnlock date)
 
 controllerState :: (MonadIO m) => ControllerEnv d -> m State
-controllerState c = readMVar (_state c)
+controllerState c = liftIO $ readMVar (_state c)
 
 runMachine :: (MonadIO m) => Input -> ControllerEnv d -> m State
 runMachine i c =
   let state = _state c
-  in do currentState <- takeMVar state
-        let (cmd, newState) = transition currentState i
-        go cmd
-        putMVar state $! newState
-        return newState
+  in liftIO $
+       do currentState <- takeMVar state
+          let (cmd, newState) = transition currentState i
+          go cmd
+          putMVar state $! newState
+          return newState
   where
     go :: (MonadIO m) => Maybe Output -> m ()
     go Nothing = return ()
     go (Just OutputLock) = lockDevice (_device c)
-    go (Just (OutputUnlock date)) =
+    go (Just (OutputUnlock date)) = liftIO $
       do unlockDevice (_device c)
          void $
            forkIO $
@@ -95,20 +120,3 @@ threadSleepUntil t =
           where diffTimeToNominalDiffTime = realToFrac
         nominalDiffTimeToMicroseconds :: NominalDiffTime -> Int
         nominalDiffTimeToMicroseconds d = truncate $ d * 1000000
-
--- MonadIO wrappers.
---
-newMVar :: (MonadIO m) => a -> m (MVar a)
-newMVar = liftIO . C.newMVar
-
-readMVar :: (MonadIO m) => MVar a -> m a
-readMVar = liftIO . C.readMVar
-
-putMVar :: (MonadIO m) => MVar a -> a -> m ()
-putMVar mv = liftIO . C.putMVar mv
-
-takeMVar :: (MonadIO m) => MVar a -> m a
-takeMVar = liftIO . C.takeMVar
-
-forkIO :: (MonadIO m) => IO () -> m ThreadId
-forkIO action = liftIO $ C.forkIO action
