@@ -1,14 +1,11 @@
 {-|
 Module      : Mellon.Device
-Description : Actions on physical access devices
+Description : An interface for physical access devices
 Copyright   : (c) 2016, Drew Hess
 License     : BSD3
 Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental
 Portability : non-portable
-
-In the @mellon-core@ state machine, physical access devices have only
-two states: locked and unlocked.
 
 This module provides both a parameterized type for devices, which acts
 as the interface used by a @mellon-core@ controller to control the
@@ -77,7 +74,10 @@ import GHC.Generics
 -- [LockEvent ... UTC,UnlockEvent ... UTC]
 data Device d =
   Device {lockDevice :: IO ()
-         ,unlockDevice :: IO ()}
+          -- ^ An action for locking the device
+         ,unlockDevice :: IO ()
+          -- ^ An action for unlocking the device
+         }
 
 -- | Events logged by 'MockLock' are of this type.
 data MockLockEvent
