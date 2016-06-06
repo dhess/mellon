@@ -64,8 +64,9 @@ Library
   Exposed-Modules:      Mellon.Controller
                       , Mellon.Device
                       , Mellon.StateMachine
-  Other-Extensions:     Safe
-                      , Trustworthy
+  Other-Extensions:     DeriveDataTypeable
+                      , DeriveGeneric
+                      , Safe
   Build-Depends:        base         >= 4.8 && < 5
                       , async        > 2 && < 3
                       , mtl
