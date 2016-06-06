@@ -8,14 +8,15 @@ import Data.Aeson (decode, encode)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB (ByteString)
 import Data.Time.Clock
-import Mellon.Monad.Controller (controllerCtx)
-import Mellon.Device.MockLock
-import Mellon.Server (State(..), app, docsApp)
+import Mellon.Controller (controller)
+import Mellon.Device (mockLock, mockLockDevice)
 import Network.HTTP.Types (hContentType, methodPut)
 import Network.Wai
 import Network.Wai.Test (SResponse, simpleBody)
 import Test.Hspec
 import Test.Hspec.Wai ((<:>), WaiSession, get, liftIO, matchHeaders, request, shouldRespondWith, with)
+
+import Mellon.Server (State(..), app, docsApp)
 
 sleep :: Int -> IO ()
 sleep = threadDelay . (* 1000000)
@@ -23,13 +24,13 @@ sleep = threadDelay . (* 1000000)
 runApp :: IO Application
 runApp =
   do ml <- mockLock
-     cc <- controllerCtx ml
+     cc <- controller $ mockLockDevice ml
      return (app cc)
 
 runDocsApp :: IO Application
 runDocsApp =
   do ml <- mockLock
-     cc <- controllerCtx ml
+     cc <- controller $ mockLockDevice ml
      return (docsApp cc)
 
 putJSON :: ByteString -> LB.ByteString -> WaiSession SResponse
@@ -48,7 +49,7 @@ spec =
 
      describe "Initial server state" $
        do ml <- runIO $ mockLock
-          cc <- runIO $ controllerCtx ml
+          cc <- runIO $ controller $ mockLockDevice ml
           now <- runIO $ getCurrentTime
           let untilTime = 30.0 `addUTCTime` now
           with (return $ app cc) $

@@ -1,4 +1,4 @@
-{ mkDerivation, base, doctest, exceptions, hlint, hpio, mellon
+{ mkDerivation, base, doctest, exceptions, hlint, hpio, mellon-core
 , mellon-server, mtl, network, optparse-applicative, stdenv
 , transformers, warp
 }:
@@ -9,11 +9,11 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    base exceptions hpio mellon mellon-server mtl network transformers
-    warp
+    base exceptions hpio mellon-core mellon-server mtl network
+    transformers warp
   ];
   executableHaskellDepends = [
-    base exceptions hpio mellon mellon-server mtl network
+    base exceptions hpio mellon-core mellon-server mtl network
     optparse-applicative transformers warp
   ];
   testHaskellDepends = [ base doctest hlint ];

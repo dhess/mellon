@@ -8,8 +8,7 @@ module Mellon.Gpio
          ) where
 
 import Control.Monad.IO.Class (liftIO)
-import Mellon.Monad.Controller (controllerCtx)
-import Mellon.Device.Class (Device(..))
+import Mellon.Controller (Device(..), controller)
 import Mellon.Server.Docs (docsApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
@@ -28,20 +27,17 @@ import System.GPIO.Linux.Sysfs (PinDescriptor, runSysfsGpioIO)
 runTCPServerSysfs :: Pin -> Int -> IO ()
 runTCPServerSysfs pin port = runSysfsGpioIO $
   withOutputPin pin OutputDefault (Just ActiveHigh) Low $ \p ->
-     liftIO $ runTCPServer (UnsafeSysfsLock p) port
+     liftIO $ runTCPServer (unsafeSysfsLockDevice $ UnsafeSysfsLock p) port
 
-runTCPServer :: (Device d) => d -> Int -> IO ()
+runTCPServer :: Device d -> Int -> IO ()
 runTCPServer device port =
-  do cc <- controllerCtx device
+  do cc <- controller device
      sock <- listenOn (PortNumber (fromIntegral port))
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
 data UnsafeSysfsLock p = UnsafeSysfsLock p deriving (Show, Eq)
 
--- Note: this will throw an exception if there's a problem writing to
--- the pin.
-instance Device (UnsafeSysfsLock (OutputPin PinDescriptor)) where
-  lockDevice (UnsafeSysfsLock pin) = runSysfsGpioIO $
-    writeOutputPin pin Low
-  unlockDevice (UnsafeSysfsLock pin) = runSysfsGpioIO $
-    writeOutputPin pin High
+unsafeSysfsLockDevice :: UnsafeSysfsLock (OutputPin PinDescriptor) -> Device (UnsafeSysfsLock p)
+unsafeSysfsLockDevice (UnsafeSysfsLock p) =
+  Device (runSysfsGpioIO $ writeOutputPin p Low)
+         (runSysfsGpioIO $ writeOutputPin p High)

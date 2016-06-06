@@ -1,3 +1,4 @@
 ## 0.7.0.0 (2016-06-02)
 
-Update for hpio-0.8.0.1.
+- Port to new `mellon-core` package.
+- Update for hpio-0.8.0.1.

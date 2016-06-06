@@ -45,7 +45,7 @@ Library
                       , http-client >= 0.4.28
                       , http-types
                       , lucid
-                      , mellon
+                      , mellon-core
                       , mellon-server
                       , servant
                       , servant-client
@@ -90,7 +90,7 @@ Test-Suite spec
                       , either
                       , hspec
                       , http-client >= 0.4.28
-                      , mellon
+                      , mellon-core
                       , mellon-server
                       , network
                       , servant

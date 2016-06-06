@@ -14,7 +14,7 @@ Tested-With:            GHC == 7.10.3
 Category:               Web, System
 Synopsis:               Run a mellon controller using GPIO
 Description:
-  @mellon-gpio@ mixes @mellon@ and @mellon-server@ together with the
+  @mellon-gpio@ mixes @mellon-core@ and @mellon-server@ together with the
   @hpio@ package to create a turnkey physical access controller.
   Simply connect a properly-designed physical access device (e.g., an
   electric strike driven by a relay circuit such as the one shown
@@ -58,7 +58,7 @@ Library
   Build-Depends:        base >= 4 && < 5
                       , exceptions
                       , hpio >= 0.8.0.1
-                      , mellon
+                      , mellon-core
                       , mellon-server
                       , mtl
                       , network
@@ -79,7 +79,7 @@ Executable mellon-gpio
     Build-Depends:      base >= 4 && < 5
                       , exceptions
                       , hpio
-                      , mellon
+                      , mellon-core
                       , mellon-server
                       , mellon-gpio
                       , mtl

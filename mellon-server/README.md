@@ -1,8 +1,8 @@
 # mellon-server
 
-`mellon-server` wraps a `mellon` controller in a REST web service.
-Like the `mellon` controller interface, the `mellon-server` web API is
-quite simple. There are only 3 methods:
+`mellon-server` wraps a `mellon-core` controller in a REST web
+service. Like the `mellon-core` controller interface, the
+`mellon-server` web API is quite simple. There are only 3 methods:
 
 * `GET /time` returns the system time on the server. This is made
   available for diagnostic purposes, primarily to ensure the server

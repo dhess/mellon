@@ -3,15 +3,16 @@ module MellonClientSpec (spec) where
 import Control.Concurrent (ThreadId, forkIO, killThread, threadDelay)
 import Control.Monad.Trans.Except (runExceptT)
 import Data.Time.Clock
-import Mellon.Monad.Controller (controllerCtx)
-import Mellon.Device.MockLock
-import Mellon.Client
+import Mellon.Controller (controller)
+import Mellon.Device (mockLock, mockLockDevice)
 import Mellon.Server (app)
 import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
 import Network.Socket
 import Network.Wai.Handler.Warp
 import Servant.Client
 import Test.Hspec
+
+import Mellon.Client
 
 sleep :: Int -> IO ()
 sleep = threadDelay . (* 1000000)
@@ -28,7 +29,7 @@ openTestSocket = do
 runApp :: IO (ThreadId, Manager, BaseUrl)
 runApp =
   do ml <- mockLock
-     cc <- controllerCtx ml
+     cc <- controller $ mockLockDevice ml
      (port, sock) <- openTestSocket
      let settings = setPort port $ defaultSettings
      threadId <- forkIO $ runSettingsSocket settings sock (app cc)

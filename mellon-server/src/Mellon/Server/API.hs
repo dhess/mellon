@@ -1,4 +1,5 @@
--- | A REST web service for interacting with @mellon@ controllers.
+-- | A REST web service for interacting with @mellon-core@
+-- controllers.
 
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -15,6 +16,7 @@ module Mellon.Server.API
          , server
          ) where
 
+import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Aeson
@@ -27,9 +29,9 @@ import Network.Wai
 import Servant
 import Servant.Docs
 import Servant.HTML.Lucid
-import Mellon.Device.Class (Device)
-import Mellon.Monad.Controller (ControllerCtx, ControllerT, MonadController(..), runControllerT)
-import qualified Mellon.Monad.Controller as Controller (State(..))
+import Mellon.Controller
+       (Controller, lockController, unlockController, queryController)
+import qualified Mellon.Controller as Controller (State(..))
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
@@ -43,8 +45,8 @@ wrapBody title body =
 data State = Locked | Unlocked UTCTime deriving (Eq, Show, Generic)
 
 stateToState :: Controller.State -> State
-stateToState Controller.Locked = Locked
-stateToState (Controller.Unlocked date) = Unlocked date
+stateToState Controller.StateLocked = Locked
+stateToState (Controller.StateUnlocked date) = Unlocked date
 
 stateJSONOptions :: Options
 stateJSONOptions = defaultOptions {sumEncoding = taggedObject}
@@ -95,51 +97,57 @@ instance ToHtml Time where
   toHtml (Time time) = timeDocument $ toHtml $ "Server time is " ++ show time
   toHtmlRaw = toHtml
 
--- | A "Servant" API for interacting with a @mellon@ controller. The API also
--- provides a way to obtain the system time on the server, to ensure
--- that the server's clock is accurate.
+-- | A "Servant" API for interacting with a @mellon-core@ controller.
+-- The API also provides a way to obtain the system time on the
+-- server, to ensure that the server's clock is accurate.
 type MellonAPI =
   "time" :> Get '[JSON, HTML] Time :<|>
   "state" :> Get '[JSON, HTML] State :<|>
   "state" :> ReqBody '[JSON] State :> Put '[JSON, HTML] State
 
-type AppM d m = ControllerT d (ExceptT ServantErr m)
+type AppM d m = ReaderT (Controller d) (ExceptT ServantErr m)
 
-serverT :: (MonadIO m, Device d) => ServerT MellonAPI (AppM d m)
+serverT :: (MonadIO m) => ServerT MellonAPI (AppM d m)
 serverT =
   getTime :<|>
   getState :<|>
   putState
   where
-    getTime :: (MonadIO m, Device d) => AppM d m Time
+    getTime :: (MonadIO m) => AppM d m Time
     getTime =
       do now <- liftIO getCurrentTime
          return $ Time now
 
-    getState :: (MonadIO m, Device d) => AppM d m State
-    getState = fmap stateToState state
+    getState :: (MonadIO m) => AppM d m State
+    getState =
+      do cc <- ask
+         fmap stateToState (queryController cc)
 
-    putState :: (MonadIO m, Device d) => State -> AppM d m State
-    putState Locked = fmap stateToState lockNow
-    putState (Unlocked date) = fmap stateToState (unlockUntil date)
+    putState :: (MonadIO m) => State -> AppM d m State
+    putState Locked =
+      do cc <- ask
+         fmap stateToState (lockController cc)
+    putState (Unlocked date) =
+      do cc <- ask
+         fmap stateToState (unlockController date cc)
 
 -- | A 'Proxy' for 'MellonAPI', exported in order to make it possible
 -- to extend the API.
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: (MonadIO m, Device d) => ControllerCtx d -> AppM d m :~> ExceptT ServantErr m
-serverToEither cc = Nat $ \m -> runControllerT cc m
+serverToEither :: (MonadIO m) => Controller d -> AppM d m :~> ExceptT ServantErr m
+serverToEither cc = Nat $ \m -> runReaderT m cc
 
 -- | A 'Server' which serves the 'MellonAPI' on the given
 -- 'ControllerCtx' instance.
 --
 -- Normally you will just use 'app', but this function is exported so
 -- that you can extend/wrap 'MellonAPI'.
-server :: (Device d) => ControllerCtx d -> Server MellonAPI
+server :: Controller d -> Server MellonAPI
 server cc = enter (serverToEither cc) serverT
 
 -- | An 'Network.Wai.Application' which runs the server, using the given
 -- 'ControllerCtx' instance for the controller.
-app :: (Device d) => ControllerCtx d -> Application
+app :: Controller d -> Application
 app = serve mellonAPI . server

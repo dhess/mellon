@@ -1,5 +1,4 @@
 packages:
-- mellon/
 - mellon-core/
 - mellon-server/
 - mellon-client/

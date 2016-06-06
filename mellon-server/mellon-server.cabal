@@ -14,7 +14,7 @@ Tested-With:            GHC == 7.10.3
 Category:               Web
 Synopsis:               A REST web service for mellon
 Description:
-  @mellon-server@ wraps a @mellon@ controller in a REST web service.
+  @mellon-server@ wraps a @mellon-core@ controller in a REST web service.
   .
   See the included <API.md API.md> file for detailed documentation
   on the REST service methods and document types.
@@ -58,7 +58,7 @@ Library
                       , either
                       , http-types
                       , lucid
-                      , mellon
+                      , mellon-core
                       , servant
                       , servant-docs
                       , servant-lucid
@@ -109,7 +109,7 @@ Test-Suite spec
                       , http-client
                       , http-types
                       , lucid
-                      , mellon
+                      , mellon-core
                       , servant
                       , servant-docs
                       , servant-lucid

@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 
--- | This module extends the standard 'Mellon.Server.API.MellonAPI' with a
--- documentation resource, in case you want to provide on-line
+-- | This module extends the standard 'Mellon.Server.API.MellonAPI'
+-- with a documentation resource, in case you want to provide on-line
 -- documentation for the API. In every other way, it is identical to
 -- the 'Mellon.Server.API.MellonAPI' server.
 
@@ -18,13 +18,13 @@ module Mellon.Server.Docs
 import Data.ByteString.Lazy (ByteString)
 import Data.Text.Lazy (pack)
 import Data.Text.Lazy.Encoding (encodeUtf8)
-import Mellon.Device.Class (Device)
-import Mellon.Monad.Controller
-import qualified Mellon.Server.API as API
+import Mellon.Controller (Controller)
 import Network.HTTP.Types
 import Network.Wai
 import Servant
 import Servant.Docs
+
+import qualified Mellon.Server.API as API
 
 -- | Extends 'Mellon.Server.API.MellonAPI' with a documentation
 -- resource.
@@ -47,7 +47,7 @@ docsBS = encodeUtf8 . pack . markdown $ docsWithIntros [intro] API.mellonAPI
 --
 -- Normally you will just use 'docsApp', but this function is exported so
 -- that you can extend/wrap 'DocsAPI'.
-docsServer :: (Device d) => ControllerCtx d -> Server DocsAPI
+docsServer :: Controller d -> Server DocsAPI
 docsServer cc = API.server cc  :<|> serveDocs
   where
     serveDocs _ respond =
@@ -58,5 +58,5 @@ docsServer cc = API.server cc  :<|> serveDocs
 -- | An 'Network.Wai.Application' which runs the server, using the given
 -- 'Mellon.Monad.Controller.ControllerCtx' instance for
 -- the controller.
-docsApp :: (Device d) => ControllerCtx d -> Application
+docsApp :: Controller d -> Application
 docsApp = serve docsAPI . docsServer
