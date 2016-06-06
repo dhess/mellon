@@ -69,7 +69,6 @@ Executable mellon-gpio
   Main-Is:              Main.hs
   Default-Language:     Haskell2010
   HS-Source-Dirs:       mellon-gpio
-                      , src
   GHC-Options:          -Wall -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   If impl(ghc > 8)
     GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
