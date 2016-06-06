@@ -3,6 +3,13 @@
 
 ## GET /state
 
+#### Authentication
+
+
+
+Clients must supply the following data
+
+
 #### Response:
 
 - Status code 200
@@ -28,7 +35,7 @@
 - Unlocked until a given date
 
 ```javascript
-{"state":"Unlocked","until":"2015-10-06T00:00:00.000000000000Z"}
+{"state":"Unlocked","until":"2015-10-06T00:00:00Z"}
 ```
 
 - Unlocked until a given date
@@ -38,6 +45,13 @@
 ```
 
 ## PUT /state
+
+#### Authentication
+
+
+
+Clients must supply the following data
+
 
 #### Request:
 
@@ -76,7 +90,7 @@
 - Unlocked until a given date
 
 ```javascript
-{"state":"Unlocked","until":"2015-10-06T00:00:00.000000000000Z"}
+{"state":"Unlocked","until":"2015-10-06T00:00:00Z"}
 ```
 
 - Unlocked until a given date
@@ -86,6 +100,13 @@
 ```
 
 ## GET /time
+
+#### Authentication
+
+
+
+Clients must supply the following data
+
 
 #### Response:
 
@@ -97,15 +118,14 @@
     - `application/json`
     - `text/html;charset=utf-8`
 
-- 
+- 2015-10-06
 
 ```javascript
-"2015-10-06T00:00:00.000000000000Z"
+"2015-10-06T00:00:00Z"
 ```
 
-- 
+- 2015-10-06
 
 ```html
 <!DOCTYPE HTML><html><head><title>Server time</title></head><body>Server time is 2015-10-06 00:00:00 UTC</body></html>
 ```
-
