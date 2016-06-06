@@ -1,5 +1,19 @@
--- | A REST web service for interacting with @mellon-core@
--- controllers.
+{-|
+Module      : Mellon.Server.API
+Description : A REST web service for @mellon-core@ controllers
+Copyright   : (c) 2016, Drew Hess
+License     : BSD3
+Maintainer  : Drew Hess <src@drewhess.com>
+Stability   : experimental
+Portability : non-portable
+
+This module provides a "Servant" REST web service for @mellon-core@
+controllers.
+
+See the included <API.md API.md> file for detailed documentation on
+the REST service methods and document types.
+
+-}
 
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
@@ -8,9 +22,12 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Mellon.Server.API
-         ( MellonAPI
+         ( -- * Types
+           MellonAPI
          , State(..)
          , Time(..)
+
+           -- * Functions
          , app
          , mellonAPI
          , server
@@ -25,13 +42,13 @@ import Data.Time.Calendar
 import Data.Time.Clock
 import GHC.Generics
 import Lucid
+import Mellon.Controller
+       (Controller, lockController, unlockController, queryController)
+import qualified Mellon.Controller as Controller (State(..))
 import Network.Wai
 import Servant
 import Servant.Docs
 import Servant.HTML.Lucid
-import Mellon.Controller
-       (Controller, lockController, unlockController, queryController)
-import qualified Mellon.Controller as Controller (State(..))
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
@@ -97,9 +114,11 @@ instance ToHtml Time where
   toHtml (Time time) = timeDocument $ toHtml $ "Server time is " ++ show time
   toHtmlRaw = toHtml
 
--- | A "Servant" API for interacting with a @mellon-core@ controller.
--- The API also provides a way to obtain the system time on the
--- server, to ensure that the server's clock is accurate.
+-- | A "Servant" API for interacting with a 'Controller'.
+--
+-- In addition to the controller methods, the API also provides a way
+-- to obtain the system time on the server, to ensure that the
+-- server's clock is accurate.
 type MellonAPI =
   "time" :> Get '[JSON, HTML] Time :<|>
   "state" :> Get '[JSON, HTML] State :<|>
@@ -139,15 +158,19 @@ mellonAPI = Proxy
 serverToEither :: (MonadIO m) => Controller d -> AppM d m :~> ExceptT ServantErr m
 serverToEither cc = Nat $ \m -> runReaderT m cc
 
--- | A 'Server' which serves the 'MellonAPI' on the given
--- 'ControllerCtx' instance.
+-- | A Servant 'Server' which serves the 'MellonAPI' on the given
+-- 'Controller'.
 --
 -- Normally you will just use 'app', but this function is exported so
 -- that you can extend/wrap 'MellonAPI'.
+--
+-- The server will translate REST actions to controller actions.
 server :: Controller d -> Server MellonAPI
 server cc = enter (serverToEither cc) serverT
 
--- | An 'Network.Wai.Application' which runs the server, using the given
--- 'ControllerCtx' instance for the controller.
+-- | A WAI 'Network.Wai.Application' which runs the web server, using
+-- the given 'Controller'.
+--
+-- The app will translate REST actions to controller actions.
 app :: Controller d -> Application
 app = serve mellonAPI . server

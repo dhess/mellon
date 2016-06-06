@@ -26,6 +26,7 @@ Extra-Doc-Files:        API.md
                       , README.md
 Extra-Source-Files:     changelog.md
                       , examples/*.hs
+                      , mellon-server.paw
 
 -- Build doctests
 Flag test-doctests
@@ -45,12 +46,11 @@ Library
     GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
   Exposed-Modules:      Mellon.Server
                       , Mellon.Server.API
-                      , Mellon.Server.Docs
+                      , Mellon.Server.DocsAPI
   Other-Extensions:     DataKinds
                       , DeriveGeneric
                       , MultiParamTypeClasses
                       , OverloadedStrings
-                      , ScopedTypeVariables
                       , TypeOperators
   Build-Depends:        base           >= 4 && < 5
                       , aeson          >= 0.11.0 && < 0.12
@@ -100,6 +100,7 @@ Test-Suite spec
                       , test
   Ghc-Options:          -w -threaded -rtsopts -with-rtsopts=-N
   Main-Is:              Main.hs
+  Other-Extensions:     ScopedTypeVariables
   Build-Depends:        aeson
                       , base
                       , bytestring
@@ -122,7 +123,7 @@ Test-Suite spec
                       , warp
   Other-Modules:        Mellon.Server
                       , Mellon.Server.API
-                      , Mellon.Server.Docs
+                      , Mellon.Server.DocsAPI
                       , MellonServerSpec
                       , Spec
 
