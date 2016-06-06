@@ -5,7 +5,7 @@ module Main where
 import Mellon.Controller (controller)
 import Mellon.Device (mockLock, mockLockDevice)
 import Mellon.Server (docsApp)
-import Network.Wai.Handler.Warp
+import Network.Wai.Handler.Warp (run)
 
 main :: IO ()
 main =

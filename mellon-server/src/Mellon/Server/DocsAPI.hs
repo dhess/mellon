@@ -31,10 +31,10 @@ import Data.ByteString.Lazy (ByteString)
 import Data.Text.Lazy (pack)
 import Data.Text.Lazy.Encoding (encodeUtf8)
 import Mellon.Controller (Controller)
-import Network.HTTP.Types
-import Network.Wai
-import Servant
-import Servant.Docs
+import Network.HTTP.Types (ok200)
+import Network.Wai (Application, responseLBS)
+import Servant ((:>), (:<|>)(..), Raw, Proxy(..), Server, serve)
+import Servant.Docs (DocIntro(..), docsWithIntros, markdown)
 
 import Mellon.Server.API (MellonAPI, mellonAPI, server)
 

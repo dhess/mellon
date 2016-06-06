@@ -36,19 +36,24 @@ module Mellon.Server.API
 import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
-import Data.Aeson
 import Data.Aeson.Types
-import Data.Time.Calendar
-import Data.Time.Clock
+       (FromJSON(..), ToJSON(..), Options(..), SumEncoding(TaggedObject),
+        defaultOptions, genericToJSON, genericParseJSON, tagFieldName,
+        contentsFieldName)
+import Data.Time.Calendar (fromGregorian)
+import Data.Time.Clock (UTCTime(..), getCurrentTime)
 import GHC.Generics
 import Lucid
+       (ToHtml(..), HtmlT, doctypehtml_, head_, title_, body_)
 import Mellon.Controller
        (Controller, lockController, unlockController, queryController)
 import qualified Mellon.Controller as Controller (State(..))
-import Network.Wai
+import Network.Wai (Application)
 import Servant
-import Servant.Docs
-import Servant.HTML.Lucid
+       ((:>), (:<|>)(..), (:~>)(..), JSON, Get, ReqBody, Put, Proxy(..),
+        ServerT, Server, ServantErr, enter, serve)
+import Servant.Docs (ToSample(..))
+import Servant.HTML.Lucid (HTML)
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
