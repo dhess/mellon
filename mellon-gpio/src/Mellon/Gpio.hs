@@ -9,7 +9,7 @@ module Mellon.Gpio
 
 import Control.Monad.IO.Class (liftIO)
 import Mellon.Controller (Device(..), controller)
-import Mellon.Server.Docs (docsApp)
+import Mellon.Server.DocsAPI (docsApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
 import System.GPIO.Monad
