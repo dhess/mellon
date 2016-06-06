@@ -44,7 +44,8 @@ module Mellon.Controller
        ) where
 
 import Control.Concurrent
-       (MVar, forkIO, newMVar, putMVar, readMVar, takeMVar, threadDelay)
+       (MVar, newMVar, putMVar, readMVar, takeMVar, threadDelay)
+import Control.Concurrent.Async (async, link)
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Time
@@ -137,10 +138,12 @@ runMachine i c =
     go (Just OutputLock) = liftIO $ lockDevice (_device c)
     go (Just (OutputUnlock date)) = liftIO $
       do unlockDevice (_device c)
-         void $
-           forkIO $
-             do threadSleepUntil date
-                void $ runMachine (InputLock date) c
+         a <- async $
+                do threadSleepUntil date
+                   void $ runMachine (InputLock date) c
+         -- Ensure exceptions which occur in the child thread are
+         -- reported in the parent.
+         link a
     -- For this particular implementation, it's safe simply to
     -- ignore this command. When the "unscheduled" lock fires, the
     -- state machine will simply ignore it.
