@@ -38,6 +38,11 @@ Flag test-hlint
   Default: True
   Manual: True
 
+-- Build example
+Flag example
+  Default: True
+  Manual: True
+
 Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
@@ -67,6 +72,21 @@ Library
                       , time
                       , transformers
                       , wai
+                      , warp
+
+Executable mock-mellon-server
+  Main-Is:              MockServer.hs
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       examples
+  GHC-Options:          -Wall -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  If impl(ghc > 8)
+    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
+  If !flag(example)
+    Buildable:         False
+  Else                        
+    Build-Depends:      base >= 4 && < 5
+                      , mellon-core
+                      , mellon-server
                       , warp
 
 Test-Suite hlint

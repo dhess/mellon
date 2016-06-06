@@ -20,3 +20,12 @@ See [API.md](API.md) for detailed documentation on the REST service.
 Note that `mellon-server` does not provide an authentication
 mechanism! You should proxy `mellon-server` behind a secure HTTPS
 server such as Nginx.
+
+## Example server
+
+An extremely simple example server (with on-line documentation
+support) is provided in the `examples` directory. You can run it with
+`cabal run` and test it using the endpoints described in
+[API.md](API.md). A [Paw](https://luckymarmot.com/paw) file is also
+included in the project with a pre-defined localhost environment for
+use with the example server.
