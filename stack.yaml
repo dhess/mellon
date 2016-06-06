@@ -1,9 +1,8 @@
 packages:
 - mellon-core/
-- mellon-server/
-- mellon-client/
+- mellon-web/
 - mellon-gpio/
 - location:
     git: git@github.com:dhess/hpio.git
     commit: ce39b7936bd4de8df15379a606ca58e0e923023f
-resolver: lts-6.1
+resolver: lts-6.2

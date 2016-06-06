@@ -1,4 +1,3 @@
 mellon-core
-mellon-server
-mellon-client
+mellon-web
 mellon-gpio

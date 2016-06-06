@@ -40,7 +40,7 @@ Description:
   Note that @mellon-core@ does not provide authentication mechanisms
   or network services for interacting with controllers; that is the
   domain of higher-level packages which use the base @mellon-core@
-  package (e.g., @mellon-server@).
+  package (e.g., @mellon-web@).
 Extra-Doc-Files:        README.md
                       , images/*.svg
 Extra-Source-Files:     changelog.md

@@ -4,7 +4,7 @@
 , text, time, transformers, wai, wai-extra, warp
 }:
 mkDerivation {
-  pname = "mellon-server";
+  pname = "mellon-web";
   version = "0.6.0.1";
   src = ./.;
   isLibrary = true;
@@ -22,6 +22,6 @@ mkDerivation {
     warp
   ];
   homepage = "https://github.com/dhess/mellon/";
-  description = "A REST web service for mellon";
+  description = "A REST web service for @mellon-core@ controllers";
   license = stdenv.lib.licenses.bsd3;
 }

@@ -24,4 +24,4 @@ provide any useful device implementations; see the companion
 Note that `mellon-core` does not provide authentication mechanisms or
 network services for interacting with controllers; that is the domain
 of higher-level packages which use the base `mellon-core` package
-(e.g., `mellon-server`).
+(e.g., `mellon-web`).

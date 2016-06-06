@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module MellonServerSpec (spec) where
+module Mellon.Web.ServerSpec (spec) where
 
 import Control.Concurrent (threadDelay)
 import Data.Aeson (decode, encode)
@@ -16,7 +16,7 @@ import Network.Wai.Test (SResponse, simpleBody)
 import Test.Hspec
 import Test.Hspec.Wai ((<:>), WaiSession, get, liftIO, matchHeaders, request, shouldRespondWith, with)
 
-import Mellon.Server (State(..), app, docsApp)
+import Mellon.Web.Server (State(..), app, docsApp)
 
 sleep :: Int -> IO ()
 sleep = threadDelay . (* 1000000)

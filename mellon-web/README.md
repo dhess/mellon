@@ -1,8 +1,11 @@
-# mellon-server
+# mellon-web
 
-`mellon-server` wraps a `mellon-core` controller in a REST web
-service. Like the `mellon-core` controller interface, the
-`mellon-server` web API is quite simple. There are only 3 methods:
+The `mellon-web` package wraps a `mellon-core` controller in a REST
+web service, and includes both a WAI application and native Haskell
+client bindings for the service.
+
+Like the `mellon-core` controller interface, the `mellon-web` REST API
+is quite simple. There are only 3 methods:
 
 * `GET /time` returns the system time on the server. This is made
   available for diagnostic purposes, primarily to ensure the server
@@ -17,8 +20,8 @@ service. Like the `mellon-core` controller interface, the
 
 See [API.md](API.md) for detailed documentation on the REST service.
 
-Note that `mellon-server` does not provide an authentication
-mechanism! You should proxy `mellon-server` behind a secure HTTPS
+Note that the `mellon-web` server does not provide an authentication
+mechanism! You should proxy it behind a secure, authenticating HTTPS
 server such as Nginx.
 
 ## Example server

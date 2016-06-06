@@ -1,5 +1,5 @@
 {-|
-Module      : Mellon.Server.API
+Module      : Mellon.Web.Server.API
 Description : A REST web service for @mellon-core@ controllers
 Copyright   : (c) 2016, Drew Hess
 License     : BSD3
@@ -21,13 +21,13 @@ the REST service methods and document types.
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Mellon.Server.API
+module Mellon.Web.Server.API
          ( -- * Types
            MellonAPI
          , State(..)
          , Time(..)
 
-           -- * Functions
+           -- * Servant / WAI functions
          , app
          , mellonAPI
          , server

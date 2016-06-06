@@ -1,5 +1,5 @@
 {-|
-Module      : Mellon.Server.DocsAPI
+Module      : Mellon.Web.Server.DocsAPI
 Description : A documentation-annotated REST web service for @mellon-core@ controllers
 Copyright   : (c) 2016, Drew Hess
 License     : BSD3
@@ -17,11 +17,11 @@ API. In every other way, it is identical to the 'MellonAPI' service.
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Mellon.Server.DocsAPI
+module Mellon.Web.Server.DocsAPI
          ( -- * Types
            DocsAPI
 
-           -- * Functions
+           -- * Servant / WAI functions
          , docsAPI
          , docsApp
          , docsServer
@@ -36,7 +36,7 @@ import Network.Wai (Application, responseLBS)
 import Servant ((:>), (:<|>)(..), Raw, Proxy(..), Server, serve)
 import Servant.Docs (DocIntro(..), docsWithIntros, markdown)
 
-import Mellon.Server.API (MellonAPI, mellonAPI, server)
+import Mellon.Web.Server.API (MellonAPI, mellonAPI, server)
 
 -- | Extends 'MellonAPI' with a documentation resource.
 --

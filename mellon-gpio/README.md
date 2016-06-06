@@ -1,6 +1,6 @@
 # mellon-gpio
 
-`mellon-gpio` mixes `mellon-core` and `mellon-server` together with
+`mellon-gpio` mixes `mellon-core` and `mellon-web` together with
 the `gpio` package to create a turnkey physical access controller,
 where the physical access device is controlled by a GPIO pin on the
 hosting device. Simply connect a properly-designed physical access

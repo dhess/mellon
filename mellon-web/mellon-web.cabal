@@ -1,4 +1,4 @@
-Name:                   mellon-server
+Name:                   mellon-web
 Version:                0.6.0.1
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
@@ -12,21 +12,37 @@ License-File:           LICENSE
 Copyright:              Copyright (c) 2016, Drew Hess
 Tested-With:            GHC == 7.10.3
 Category:               Web
-Synopsis:               A REST web service for mellon
+Synopsis:               A REST web service for Mellon controllers
 Description:
-  @mellon-server@ wraps a @mellon-core@ controller in a REST web service.
+  The @mellon-web@ package wraps a @mellon-core@ controller in a REST
+  web service, and includes both a WAI application and native Haskell
+  client bindings for the service.
   .
-  See the included <API.md API.md> file for detailed documentation
-  on the REST service methods and document types.
+  Like the @mellon-core@ controller interface, the @mellon-web@ REST API
+  is quite simple. There are only 3 methods:
   .
-  Note that @mellon-server@ does not provide an authentication
-  mechanism! You should proxy @mellon-server@ behind a secure
-  HTTPS server such as Nginx.
+  * @GET /time@ returns the system time on the server. This is made
+    available for diagnostic purposes, primarily to ensure the server
+    has an accurate clock.
+  .
+  * @GET /state@ returns the controller's current state (either @Locked@
+    or @Unlocked date@ where @date@ is the UTC time at which the
+    controller will automatically lock again).
+  .
+  * @PUT /state@ sets the controller's current state. Use this method to
+    lock and unlock the controller.
+  .
+  See the included <API.md API.md> document for detailed documentation
+  on the REST service.
+  .
+  Note that the @mellon-web@ server does not provide an authentication
+  mechanism! You should proxy it behind a secure, authenticating HTTPS
+  server such as Nginx.
 Extra-Doc-Files:        API.md
                       , README.md
 Extra-Source-Files:     changelog.md
                       , examples/*.hs
-                      , mellon-server.paw
+                      , mellon-web.paw
 
 -- Build doctests
 Flag test-doctests
@@ -49,9 +65,9 @@ Library
   GHC-Options:          -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   If impl(ghc > 8)
     GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
-  Exposed-Modules:      Mellon.Server
-                      , Mellon.Server.API
-                      , Mellon.Server.DocsAPI
+  Exposed-Modules:      Mellon.Web.Server
+                      , Mellon.Web.Server.API
+                      , Mellon.Web.Server.DocsAPI
   Other-Extensions:     DataKinds
                       , DeriveGeneric
                       , MultiParamTypeClasses
@@ -86,7 +102,7 @@ Executable mock-mellon-server
   Else                        
     Build-Depends:      base >= 4 && < 5
                       , mellon-core
-                      , mellon-server
+                      , mellon-web
                       , warp
 
 Test-Suite hlint
@@ -141,11 +157,11 @@ Test-Suite spec
                       , wai
                       , wai-extra
                       , warp
-  Other-Modules:        Mellon.Server
-                      , Mellon.Server.API
-                      , Mellon.Server.DocsAPI
-                      , MellonServerSpec
+  Other-Modules:        Mellon.Web.Server
+                      , Mellon.Web.Server.API
+                      , Mellon.Web.Server.DocsAPI
                       , Spec
+                      , Mellon.Web.ServerSpec
 
 Source-Repository head
   Type:                 git

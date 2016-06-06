@@ -9,13 +9,10 @@ of packages includes:
 * `mellon-core`, which provides the core functionality upon which the
   other packages depend.
 
-* `mellon-server`, a web interface for interacting with
-  Mellon controllers.
+* `mellon-web`, a web interface (with client and server bindings) for
+  interacting with Mellon controllers.
 
-* `mellon-client`, Haskell bindings for interacting with
-  `mellon-server`.
-
-* `mellon-gpio`, a service which connects the `mellon-server` web
+* `mellon-gpio`, a service which connects the `mellon-web` web server
   interface to a GPIO-controlled access device.
 
 ## Building from git
