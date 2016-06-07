@@ -1,10 +1,18 @@
--- | Automatically generate client functions for the
--- 'Mellon.Server.API.MellonAPI'.
+{-|
+Module      : Mellon.Web.Client
+Description : Client actions for the Mellon REST web service
+Copyright   : (c) 2016, Drew Hess
+License     : BSD3
+Maintainer  : Drew Hess <src@drewhess.com>
+Stability   : experimental
+Portability : non-portable
+
+-}
 
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Mellon.Client
+module Mellon.Web.Client
          ( -- * Re-exported for convenience.
            State(..)
          , Time(..)
@@ -18,9 +26,10 @@ module Mellon.Client
 import Control.Monad.Trans.Except (ExceptT)
 import Data.Proxy
 import Network.HTTP.Client (Manager)
-import Mellon.Server (MellonAPI, State(..), Time(..))
 import Servant.API
 import Servant.Client
+
+import Mellon.Web.Server (MellonAPI, State(..), Time(..))
 
 -- | The client API.
 clientAPI :: Proxy MellonAPI

@@ -1,18 +1,18 @@
-module MellonClientSpec (spec) where
+module Mellon.Web.ClientSpec (spec) where
 
 import Control.Concurrent (ThreadId, forkIO, killThread, threadDelay)
 import Control.Monad.Trans.Except (runExceptT)
 import Data.Time.Clock
 import Mellon.Controller (controller)
 import Mellon.Device (mockLock, mockLockDevice)
-import Mellon.Server (app)
 import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
 import Network.Socket
 import Network.Wai.Handler.Warp
 import Servant.Client
 import Test.Hspec
 
-import Mellon.Client
+import Mellon.Web.Client
+import Mellon.Web.Server (app)
 
 sleep :: Int -> IO ()
 sleep = threadDelay . (* 1000000)
