@@ -9,11 +9,10 @@ of packages includes:
 * `mellon-core`, which provides the core functionality upon which the
   other packages depend.
 
+* `mellon-gpio`, for controlling physical access devices via GPIO.
+
 * `mellon-web`, a web interface (with client and server bindings) for
   interacting with Mellon controllers.
-
-* `mellon-gpio`, a service which connects the `mellon-web` web server
-  interface to a GPIO-controlled access device.
 
 ## Building from git
 
