@@ -54,8 +54,13 @@ Flag test-hlint
   Default: True
   Manual: True
 
--- Build example
-Flag example
+-- Build the mock server example
+Flag mock-example
+  Default: True
+  Manual: True
+
+-- Build the GPIO server example
+Flag gpio-example
   Default: True
   Manual: True
 
@@ -99,12 +104,35 @@ Executable mock-mellon-server
   GHC-Options:          -Wall -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   If impl(ghc > 8)
     GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
-  If !flag(example)
+  If !flag(mock-example)
     Buildable:         False
   Else                        
     Build-Depends:      base >= 4 && < 5
                       , mellon-core
                       , mellon-web
+                      , warp
+
+Executable gpio-mellon-server
+  Main-Is:              GpioServer.hs
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       examples
+  GHC-Options:          -Wall -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  If impl(ghc > 8)
+    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
+  Other-Extensions:     OverloadedStrings
+  If !flag(gpio-example)
+    Buildable:         False
+  Else                        
+    Build-Depends:      base >= 4 && < 5
+                      , exceptions
+                      , hpio
+                      , mellon-core
+                      , mellon-gpio
+                      , mellon-web
+                      , mtl
+                      , network
+                      , optparse-applicative
+                      , transformers
                       , warp
 
 Test-Suite hlint

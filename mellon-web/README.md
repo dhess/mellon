@@ -24,11 +24,50 @@ Note that the `mellon-web` server does not provide an authentication
 mechanism! You should proxy it behind a secure, authenticating HTTPS
 server such as Nginx.
 
-## Example server
+## Example servers
+
+### "Mock" server
 
 An extremely simple example server (with on-line documentation
 support) is provided in the `examples` directory. You can run it with
-`cabal run` and test it using the endpoints described in
-[API.md](API.md). A [Paw](https://luckymarmot.com/paw) file is also
-included in the project with a pre-defined localhost environment for
-use with the example server.
+`cabal run mock-mellon-server` and test it using the endpoints
+described in [API.md](API.md). The server is will run on the
+`localhost` loopback interface on port 8081.
+
+Also included is a [Paw](https://luckymarmot.com/paw) file with a
+pre-defined `localhost` environment for use with the example server.
+
+This particular example server uses a "mock lock" device which only
+internally logs lock and unlock events without depending on any actual
+hardware, so it will run anywhere.
+
+### GPIO server
+
+Another included example server uses the `mellon-gpio` package to
+drive a simple physical access device via a GPIO pin. This server must
+be run on a Linux host with GPIO hardware, e.g., a Raspberry Pi
+running Linux.
+
+This server takes a GPIO pin number and a local port number, then
+starts a `mellon-web` server on all local interfaces on the specified
+port. When the server receives an unlock request, it will drive a high
+signal on the specified GPIO pin. When the unlock expires, or when the
+server receives a lock request, it will drive a low signal on the
+specified GPIO pin.
+
+To use this server, simply connect a properly-designed physical access
+device (e.g., an electric strike driven by a relay circuit such as the
+one shown
+[here](http://www.petervis.com/Raspberry_PI/Driving_Relays_with_CMOS_and_TTL_Outputs/Driving_Relays_with_CMOS_and_TTL_Outputs.html))
+to an available GPIO pin on the host device, then run the server with
+the specified GPIO pin number and port. For example, to run the server
+on port 7533 using GPIO pin 65:
+
+```
+cabal run gpio-mellon-server -- --port 7533 65
+```
+
+**NOTE**: the REST service provided by `gpio-mellon-server` offers no
+security/authentication for your access control device! You should
+always run it (or any @mellon-web@ server) behind a secure proxy web
+service or equivalent HTTP(S)-based authentication mechanism.

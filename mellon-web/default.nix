@@ -1,5 +1,6 @@
-{ mkDerivation, aeson, base, bytestring, doctest, hlint, hspec
-, hspec-wai, http-client, http-types, lucid, mellon-core, network
+{ mkDerivation, aeson, base, bytestring, doctest, exceptions, hlint
+, hpio, hspec, hspec-wai, http-client, http-types, lucid
+, mellon-core, mellon-gpio, mtl, network, optparse-applicative
 , servant, servant-client, servant-docs, servant-lucid
 , servant-server, stdenv, text, time, transformers, wai, wai-extra
 , warp
@@ -15,7 +16,10 @@ mkDerivation {
     servant servant-client servant-docs servant-lucid servant-server
     text time transformers wai warp
   ];
-  executableHaskellDepends = [ base mellon-core warp ];
+  executableHaskellDepends = [
+    base exceptions hpio mellon-core mellon-gpio mtl network
+    optparse-applicative transformers warp
+  ];
   testHaskellDepends = [
     aeson base bytestring doctest hlint hspec hspec-wai http-client
     http-types lucid mellon-core network servant servant-client

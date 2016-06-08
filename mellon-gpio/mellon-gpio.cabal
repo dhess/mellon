@@ -11,22 +11,11 @@ License:                BSD3
 License-File:           LICENSE
 Copyright:              Copyright (c) 2016, Drew Hess
 Tested-With:            GHC == 7.10.3
-Category:               Web, System
-Synopsis:               Run a mellon controller using GPIO
+Category:               System
+Synopsis:               GPIO support for mellon
 Description:
-  @mellon-gpio@ mixes @mellon-core@ and @mellon-web@ together with the
-  @hpio@ package to create a turnkey physical access controller.
-  Simply connect a properly-designed physical access device (e.g., an
-  electric strike driven by a relay circuit such as the one shown
-  <http://www.petervis.com/Raspberry_PI/Driving_Relays_with_CMOS_and_TTL_Outputs/Driving_Relays_with_CMOS_and_TTL_Outputs.html
-  here>) to an available GPIO pin on your host device, then run
-  @mellon-gpio@ with the specified GPIO pin number and port to provide
-  a REST web service for your access device.
-  .
-  __NOTE__: the REST service provided by @mellon-gpio@ offers no
-  security/authentication for your access control device! You should
-  always run @mellon-gpio@ behind a secure proxy web service or
-  equivalent HTTP(S)-based authentication mechanism.
+  @mellon-gpio@ provides a GPIO-driven @mellon-core@ @Device@.
+  Currently, it provides support for Linux @sysfs@-based GPIO.
 Extra-Doc-Files:        README.md
 Extra-Source-Files:     changelog.md
 
@@ -40,52 +29,16 @@ Flag test-hlint
   Default: True
   Manual: True
 
--- Build executable
-Flag executable
-  Default: True
-  Manual: True
-          
 Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
   GHC-Options:          -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   If impl(ghc > 8)
     GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
-  Exposed-Modules:      Mellon.Gpio
-  Other-Extensions:     FlexibleContexts
-                      , FlexibleInstances
-                      , OverloadedStrings
-  Build-Depends:        base >= 4 && < 5
-                      , exceptions
-                      , hpio >= 0.8.0.1
+  Exposed-Modules:      Mellon.Device.GPIO
+  Build-Depends:        base        == 4.*
+                      , hpio        >= 0.8.0.1 && < 2
                       , mellon-core
-                      , mellon-web
-                      , mtl
-                      , network
-                      , transformers
-                      , warp
-
-Executable mellon-gpio
-  Main-Is:              Main.hs
-  Default-Language:     Haskell2010
-  HS-Source-Dirs:       mellon-gpio
-  GHC-Options:          -Wall -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
-  If impl(ghc > 8)
-    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
-  If !flag(executable)
-    Buildable:         False
-  Else                        
-    Build-Depends:      base >= 4 && < 5
-                      , exceptions
-                      , hpio
-                      , mellon-core
-                      , mellon-web
-                      , mellon-gpio
-                      , mtl
-                      , network
-                      , optparse-applicative
-                      , transformers
-                      , warp
 
 Test-Suite hlint
   Type:                 exitcode-stdio-1.0
