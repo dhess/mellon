@@ -64,8 +64,11 @@ the specified GPIO pin number and port. For example, to run the server
 on port 7533 using GPIO pin 65:
 
 ```
-cabal run gpio-mellon-server -- --port 7533 65
+cabal run gpio-mellon-server -- sysfs --port 7533 65
 ```
+
+The `sysfs` command tells the server to use the Linux `sysfs` GPIO
+interpreter. (Currently, this is the only supported GPIO platform.)
 
 **NOTE**: the REST service provided by `gpio-mellon-server` offers no
 security/authentication for your access control device! You should
