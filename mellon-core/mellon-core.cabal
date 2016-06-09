@@ -10,7 +10,7 @@ Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
 Copyright:              Copyright (c) 2016, Drew Hess
-Tested-With:            GHC == 7.10.3
+Tested-With:            GHC == 7.10.3, GHC == 8.0.1
 Category:               System
 Synopsis:               Control physical access devices
 Description:
