@@ -1,17 +1,23 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+
 module Mellon.ControllerSpec (spec) where
 
-import Control.Concurrent (threadDelay)
-import Control.Monad (void)
+import Control.Concurrent (MVar, newMVar, modifyMVar, threadDelay)
+import Control.Exception (Exception(..), throwIO)
+import Control.Monad (void, when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.RWS.Strict (RWST, execRWST, ask, tell)
+import Data.Data
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
 import Test.Hspec
 
 import Mellon.Controller
-       (Controller, controller, lockController, unlockController)
+       (Controller, State(..), controller, lockController,
+        queryController, unlockController)
 import Mellon.Device
-       (MockLock, MockLockEvent(..), events, mockLock, mockLockDevice)
+       (Device(..), MockLock, MockLockEvent(..), events, mockLock,
+        mockLockDevice)
 
 sleep :: (MonadIO m) => Int -> m ()
 sleep = liftIO . threadDelay . (* 1000000)
@@ -102,12 +108,64 @@ controllerTest =
      cc <- controller $ mockLockDevice ml
      ccEvents <- testController cc
      -- Discard the first MockLock event, which happened when
-     -- concurrentController initialized the lock.
+     -- controller initialized the lock.
      _:lockEvents <- events ml
      return $ checkResults ccEvents lockEvents (0.5 :: NominalDiffTime)
 
+data ExceptionLock =
+  ExceptionLock {_ops :: MVar Int
+                ,_opsPerException :: Int}
+
+data ExceptionLockException =
+  LockException
+  deriving (Show,Typeable)
+
+instance Exception ExceptionLockException
+
+exceptionLock :: Int -> IO ExceptionLock
+exceptionLock n =
+  do mvar <- newMVar 0
+     return $ ExceptionLock mvar n
+
+-- | This device throws an exception every N operations.
+exceptionLockDevice :: ExceptionLock -> Device ExceptionLock
+exceptionLockDevice l =
+  Device inc
+         inc
+  where
+    inc =
+      do ops <- modifyMVar (_ops l) $ \n -> return (succ n, succ n)
+         when (ops `mod` (_opsPerException l) == 0) $
+           throwIO LockException
+
+isExceptionLockException :: ExceptionLockException -> Bool
+isExceptionLockException = const True
+
+asyncExceptionTest :: IO ()
+asyncExceptionTest =
+  do el <- exceptionLock 3
+     cc <- controller $ exceptionLockDevice el -- 1st lock op
+     now <- getCurrentTime
+     let expire = timePlusN now 3
+     unlockController expire cc -- 2nd & 3rd lock op (unlock, timed lock)
+     (sleep 5) `shouldThrow` isExceptionLockException -- async exception
+     queryController cc `shouldReturn` StateUnlocked expire -- should have state prior to exception
+
+syncExceptionTest :: IO ()
+syncExceptionTest =
+  do el <- exceptionLock 2
+     cc <- controller $ exceptionLockDevice el -- 1st lock op
+     now <- getCurrentTime
+     let expire = timePlusN now 3
+     unlockController expire cc `shouldThrow` isExceptionLockException -- 2nd lock op
+     queryController cc `shouldReturn` StateLocked -- should have state prior to exception
+
 spec :: Spec
 spec = do
-  describe "concurrentController test" $ do
+  describe "Controller tests" $ do
     it "should produce the correct lock sequence plus or minus a few hundred milliseconds" $ do
       controllerTest >>= (`shouldBe` Right "OK")
+    it "should recover from asynchronous exceptions" $ do
+      asyncExceptionTest
+    it "should recover from synchronous exceptions" $ do
+      syncExceptionTest

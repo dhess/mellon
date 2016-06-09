@@ -24,6 +24,21 @@ The controller's behavior is determined by the @mellon-core@ state
 machine. See the "Mellon.StateMachine" module for a detailed
 description of the state machine's operation.
 
+== Exception safety
+
+All the controller actions provided in this module are exception-safe.
+If an exception occurs in a controller action (e.g., because the
+device throws an exception), the controller will be restored to its
+state as it was immediately prior to the execution of the action, and
+the exception will be re-thrown. After handling the exception, you can
+continue to execute actions on the controller, if you wish. However,
+the controller and the device may be out of sync at that point, or the
+device may continue to throw exceptions until it can be reset.
+
+The safest action to take after an exception occurs in a controller is
+to reset the device to a known working state; and then to create, from
+scratch, a new controller for the device.
+
 -}
 
 module Mellon.Controller
@@ -40,7 +55,7 @@ module Mellon.Controller
        ) where
 
 import Control.Concurrent
-       (MVar, newMVar, putMVar, readMVar, takeMVar, threadDelay)
+       (MVar, modifyMVar, newMVar, readMVar, threadDelay)
 import Control.Concurrent.Async (async, link)
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -123,11 +138,10 @@ runMachine :: (MonadIO m) => Input -> Controller d -> m State
 runMachine i c =
   let state = _state c
   in liftIO $
-       do currentState <- takeMVar state
-          let (cmd, newState) = transition currentState i
-          go cmd
-          putMVar state $! newState
-          return newState
+       modifyMVar state $ \currentState ->
+         let (cmd, newState) = transition currentState i
+         in do go cmd
+               return (newState, newState)
   where
     go :: (MonadIO m) => Maybe Output -> m ()
     go Nothing = return ()
