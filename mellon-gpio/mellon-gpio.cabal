@@ -19,11 +19,6 @@ Description:
 Extra-Doc-Files:        README.md
 Extra-Source-Files:     changelog.md
 
--- Build doctests
-Flag test-doctests
-  Default: True
-  Manual: True
-
 -- Build hlint test
 Flag test-hlint
   Default: True
@@ -51,18 +46,6 @@ Test-Suite hlint
   Else
     Build-Depends:      base
                       , hlint
-
-Test-Suite doctest
-  Type:                 exitcode-stdio-1.0
-  Default-Language:     Haskell2010
-  Hs-Source-Dirs:       test
-  Ghc-Options:          -Wall -threaded
-  Main-Is:              doctest.hs
-  If !flag(test-doctests)
-    Buildable:          False
-  Else
-    Build-Depends:      base
-                      , doctest
 
 Source-Repository head
   Type:                 git
