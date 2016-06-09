@@ -7,10 +7,10 @@ Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental
 Portability : non-portable
 
-This module provides both a parameterized type for devices, which acts
-as the interface used by a @mellon-core@ controller to control the
-device; and a "mock lock" device implementation, which can be used for
-testing.
+This module provides both a parameterized type for adapting a
+device-specific interface to the generic interface expected by a
+'Mellon.Controller.Controller', and a "mock lock" device
+implementation, which is useful for testing.
 
 -}
 
@@ -48,12 +48,11 @@ import GHC.Generics
 -- lock the device, and the other to unlock it.
 --
 -- The parameter @d@ is the concrete device type and is used during
--- construction to create the two methods and bind them to actions on
--- the specific device instance that will be used.
+-- construction to create the two methods by binding them to actions
+-- on the specific device.
 --
 -- For example, the implementation of the 'mockLockDevice' function,
--- which wraps a 'MockLock' in a generic 'Device' @d@ value, looks
--- like this:
+-- which wraps a 'MockLock' in a 'Device' @d@, looks like this:
 --
 -- > mockLockDevice :: MockLock -> Device MockLock
 -- > mockLockDevice l =
@@ -74,10 +73,7 @@ import GHC.Generics
 -- [LockEvent ... UTC,UnlockEvent ... UTC]
 data Device d =
   Device {lockDevice :: IO ()
-          -- ^ An action for locking the device
-         ,unlockDevice :: IO ()
-          -- ^ An action for unlocking the device
-         }
+         ,unlockDevice :: IO ()}
 
 -- | Events logged by 'MockLock' are of this type.
 data MockLockEvent

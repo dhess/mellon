@@ -14,15 +14,15 @@ its /expiration date/. When an unlock expires, the @mellon-core@
 controller will automatically lock it again.
 
 The @mellon-core@ state machine model is shown in the following
-diagram:
+flow chart:
 
 <<https://s3-us-west-2.amazonaws.com/mellon/mellon-state-diagram.svg mellon-core state diagram>>
 
 Note that the state machine model implemented in this module is
 slightly different than the one shown in the diagram. Specificaly,
 this implementation has two types of lock commands, whereas in the
-diagram there is only one. This is due to the fact that, in a
-concurrent implementation of a controller, it may not be possible to
+diagram there is only one. This distinction is due to the fact that, in
+a concurrent implementation of a controller, it may not be possible to
 guarantee that the unlock-expiration-followed-by-lock sequence as
 specified by the model is atomic: the controller could receive a new
 unlock command from the user while it is arranging for the
@@ -34,7 +34,9 @@ directly with the state machine, as the state machine is pure and is
 not capable of setting timers or performing 'IO' actions on physical
 access devices. In @mellon-core@, those operations are the
 responsibility of controllers, and controllers are what users should
-interact with; see the "Mellon.Controller" module.
+interact with; see the "Mellon.Controller" module. However,
+understanding the state machine model is useful for understanding the
+behavior of a @mellon-core@ application.
 
 -}
 

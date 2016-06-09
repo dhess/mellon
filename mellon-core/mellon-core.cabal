@@ -22,7 +22,7 @@ Description:
   particular date and time (an /expiration date/). Once the expiration
   date passes, the device is automatically locked again. In the
   meantime, the device can be locked immediately, overriding the
-  unlocked state, or the unlock period can be extended.
+  unlocked state; or the unlock period can be extended.
   .
   User programs incorporate @mellon-core@ functionality via a
   'Mellon.Controller.Controller', which is responsible for handling

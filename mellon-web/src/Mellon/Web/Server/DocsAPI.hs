@@ -65,7 +65,7 @@ docsServer cc = server cc  :<|> serveDocs
 
     plain = ("Content-Type", "text/plain")
 
--- | A WAI 'Network.Wai.Application' which runs the server, using the
+-- | A WAI 'Network.Wai.Application' which runs the service, using the
 -- given 'Controller'
 docsApp :: Controller d -> Application
 docsApp = serve docsAPI . docsServer

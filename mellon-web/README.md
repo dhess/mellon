@@ -1,8 +1,9 @@
 # mellon-web
 
 The `mellon-web` package wraps a `mellon-core` controller in a REST
-web service, and includes both a WAI application and native Haskell
-client bindings for the service.
+web service, making it possible to control physical access devices
+from an HTTP client. The package includes both a WAI application
+server, and native Haskell client bindings for the service.
 
 Like the `mellon-core` controller interface, the `mellon-web` REST API
 is quite simple. There are only 3 methods:

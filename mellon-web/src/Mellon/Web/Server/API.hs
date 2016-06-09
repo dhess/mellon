@@ -8,7 +8,8 @@ Stability   : experimental
 Portability : non-portable
 
 This module provides a "Servant" REST web service for @mellon-core@
-controllers.
+controllers. The service translates REST methods to controller
+actions.
 
 See the included <API.md API.md> file for detailed documentation on
 the REST service methods and document types.
@@ -168,14 +169,10 @@ serverToEither cc = Nat $ \m -> runReaderT m cc
 --
 -- Normally you will just use 'app', but this function is exported so
 -- that you can extend/wrap 'MellonAPI'.
---
--- The server will translate REST actions to controller actions.
 server :: Controller d -> Server MellonAPI
 server cc = enter (serverToEither cc) serverT
 
--- | A WAI 'Network.Wai.Application' which runs the web server, using
--- the given 'Controller'.
---
--- The app will translate REST actions to controller actions.
+-- | A WAI 'Network.Wai.Application' which runs the service, using the
+-- given 'Controller'.
 app :: Controller d -> Application
 app = serve mellonAPI . server

@@ -15,18 +15,14 @@ machine.
 
 A controller provides two commands to the user: /lock/ and /unlock/.
 User lock commands are effective immediately, and the device remains
-locked until the user runs a subsequent unlock command.
+locked until the user runs a subsequent unlock command. User unlock
+commands are effective immediately, but also take a 'UTCTime' argument
+that specifies the date at which the controller will automatically
+lock the device again.
 
-User unlock commands are effective immediately, but also take a
-'UTCTime' argument which specifies the date at which the controller
-will automatically lock the device again, if it hasn't subsequently
-been overridden by the user via an unlock command with a later
-expiration date.
-
-The controller uses the @mellon-core@ state machine via the
-'transition' function. The output of that function determines both the
-controller's next state, and also what actions, if any, the controller
-should take in response to a state transition.
+The controller's behavior is determined by the @mellon-core@ state
+machine. See the "Mellon.StateMachine" module for a detailed
+description of the state machine's operation.
 
 -}
 
@@ -56,9 +52,8 @@ import Mellon.Device (Device(..))
 import Mellon.StateMachine
        (Input(..), Output(..), State(..), transition)
 
--- | A concurrent, thread-safe controller type.
---
--- The controller is parameterized on its device type.
+-- | A concurrent, thread-safe controller type parameterized on its
+-- device type.
 --
 -- Note that the type's constructor is not exported. You must use the
 -- 'controller' constructor to create a new value of this type; it
@@ -101,19 +96,20 @@ controller device = liftIO $
      mvar <- newMVar StateLocked
      return $ Controller mvar device
 
--- | Lock the device controlled by the controller immediately.
+-- | Immediately lock the device controlled by the controller.
 --
 -- Returns the new state of the controller.
 lockController :: (MonadIO m) => Controller d -> m State
 lockController = runMachine InputLockNow
 
--- | Unlock the device controlled by the controller immediately, and
+-- | Immediately unlock the device controlled by the controller, and
 -- keep it unlocked until the specified 'UTCTime'.
 --
 -- If the specified time is in the past, then the device will remain
 -- unlocked until it is locked via an explicit 'lockController'
--- action, or until this action is called again with a 'UTCTime' in
--- the future.
+-- action; or until this action is called again with a 'UTCTime' in
+-- the future, in which case the device will remain unlocked until the
+-- newly-specified time.
 --
 -- Returns the new state of the controller.
 unlockController :: (MonadIO m) => UTCTime -> Controller d -> m State

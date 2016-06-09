@@ -23,8 +23,8 @@ module Mellon.Web.Client
            --
            -- | These actions take a 'Manager' and a 'BaseUrl', and
            -- should then be run in an 'ExceptT' transformer stack to
-           -- produce a result. For example, assuming the server is
-           -- running on @localhost@ on port @8081@:
+           -- produce a result. For example, assuming the service
+           -- endpoint is @http://localhost:8081/@:
            --
            -- > > let baseUrl = BaseUrl Http "localhost" 8081 ""
            -- > > manager <- newManager defaultManagerSettings
