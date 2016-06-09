@@ -4,5 +4,5 @@ packages:
 - mellon-gpio/
 - location:
     git: git@github.com:dhess/hpio.git
-    commit: ce39b7936bd4de8df15379a606ca58e0e923023f
+    commit: a406b63e1209417843b807ec94851651861a064f
 resolver: lts-6.2
