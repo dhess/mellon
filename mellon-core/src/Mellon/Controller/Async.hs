@@ -92,11 +92,10 @@ lockController = runMachine InputLockNow
 -- | Immediately unlock the device controlled by the controller, and
 -- keep it unlocked until the specified 'UTCTime'.
 --
--- If the specified time is in the past, then the device will remain
--- unlocked until it is locked via an explicit 'lockController'
--- action; or until this action is called again with a 'UTCTime' in
--- the future, in which case the device will remain unlocked until the
--- newly-specified time.
+-- If the specified time is in the past, then the device will unlock
+-- briefly, and then lock again after a brief amount of time.
+-- (__NOTE__: this behavior is considered to be a bug and will be
+-- fixed in a subsequent release.)
 --
 -- Returns the new state of the controller.
 unlockController :: (MonadIO m) => UTCTime -> Controller d -> m State

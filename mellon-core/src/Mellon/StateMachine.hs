@@ -70,9 +70,7 @@ data State
   = StateLocked
     -- ^ The state machine is in the locked state
   | StateUnlocked UTCTime
-    -- ^ The state machine is unlocked until the specified time. If
-    -- the time is in the past, then the machine is unlocked
-    -- indefinitely.
+    -- ^ The state machine is unlocked until the specified date.
   deriving (Eq,Show,Read,Generic,Data,Typeable)
 
 -- | The state machine's inputs, i.e., commands sent to the machine by

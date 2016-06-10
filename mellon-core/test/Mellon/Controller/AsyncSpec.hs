@@ -3,6 +3,7 @@
 module Mellon.Controller.AsyncSpec (spec) where
 
 import Control.Concurrent (MVar, newMVar, modifyMVar, threadDelay)
+import Control.Concurrent.Async (race)
 import Control.Exception (Exception(..), throwIO)
 import Control.Monad (void, when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -160,6 +161,19 @@ syncExceptionTest =
      unlockController expire cc `shouldThrow` isExceptionLockException -- 2nd lock op
      queryController cc `shouldReturn` StateLocked -- should have state prior to exception
 
+pastUnlockTimeTest :: IO ()
+pastUnlockTimeTest =
+  do ml <- mockLock
+     cc <- controller $ mockLockDevice ml
+     race
+       (sleep 10) -- 10 sec should be more than enough time
+       (do now <- getCurrentTime
+           let past = timePlusN now (-5)
+           unlockController past cc `shouldReturn` (StateUnlocked past)
+           sleep 2 -- 2 sec should be more than enough time
+           queryController cc)
+       `shouldReturn` Right StateLocked
+
 spec :: Spec
 spec = do
   describe "Controller tests" $ do
@@ -169,3 +183,5 @@ spec = do
       asyncExceptionTest
     it "should recover from synchronous exceptions" $ do
       syncExceptionTest
+    it "should not wait forever if the unlock time is in the past" $ do
+      pastUnlockTimeTest
