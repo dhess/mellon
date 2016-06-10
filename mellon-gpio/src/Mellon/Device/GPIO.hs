@@ -14,7 +14,7 @@ module Mellon.Device.GPIO
            sysfsGpioDevice
          ) where
 
-import Mellon.Controller (Device(..))
+import Mellon.Device (Device(..))
 import System.GPIO.Monad (PinValue(..), OutputPin, writeOutputPin)
 import System.GPIO.Linux.Sysfs (PinDescriptor, runSysfsGpioIO)
 

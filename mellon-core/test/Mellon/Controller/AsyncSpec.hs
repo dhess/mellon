@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Mellon.ControllerSpec (spec) where
+module Mellon.Controller.AsyncSpec (spec) where
 
 import Control.Concurrent (MVar, newMVar, modifyMVar, threadDelay)
 import Control.Exception (Exception(..), throwIO)
@@ -12,7 +12,7 @@ import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
 import Test.Hspec
 
-import Mellon.Controller
+import Mellon.Controller.Async
        (Controller, State(..), controller, lockController,
         queryController, unlockController)
 import Mellon.Device

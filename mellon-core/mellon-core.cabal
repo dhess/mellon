@@ -62,6 +62,7 @@ Library
   If impl(ghc > 8)
     GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
   Exposed-Modules:      Mellon.Controller
+                      , Mellon.Controller.Async
                       , Mellon.Device
                       , Mellon.StateMachine
   Other-Extensions:     DeriveDataTypeable
@@ -113,10 +114,11 @@ Test-Suite spec
                       , time
                       , transformers
   Other-Modules:        Mellon.Controller
+                      , Mellon.Controller.Async
                       , Mellon.Device
                       , Mellon.StateMachine
                       , Spec
-                      , Mellon.ControllerSpec
+                      , Mellon.Controller.AsyncSpec
 
 Source-Repository head
   Type:                 git
