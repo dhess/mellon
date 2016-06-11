@@ -96,19 +96,23 @@ data Input
 -- | The state machine's outputs, i.e., commands to be performed by a
 -- controller.
 --
--- It's reasonable to wonder why the 'OutputUnlock' value takes a
--- 'UTCTime' parameter, when the 'State' it's always associated with
--- ('StateUnlocked') also takes a 'UTCTime' parameter. Indeed, their
--- time values will always be the same. However, this redundancy
--- permits an interface to the state machine where the state is
--- implicit (e.g., in a state monad) and the controller only "sees"
--- the 'Output'.
+-- It's reasonable to wonder why the 'OutputUnlock' and
+-- 'OutputRescheduleLock' values take a 'UTCTime' parameter, when the
+-- 'State' they're both always associated with ('StateUnlocked') also
+-- takes a 'UTCTime' parameter. Indeed, their time values will always
+-- be the same. However, this redundancy permits an interface to the
+-- state machine where the state is implicit (e.g., in a state monad)
+-- and the controller only "sees" the 'Output'.
 data Output
   = OutputLock
     -- ^ Lock the device now
   | OutputUnlock UTCTime
     -- ^ Unlock the device now and schedule a lock to run at the given
     -- time
+  | OutputRescheduleLock UTCTime
+    -- ^ The date for the currently scheduled lock has changed.
+    -- Reschedule it for the specified date. Note that the new date is
+    -- guaranteed to be later than the previously-scheduled time.
   | OutputCancelLock
     -- ^ Cancel the currently scheduled lock and lock the device now
   deriving (Eq,Show,Read,Generic,Data,Typeable)
@@ -128,7 +132,7 @@ data Output
 -- prop> \date -> transition (StateUnlocked date) (InputUnlockExpired date) == (Just OutputLock,StateLocked)
 -- prop> \(date1, date2) -> date1 /= date2 ==> transition (StateUnlocked date1) (InputUnlockExpired date2) == (Nothing,StateUnlocked date1)
 -- prop> \date -> transition (StateUnlocked date) (InputUnlock date) == (Nothing,StateUnlocked date)
--- prop> \(date1, date2) -> date2 > date1 ==> transition (StateUnlocked date1) (InputUnlock date2) == (Just $ OutputUnlock date2,StateUnlocked date2)
+-- prop> \(date1, date2) -> date2 > date1 ==> transition (StateUnlocked date1) (InputUnlock date2) == (Just $ OutputRescheduleLock date2,StateUnlocked date2)
 -- prop> \(date1, date2) -> not (date2 > date1) ==> transition (StateUnlocked date1) (InputUnlock date2) == (Nothing,StateUnlocked date1)
 transition :: State -> Input -> (Maybe Output, State)
 
@@ -143,7 +147,7 @@ transition (StateUnlocked _) InputLockNow =
   (Just OutputCancelLock, StateLocked)
 transition (StateUnlocked scheduledDate) (InputUnlock untilDate) =
   if untilDate > scheduledDate
-     then (Just $ OutputUnlock untilDate, StateUnlocked untilDate)
+     then (Just $ OutputRescheduleLock untilDate, StateUnlocked untilDate)
      else (Nothing, StateUnlocked scheduledDate)
 transition (StateUnlocked scheduledDate) (InputUnlockExpired lockDate) =
   -- In this case, the state machine is currently unlocked, and the

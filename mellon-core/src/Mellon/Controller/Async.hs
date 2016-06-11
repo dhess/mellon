@@ -122,22 +122,35 @@ runMachine i c =
       do liftIO $ lockDevice (_device c)
          return s
     go (Just (OutputUnlock date), s) = liftIO $
+      -- Don't let the lock glitch. If the expiration date is too near
+      -- (or in the past), we ignore it (in which case we must keep
+      -- the state machine in sync by telling it that the unlock has
+      -- already expired).
       do now <- getCurrentTime
          if minSleep `addUTCTime` now > date
            then return $ snd $ transition s (InputUnlockExpired date)
            else
              do unlockDevice (_device c)
-                a <- async $
-                       do threadSleepUntil date
-                          void $ runMachine (InputUnlockExpired date) c
-                -- Ensure exceptions which occur in the child thread are
-                -- reported in the parent.
-                link a
+                scheduleLock date
                 return s
-    -- For this particular implementation, it's safe simply to
-    -- ignore this command. When the "unscheduled" lock fires, the
-    -- state machine will simply ignore it.
+    go (Just (OutputRescheduleLock date), s) = liftIO $
+      -- The device is already unlocked, so we don't need to worry
+      -- about a glitch here.
+      do scheduleLock date
+         return s
+    -- For this particular implementation, it's safe simply to ignore
+    -- this command. When the "unscheduled" lock fires, the state
+    -- machine will simply ignore it.
     go (Just OutputCancelLock, s) = return s
+
+    scheduleLock :: UTCTime -> IO ()
+    scheduleLock date =
+      do a <- async $
+                do threadSleepUntil date
+                   void $ runMachine (InputUnlockExpired date) c
+         -- Ensure exceptions which occur in the child thread are
+         -- reported in the parent.
+         link a
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be

@@ -42,7 +42,7 @@ testController cc =
              sleep 8
              unlockWontExpire 3
              sleep 1
-             unlockWillExpire 10
+             unlockExtend 10
              sleep 14
              unlockWillExpire 8
              sleep 2
@@ -78,6 +78,11 @@ testController cc =
         unlockWontExpire duration =
           do (now, _) <- unlockIt duration
              tell [UnlockEvent now]
+
+        unlockExtend :: Integer -> TestController d ()
+        unlockExtend duration =
+          do (_, expire) <- unlockIt duration
+             tell [LockEvent expire]
 
         unlockWillBeIgnored :: Integer -> TestController d ()
         unlockWillBeIgnored duration =
