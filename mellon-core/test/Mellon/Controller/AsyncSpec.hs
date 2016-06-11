@@ -166,12 +166,10 @@ pastUnlockTimeTest =
   do ml <- mockLock
      cc <- controller $ mockLockDevice ml
      race
-       (sleep 10) -- 10 sec should be more than enough time
+       (sleep 3) -- 3 sec should be more than enough time
        (do now <- getCurrentTime
-           let past = timePlusN now (-5)
-           unlockController past cc `shouldReturn` (StateUnlocked past)
-           sleep 2 -- 2 sec should be more than enough time
-           queryController cc)
+           let past = timePlusN now (-1)
+           unlockController past cc)
        `shouldReturn` Right StateLocked
 
 spec :: Spec

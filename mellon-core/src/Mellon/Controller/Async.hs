@@ -32,7 +32,7 @@ import Control.Concurrent.Async (async, link)
 import Control.Monad (void)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Time
-       (NominalDiffTime, UTCTime, diffUTCTime, getCurrentTime,
+       (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime, getCurrentTime,
         picosecondsToDiffTime)
 
 import Mellon.Device (Device(..))
@@ -105,30 +105,39 @@ unlockController date = runMachine (InputUnlock date)
 queryController :: (MonadIO m) => Controller d -> m State
 queryController c = liftIO $ readMVar (_state c)
 
+minSleep :: NominalDiffTime
+minSleep = 1
+
 runMachine :: (MonadIO m) => Input -> Controller d -> m State
 runMachine i c =
   let state = _state c
   in liftIO $
        modifyMVar state $ \currentState ->
-         let (cmd, newState) = transition currentState i
-         in do go cmd
-               return (newState, newState)
+         do nextState <- go $ transition currentState i
+            return (nextState, nextState)
   where
-    go :: (MonadIO m) => Maybe Output -> m ()
-    go Nothing = return ()
-    go (Just OutputLock) = liftIO $ lockDevice (_device c)
-    go (Just (OutputUnlock date)) = liftIO $
-      do unlockDevice (_device c)
-         a <- async $
-                do threadSleepUntil date
-                   void $ runMachine (InputLock date) c
-         -- Ensure exceptions which occur in the child thread are
-         -- reported in the parent.
-         link a
+    go :: (MonadIO m) => (Maybe Output, State) -> m State
+    go (Nothing, s) = return s
+    go (Just OutputLock, s) =
+      do liftIO $ lockDevice (_device c)
+         return s
+    go (Just (OutputUnlock date), s) = liftIO $
+      do now <- getCurrentTime
+         if minSleep `addUTCTime` now > date
+           then return $ snd $ transition s (InputLock date)
+           else
+             do unlockDevice (_device c)
+                a <- async $
+                       do threadSleepUntil date
+                          void $ runMachine (InputLock date) c
+                -- Ensure exceptions which occur in the child thread are
+                -- reported in the parent.
+                link a
+                return s
     -- For this particular implementation, it's safe simply to
     -- ignore this command. When the "unscheduled" lock fires, the
     -- state machine will simply ignore it.
-    go (Just OutputCancelLock) = return ()
+    go (Just OutputCancelLock, s) = return s
 
 -- 'threadDelay' takes an 'Int' argument which is measured in
 -- microseconds, so on 32-bit platforms, 'threadDelay' might not be
