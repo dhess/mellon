@@ -24,13 +24,13 @@ sleep = threadDelay . (* 1000000)
 runApp :: IO Application
 runApp =
   do ml <- mockLock
-     cc <- controller $ mockLockDevice ml
+     cc <- controller Nothing $ mockLockDevice ml
      return (app cc)
 
 runDocsApp :: IO Application
 runDocsApp =
   do ml <- mockLock
-     cc <- controller $ mockLockDevice ml
+     cc <- controller Nothing $ mockLockDevice ml
      return (docsApp cc)
 
 putJSON :: ByteString -> LB.ByteString -> WaiSession SResponse
@@ -49,7 +49,7 @@ spec =
 
      describe "Initial server state" $
        do ml <- runIO $ mockLock
-          cc <- runIO $ controller $ mockLockDevice ml
+          cc <- runIO $ controller Nothing $ mockLockDevice ml
           now <- runIO $ getCurrentTime
           let untilTime = 30.0 `addUTCTime` now
           with (return $ app cc) $

@@ -6,6 +6,7 @@
 module Main where
 
 import Control.Monad.IO.Class (liftIO)
+import Data.Time.Clock (NominalDiffTime)
 import Mellon.Controller (Device(..), controller)
 import Mellon.Device.GPIO (sysfsGpioDevice)
 import Mellon.Web.Server.DocsAPI (docsApp)
@@ -19,6 +20,7 @@ import System.GPIO.Linux.Sysfs (runSysfsGpioIO)
 
 data GlobalOptions =
   GlobalOptions {_port :: Int
+                ,_minUnlockTime :: Int
                 ,_cmd :: Command}
 
 data Command
@@ -43,25 +45,30 @@ cmds =
                metavar "INT" <>
                value 8000 <>
                help "Listen on port") <*>
+  option auto (long "min-unlock-time" <>
+               short 'u' <>
+               metavar "INT" <>
+               value 1 <>
+               help "Minimum unlock time in seconds") <*>
   hsubparser
     (command "sysfs" (info sysfsCmd (progDesc "Use the Linux sysfs GPIO interpreter")))
 
-runTCPServerSysfs :: Pin -> Int -> IO ()
-runTCPServerSysfs pin port = runSysfsGpioIO $
+runTCPServerSysfs :: Pin -> Int -> NominalDiffTime -> IO ()
+runTCPServerSysfs pin port minUnlockTime = runSysfsGpioIO $
   withOutputPin pin OutputDefault (Just ActiveHigh) Low $ \p ->
-     liftIO $ runTCPServer (sysfsGpioDevice p) port
+     liftIO $ runTCPServer minUnlockTime (sysfsGpioDevice p) port
 
-runTCPServer :: Device d -> Int -> IO ()
-runTCPServer device port =
-  do cc <- controller device
+runTCPServer :: NominalDiffTime -> Device d -> Int -> IO ()
+runTCPServer minUnlock device port =
+  do cc <- controller (Just minUnlock) device
      sock <- listenOn (PortNumber (fromIntegral port))
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions listenPort (Sysfs (SysfsOptions pinNumber))) =
+run (GlobalOptions listenPort minUnlockTime (Sysfs (SysfsOptions pinNumber))) =
   let pin = Pin pinNumber
   in
-    runTCPServerSysfs pin listenPort
+    runTCPServerSysfs pin listenPort (fromIntegral minUnlockTime)
 
 main :: IO ()
 main = execParser opts >>= run

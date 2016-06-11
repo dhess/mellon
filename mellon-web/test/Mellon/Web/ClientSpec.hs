@@ -29,7 +29,7 @@ openTestSocket = do
 runApp :: IO (ThreadId, Manager, BaseUrl)
 runApp =
   do ml <- mockLock
-     cc <- controller $ mockLockDevice ml
+     cc <- controller Nothing $ mockLockDevice ml
      (port, sock) <- openTestSocket
      let settings = setPort port $ defaultSettings
      threadId <- forkIO $ runSettingsSocket settings sock (app cc)

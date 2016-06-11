@@ -10,6 +10,6 @@ import Network.Wai.Handler.Warp (run)
 main :: IO ()
 main =
   do ml <- mockLock
-     cc <- controller $ mockLockDevice ml
+     cc <- controller Nothing $ mockLockDevice ml
      putStrLn "Running on port 8081"
      run 8081 $ docsApp cc
