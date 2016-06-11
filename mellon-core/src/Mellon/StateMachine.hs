@@ -79,12 +79,12 @@ data State
 data Input
   = InputLockNow
     -- ^ Lock immediately, canceling any unlock currently in effect
-  | InputLock UTCTime
-    -- ^ Lock immediately, as the result of an expiring unlock. The
-    -- unlock's expiration date is given by the specified 'UTCTime'
-    -- timestamp. Note that in the @mellon-core@ protocol, these
-    -- commands are only ever sent by the controller in response to an
-    -- expired unlock command, and never by the user directly.
+  | InputUnlockExpired UTCTime
+    -- ^ An unlock command has expired. The unlock's expiration date
+    -- is given by the specified 'UTCTime' timestamp. Note that in the
+    -- @mellon-core@ protocol, these commands are only ever sent by
+    -- the controller, which manages timed events, and never by the
+    -- user directly.
   | InputUnlock UTCTime
     -- ^ Unlock until the specified time. If no existing unlock
     -- command with a later expiration is currently in effect when
@@ -122,11 +122,11 @@ data Output
 -- == Properties
 --
 -- prop> transition StateLocked InputLockNow == (Nothing,StateLocked)
--- prop> \date -> transition StateLocked (InputLock date) == (Nothing,StateLocked)
+-- prop> \date -> transition StateLocked (InputUnlockExpired date) == (Nothing,StateLocked)
 -- prop> \date -> transition StateLocked (InputUnlock date) == (Just $ OutputUnlock date,StateUnlocked date)
 -- prop> \date -> transition (StateUnlocked date) InputLockNow == (Just OutputCancelLock,StateLocked)
--- prop> \date -> transition (StateUnlocked date) (InputLock date) == (Just OutputLock,StateLocked)
--- prop> \(date1, date2) -> date1 /= date2 ==> transition (StateUnlocked date1) (InputLock date2) == (Nothing,StateUnlocked date1)
+-- prop> \date -> transition (StateUnlocked date) (InputUnlockExpired date) == (Just OutputLock,StateLocked)
+-- prop> \(date1, date2) -> date1 /= date2 ==> transition (StateUnlocked date1) (InputUnlockExpired date2) == (Nothing,StateUnlocked date1)
 -- prop> \date -> transition (StateUnlocked date) (InputUnlock date) == (Nothing,StateUnlocked date)
 -- prop> \(date1, date2) -> date2 > date1 ==> transition (StateUnlocked date1) (InputUnlock date2) == (Just $ OutputUnlock date2,StateUnlocked date2)
 -- prop> \(date1, date2) -> not (date2 > date1) ==> transition (StateUnlocked date1) (InputUnlock date2) == (Nothing,StateUnlocked date1)
@@ -134,17 +134,18 @@ transition :: State -> Input -> (Maybe Output, State)
 
 -- Locked state transitions.
 transition StateLocked InputLockNow            = (Nothing, StateLocked)
-transition StateLocked (InputLock _)           = (Nothing, StateLocked)
+transition StateLocked (InputUnlockExpired _)  = (Nothing, StateLocked)
 transition StateLocked (InputUnlock untilDate) =
   (Just $ OutputUnlock untilDate,StateUnlocked untilDate)
 
 -- Unlocked state transitions.
-transition (StateUnlocked _) InputLockNow      = (Just OutputCancelLock, StateLocked)
+transition (StateUnlocked _) InputLockNow =
+  (Just OutputCancelLock, StateLocked)
 transition (StateUnlocked scheduledDate) (InputUnlock untilDate) =
   if untilDate > scheduledDate
      then (Just $ OutputUnlock untilDate, StateUnlocked untilDate)
      else (Nothing, StateUnlocked scheduledDate)
-transition (StateUnlocked scheduledDate) (InputLock lockDate) =
+transition (StateUnlocked scheduledDate) (InputUnlockExpired lockDate) =
   -- In this case, the state machine is currently unlocked, and the
   -- controller is informing the state machine that a
   -- previously-scheduled lock event has fired; in other words, a

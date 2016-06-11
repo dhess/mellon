@@ -124,12 +124,12 @@ runMachine i c =
     go (Just (OutputUnlock date), s) = liftIO $
       do now <- getCurrentTime
          if minSleep `addUTCTime` now > date
-           then return $ snd $ transition s (InputLock date)
+           then return $ snd $ transition s (InputUnlockExpired date)
            else
              do unlockDevice (_device c)
                 a <- async $
                        do threadSleepUntil date
-                          void $ runMachine (InputLock date) c
+                          void $ runMachine (InputUnlockExpired date) c
                 -- Ensure exceptions which occur in the child thread are
                 -- reported in the parent.
                 link a
