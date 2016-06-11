@@ -17,7 +17,7 @@ mkDerivation {
   ];
   executableHaskellDepends = [
     base exceptions hpio mellon-core mellon-gpio mtl network
-    optparse-applicative transformers warp
+    optparse-applicative time transformers warp
   ];
   testHaskellDepends = [
     aeson base bytestring hlint hspec hspec-wai http-client http-types
