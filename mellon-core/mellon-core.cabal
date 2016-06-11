@@ -25,17 +25,15 @@ Description:
   unlocked state; or the unlock period can be extended.
   .
   User programs incorporate @mellon-core@ functionality via a
-  'Mellon.Controller.Controller', which is responsible for handling
-  user lock and unlock commands, and for scheduling and canceling
-  unlock expirations.
+  /controller/, which is responsible for handling user lock and unlock
+  commands, and for scheduling and canceling unlock expirations.
   .
   User programs must also adapt their physical access devices to the
   interface expected by the controller. For this purpose,
-  @mellon-core@ defines a generic 'Mellon.Device.Device' parametric
-  data type with 2 simple 'IO' actions for locking and unlocking the
-  device. (@mellon-core@ does not provide any useful device
-  implementations; see the companion @mellon-gpio@ package for a
-  GPIO-driven implementation.)
+  @mellon-core@ defines a /device/ type with 2 simple 'IO' actions for
+  locking and unlocking the device. (@mellon-core@ does not provide
+  any useful device implementations; see the companion @mellon-gpio@
+  package for a GPIO-driven implementation.)
   .
   Note that @mellon-core@ does not provide authentication mechanisms
   or network services for interacting with controllers; that is the
