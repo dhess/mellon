@@ -65,7 +65,10 @@ wrapBody title body =
 
 -- | Mimics 'Controller.State', but provides JSON conversions.
 -- (Avoids orphan instances.)
-data State = Locked | Unlocked UTCTime deriving (Eq, Show, Generic)
+data State
+  = Locked
+  | Unlocked !UTCTime
+  deriving (Eq,Show,Generic)
 
 stateToState :: Controller.State -> State
 stateToState Controller.StateLocked = Locked

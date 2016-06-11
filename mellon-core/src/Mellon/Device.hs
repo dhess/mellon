@@ -86,7 +86,7 @@ data MockLockEvent
 -- No constructor is exported. Use 'mockLock' to create a new
 -- instance and 'events' to extract the log.
 data MockLock =
-  MockLock (MVar [MockLockEvent])
+  MockLock !(MVar [MockLockEvent])
   deriving (Eq)
 
 -- | Construct a new mock lock with an empty event log.

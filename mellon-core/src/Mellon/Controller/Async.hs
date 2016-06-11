@@ -47,9 +47,9 @@ import Mellon.StateMachine
 -- 'controller' constructor to create a new value of this type; it
 -- ensures that the controller is initialized properly.
 data Controller d =
-  Controller {_state :: MVar State
-             ,_minUnlockTime :: NominalDiffTime
-             ,_device :: Device d}
+  Controller {_state :: !(MVar State)
+             ,_minUnlockTime :: !NominalDiffTime
+             ,_device :: !(Device d)}
 
 -- | Create a new 'Controller' value to control the given 'Device'.
 --

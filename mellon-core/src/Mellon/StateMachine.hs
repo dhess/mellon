@@ -68,7 +68,7 @@ import GHC.Generics
 data State
   = StateLocked
     -- ^ The state machine is in the locked state
-  | StateUnlocked UTCTime
+  | StateUnlocked !UTCTime
     -- ^ The state machine is unlocked until the specified date.
   deriving (Eq,Show,Read,Generic,Data,Typeable)
 
@@ -78,13 +78,13 @@ data State
 data Input
   = InputLockNow
     -- ^ Lock immediately, canceling any unlock currently in effect
-  | InputUnlockExpired UTCTime
+  | InputUnlockExpired !UTCTime
     -- ^ An unlock command has expired. The unlock's expiration date
     -- is given by the specified 'UTCTime' timestamp. Note that in the
     -- @mellon-core@ protocol, these commands are only ever sent by
     -- the controller, which manages timed events, and never by the
     -- user directly.
-  | InputUnlock UTCTime
+  | InputUnlock !UTCTime
     -- ^ Unlock until the specified time. If no existing unlock
     -- command with a later expiration is currently in effect when
     -- this command is executed, the controller managing the state
@@ -105,10 +105,10 @@ data Input
 data Output
   = OutputLock
     -- ^ Lock the device now
-  | OutputUnlock UTCTime
+  | OutputUnlock !UTCTime
     -- ^ Unlock the device now and schedule a lock to run at the given
     -- time
-  | OutputRescheduleLock UTCTime
+  | OutputRescheduleLock !UTCTime
     -- ^ The date for the currently scheduled lock has changed.
     -- Reschedule it for the specified date. Note that the new date is
     -- guaranteed to be later than the previously-scheduled time.

@@ -19,14 +19,14 @@ import System.GPIO.Monad
 import System.GPIO.Linux.Sysfs (runSysfsGpioIO)
 
 data GlobalOptions =
-  GlobalOptions {_port :: Int
-                ,_minUnlockTime :: Int
-                ,_cmd :: Command}
+  GlobalOptions {_port :: !Int
+                ,_minUnlockTime :: !Int
+                ,_cmd :: !Command}
 
 data Command
   = Sysfs SysfsOptions
 
-data SysfsOptions = SysfsOptions {_pin :: Int}
+data SysfsOptions = SysfsOptions {_pin :: !Int}
 
 sysfsCmd :: Parser Command
 sysfsCmd = Sysfs <$> sysfsOptions

@@ -119,8 +119,8 @@ controllerTest =
      return $ checkResults ccEvents lockEvents (0.5 :: NominalDiffTime)
 
 data ExceptionLock =
-  ExceptionLock {_ops :: MVar Int
-                ,_opsPerException :: Int}
+  ExceptionLock {_ops :: !(MVar Int)
+                ,_opsPerException :: !Int}
 
 data ExceptionLockException =
   LockException
