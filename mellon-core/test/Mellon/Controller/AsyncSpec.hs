@@ -14,7 +14,7 @@ import qualified Data.Time as Time (getCurrentTime)
 import Test.Hspec
 
 import Mellon.Controller.Async
-       (Controller, State(..), controller, lockController,
+       (Controller, State(..), controller, minUnlockTime, lockController,
         queryController, unlockController)
 import Mellon.Device
        (Device(..), MockLock, MockLockEvent(..), events, mockLock,
@@ -111,7 +111,7 @@ checkResults expected actual epsilon = foldr compareResult (Right "No results to
 controllerTest :: IO CheckedResults
 controllerTest =
   do ml <- mockLock
-     cc <- controller $ mockLockDevice ml
+     cc <- controller (Just 1) $ mockLockDevice ml
      ccEvents <- testController cc
      -- Discard the first MockLock event, which happened when
      -- controller initialized the lock.
@@ -150,7 +150,7 @@ isExceptionLockException = const True
 asyncExceptionTest :: IO ()
 asyncExceptionTest =
   do el <- exceptionLock 3
-     cc <- controller $ exceptionLockDevice el -- 1st lock op
+     cc <- controller Nothing $ exceptionLockDevice el -- 1st lock op
      now <- getCurrentTime
      let expire = timePlusN now 3
      unlockController expire cc -- 2nd & 3rd lock op (unlock, timed lock)
@@ -160,7 +160,7 @@ asyncExceptionTest =
 syncExceptionTest :: IO ()
 syncExceptionTest =
   do el <- exceptionLock 2
-     cc <- controller $ exceptionLockDevice el -- 1st lock op
+     cc <- controller Nothing $ exceptionLockDevice el -- 1st lock op
      now <- getCurrentTime
      let expire = timePlusN now 3
      unlockController expire cc `shouldThrow` isExceptionLockException -- 2nd lock op
@@ -169,13 +169,32 @@ syncExceptionTest =
 pastUnlockTimeTest :: IO ()
 pastUnlockTimeTest =
   do ml <- mockLock
-     cc <- controller $ mockLockDevice ml
+     cc <- controller Nothing $ mockLockDevice ml
      race
        (sleep 3) -- 3 sec should be more than enough time
        (do now <- getCurrentTime
            let past = timePlusN now (-1)
            unlockController past cc)
        `shouldReturn` Right StateLocked
+
+ignoreUnlockTimeTest :: IO ()
+ignoreUnlockTimeTest =
+  do ml <- mockLock
+     cc <- controller (Just 3) $ mockLockDevice ml
+     race
+       (sleep 3) -- 3 sec should be more than enough time
+       (do now <- getCurrentTime
+           let expire = timePlusN now 2
+           unlockController expire cc)
+       `shouldReturn` Right StateLocked
+
+minUnlockTimeTest :: IO ()
+minUnlockTimeTest =
+  do ml <- mockLock
+     cc1 <- controller Nothing $ mockLockDevice ml
+     minUnlockTime cc1 `shouldBe` 0
+     cc2 <- controller (Just (-1)) $ mockLockDevice ml
+     minUnlockTime cc2 `shouldBe` 0
 
 spec :: Spec
 spec = do
@@ -188,3 +207,7 @@ spec = do
       syncExceptionTest
     it "should not wait forever if the unlock time is in the past" $ do
       pastUnlockTimeTest
+    it "should ignore an unlock if its duration is less than the minimum unlock time" $ do
+      ignoreUnlockTimeTest
+    it "should set the minimum unlock time to 0 if the value is Nothing or < 0" $ do
+      minUnlockTimeTest

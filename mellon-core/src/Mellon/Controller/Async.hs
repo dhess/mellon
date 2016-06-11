@@ -17,6 +17,7 @@ module Mellon.Controller.Async
        ( -- * An asynchronous controller implementation
          Controller
        , controller
+       , minUnlockTime
        , lockController
        , unlockController
        , queryController
@@ -47,10 +48,10 @@ import Mellon.StateMachine
 -- ensures that the controller is initialized properly.
 data Controller d =
   Controller {_state :: MVar State
+             ,_minUnlockTime :: NominalDiffTime
              ,_device :: Device d}
 
--- | Create a new 'Controller' value, parameterized on the device type
--- 'Device' @d@.
+-- | Create a new 'Controller' value to control the given 'Device'.
 --
 -- Controllers created by this constructor are thread-safe and may be
 -- passed around and controlled simultaneously on multiple threads.
@@ -73,15 +74,31 @@ data Controller d =
 -- machine's initial state to 'StateLocked' before returning the new
 -- 'Controller' value.
 --
--- N.B. The controller makes no guarantees about the period between
--- invoking actions on the device. If your device requires a delay
--- bewtween successive operations, you should build that delay into
--- your 'Device' @d@ implementation.
-controller :: (MonadIO m) => Device d -> m (Controller d)
-controller device = liftIO $
+-- The optional 'NominalDiffTime' argument can be used to prevent the
+-- device from too rapidly switching from the locked->unlocked->locked
+-- states (/glitching/). Effectively, it specifies the minimum amount
+-- of time that the controller will unlock the device. This is useful
+-- for handling delayed unlock commands (for example, if the user is
+-- communicating with the controller via a network connection but the
+-- unlock command is delayed in transit because connection is down or
+-- lagged), extremely short unlock durations that might damage the
+-- physical access device, or hacking attempts. When the controller
+-- receives an unlock command, it compares the current time to the
+-- unlock command's expiration date. If the difference between the two
+-- times is less than the minimum unlock duration, or if the
+-- expiration date is in the past, then the controller will
+-- effectively ignore the unlock request. If the value of this
+-- argument is 'Nothing' or is negative, the controller treats it as a
+-- 0 value.
+controller :: (MonadIO m) => Maybe NominalDiffTime -> Device d -> m (Controller d)
+controller minUnlock device = liftIO $
   do lockDevice device
      mvar <- newMVar StateLocked
-     return $ Controller mvar device
+     return $ Controller mvar (maybe 0 (max 0) minUnlock) device
+
+-- | Get the controller's minimum unlock time.
+minUnlockTime :: Controller d -> NominalDiffTime
+minUnlockTime = _minUnlockTime
 
 -- | Immediately lock the device controlled by the controller.
 --
@@ -105,9 +122,6 @@ unlockController date = runMachine (InputUnlock date)
 queryController :: (MonadIO m) => Controller d -> m State
 queryController c = liftIO $ readMVar (_state c)
 
-minSleep :: NominalDiffTime
-minSleep = 1
-
 runMachine :: (MonadIO m) => Input -> Controller d -> m State
 runMachine i c =
   let state = _state c
@@ -127,7 +141,7 @@ runMachine i c =
       -- the state machine in sync by telling it that the unlock has
       -- already expired).
       do now <- getCurrentTime
-         if minSleep `addUTCTime` now > date
+         if _minUnlockTime c `addUTCTime` now > date
            then return $ snd $ transition s (InputUnlockExpired date)
            else
              do unlockDevice (_device c)
