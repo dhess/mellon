@@ -11,6 +11,21 @@ This module implements a thread-safe, asynchronous controller.
 Scheduled locks are run as background threads, which sleep until their
 events fire.
 
+== Exception safety
+
+All the controller actions provided in this module are exception-safe.
+If an exception occurs in a controller action (e.g., because the
+device throws an exception), the controller will be restored to its
+state as it was immediately prior to the execution of the action, and
+the exception will be re-thrown. After handling the exception, you can
+continue to execute actions on the controller, if you wish. However,
+the controller and the device may be out of sync at that point, or the
+device may continue to throw exceptions until it can be reset.
+
+The safest action to take after an exception occurs in a controller is
+to reset the device to a known working state; and then to create, from
+scratch, a new controller for the device.
+
 -}
 
 module Mellon.Controller.Async

@@ -20,40 +20,17 @@ commands are effective immediately, but also take a 'UTCTime' argument
 that specifies the date at which the controller will automatically
 lock the device again.
 
-The controller's behavior is determined by the @mellon-core@ state
+A controller's behavior is determined by the @mellon-core@ state
 machine. See the "Mellon.StateMachine" module for a detailed
 description of the state machine's operation.
 
-== Exception safety
-
-All the controller actions provided in this module are exception-safe.
-If an exception occurs in a controller action (e.g., because the
-device throws an exception), the controller will be restored to its
-state as it was immediately prior to the execution of the action, and
-the exception will be re-thrown. After handling the exception, you can
-continue to execute actions on the controller, if you wish. However,
-the controller and the device may be out of sync at that point, or the
-device may continue to throw exceptions until it can be reset.
-
-The safest action to take after an exception occurs in a controller is
-to reset the device to a known working state; and then to create, from
-scratch, a new controller for the device.
+This module re-exports the default (and, currently, only) controller
+implementation.
 
 -}
 
 module Mellon.Controller
-       ( -- * The default mellon-core controller
-         Controller
-       , controller
-       , lockController
-       , unlockController
-       , queryController
-
-         -- * Re-exported types
-       , Device(..)
-       , State(..)
+       ( module Mellon.Controller.Async
        ) where
 
 import Mellon.Controller.Async
-       (Controller, Device(..), State(..), controller, lockController,
-        unlockController, queryController)
