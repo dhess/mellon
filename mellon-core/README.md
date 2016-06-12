@@ -3,12 +3,13 @@
 <em>"Speak, friend, and enter."</em>
 
 `mellon-core` is a Haskell package for controlling physical access
-devices, e.g., electric strikes. The access control protocol is quite
-simple: a device is either locked, or it is unlocked until a
-particular date and time (an <em>expiration date</em>). Once the
-expiration date passes, the device is automatically locked again. In
-the meantime, the device can be locked immediately, overriding the
-unlocked state; or the unlock period can be extended.
+devices designed for human factors, e.g., electric strikes. The access
+control protocol is quite simple: a device is either locked, or it is
+unlocked until a particular date and time (an <em>expiration
+date</em>). Once the expiration date passes, the device is
+automatically locked again. In the meantime, the device can be locked
+immediately, overriding the unlocked state; or the unlock period can
+be extended.
 
 User programs incorporate `mellon-core` functionality via a
 `Controller`, which is responsible for handling user lock and unlock
