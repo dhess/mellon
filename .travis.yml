@@ -61,6 +61,9 @@ matrix:
     os: osx
 
   allow_failures:
+  # The cabal + GHC 8.0.1 build is allowed to fail currently due to
+  # this: https://ghc.haskell.org/trac/ghc/ticket/12076
+  - env: BUILD=cabal GHCVER=8.0.1 CABALVER=1.24 HAPPYVER=1.19.5 ALEXVER=3.1.7
   - env: BUILD=cabal GHCVER=head  CABALVER=head HAPPYVER=1.19.5 ALEXVER=3.1.7
   - env: BUILD=stack ARGS="--resolver nightly"
 
