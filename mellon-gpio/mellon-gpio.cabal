@@ -31,8 +31,8 @@ Library
   If impl(ghc > 8)
     GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
   Exposed-Modules:      Mellon.Device.GPIO
-  Build-Depends:        base        >= 4.8     && < 5
-                      , hpio        >= 0.8.0.2 && < 1
+  Build-Depends:        base        >= 4.8   && < 5
+                      , hpio        >= 0.8   && < 1
                       , mellon-core == 0.7.*
 
 Test-Suite hlint

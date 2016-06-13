@@ -120,8 +120,8 @@ Executable gpio-mellon-server
     Buildable:         False
   Else                        
     Build-Depends:      base
-                      , exceptions           >= 0.8.0   && < 1
-                      , hpio                 >= 0.8.0.2 && < 1
+                      , exceptions           >= 0.8.0  && < 1
+                      , hpio                 >= 0.8    && < 1
                       , mellon-core
                       , mellon-gpio          == 0.7.*
                       , mellon-web
