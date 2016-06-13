@@ -10,4 +10,4 @@ shown
 to an available GPIO pin on the host where the `mellon-core`
 application will run.
 
-[![Travis CI build status](https://travis-ci.org/dhess/mellon.svg?branch=master)](https://travis-ci.org/dhess/mellon)
+[![Travis CI build status](https://travis-ci.org/dhess/mellon.svg?branch=v0.7.0)](https://travis-ci.org/dhess/mellon)

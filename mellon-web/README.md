@@ -76,4 +76,4 @@ security/authentication for your access control device! You should
 always run it (or any @mellon-web@ server) behind a secure proxy web
 service or equivalent HTTP(S)-based authentication mechanism.
 
-[![Travis CI build status](https://travis-ci.org/dhess/mellon.svg?branch=master)](https://travis-ci.org/dhess/mellon)
+[![Travis CI build status](https://travis-ci.org/dhess/mellon.svg?branch=v0.7.0)](https://travis-ci.org/dhess/mellon)

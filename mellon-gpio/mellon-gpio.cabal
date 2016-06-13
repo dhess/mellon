@@ -54,4 +54,5 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/dhess/mellon.git
+  Branch:               v0.7.0
   Tag:                  v0.7.0.1
