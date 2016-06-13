@@ -1,5 +1,5 @@
 Name:                   mellon-web
-Version:                0.7.0.0
+Version:                0.7.0.1
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
@@ -188,4 +188,4 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/dhess/mellon.git
-  Tag:                  v0.7.0.0
+  Tag:                  v0.7.0.1

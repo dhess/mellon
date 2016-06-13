@@ -1,5 +1,5 @@
 Name:                   mellon-core
-Version:                0.7.0.0
+Version:                0.7.0.1
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
@@ -14,7 +14,7 @@ Tested-With:            GHC == 7.10.3, GHC == 8.0.1
 Category:               System
 Synopsis:               Control physical access devices
 Description:
-  "Speak, friend, and enter."
+  /Speak, friend, and enter./
   .
   @mellon-core@ is a Haskell package for controlling physical access
   devices designed for human factors, e.g., electric strikes. The
@@ -41,7 +41,7 @@ Description:
   domain of higher-level packages which use the base @mellon-core@
   package (e.g., @mellon-web@).
   .
-  == On the use of UTC dates for timers
+  /On the use of UTC dates for timers/
   .
   @mellon-core@ uses UTC dates for unlock expiration, rather than a
   time delta or a monotonic clock. You might disagree with this
@@ -204,4 +204,4 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/dhess/mellon.git
-  Tag:                  v0.7.0.0
+  Tag:                  v0.7.0.1

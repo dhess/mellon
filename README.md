@@ -1,6 +1,6 @@
 # Mellon
 
-<em>"Speak, friend, and enter."</em>
+*"Speak, friend, and enter."*
 
 Mellon is a set of Haskell packages for controlling physical access
 devices, such as electric strikes and other electronic locks. The set
