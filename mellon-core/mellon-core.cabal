@@ -46,15 +46,15 @@ Description:
   @mellon-core@ uses UTC dates for unlock expiration, rather than a
   time delta or a monotonic clock. You might disagree with this
   decision based on the common wisdom that it's a bad idea to use
-  "wall clock time" (of which UTC is one flavor) for timers. In
+  \"wall clock time\" (of which UTC is one flavor) for timers. In
   general, the common wisdom is correct. Wall clocks have lots of
   problems: they may not be accurate, they may disagree from one
-  system to the next, they may "jump around" if the system is running
+  system to the next, they may \"jump around\" if the system is running
   a time daemon such as NTP, and they occasionally do something
   unexpected like adding a leap second.
   .
   If your timers must be high-precision (i.e., this timer must run for
-  exactly /n/ microseconds, for some definition of "exactly"), then
+  exactly /n/ microseconds, for some definition of \"exactly\"), then
   there's no argument: using a wall clock is a bad idea. However, as
   @mellon-core@ is designed for use with physical access devices,
   which themselves are typically designed for human factors, accuracy
@@ -74,7 +74,7 @@ Description:
     in networked environments, where network problems may appreciably
     delay the delivery of commands from client to server. If a user
     wants to unlock a device for 7 seconds, does that mean 7 seconds
-    from the clock time @T@ when the user presses "send," or does it
+    from the clock time @T@ when the user presses \"send,\" or does it
     mean 7 seconds from opening to close, regardless of when the
     server receives the command? Without a common reference, there is
     no way for the user to communicate her intent.
