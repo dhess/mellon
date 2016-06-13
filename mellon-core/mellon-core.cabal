@@ -186,7 +186,7 @@ Test-Suite spec
   Main-Is:              Main.hs
   Build-Depends:        base
                       , async
-                      , hspec        == 0.2.*
+                      , hspec        == 2.2.*
                       , mtl
                       , time
                       , transformers
