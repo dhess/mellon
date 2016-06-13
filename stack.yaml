@@ -4,4 +4,4 @@ packages:
 - mellon-gpio/
 extra-deps:
 - hpio-0.8.0.2
-resolver: lts-6.2
+resolver: lts-6.3
