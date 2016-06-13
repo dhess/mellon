@@ -1,5 +1,5 @@
 Name:                   mellon-web
-Version:                0.6.0.1
+Version:                0.7.0.0
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
@@ -81,7 +81,7 @@ Library
                       , http-client    == 0.4.*
                       , http-types     == 0.9.*
                       , lucid          == 2.9.*
-                      , mellon-core
+                      , mellon-core    == 0.7.*
                       , servant        >= 0.7.1 && < 0.8
                       , servant-client >= 0.7.1 && < 0.8
                       , servant-docs   >= 0.7.1 && < 0.8
@@ -123,7 +123,7 @@ Executable gpio-mellon-server
                       , exceptions           >= 0.8.0   && < 1
                       , hpio                 >= 0.8.0.2 && < 1
                       , mellon-core
-                      , mellon-gpio
+                      , mellon-gpio          == 0.7.*
                       , mellon-web
                       , mtl
                       , network              == 2.6.*
@@ -188,4 +188,4 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/dhess/mellon.git
-  Tag:                  v0.6.0.1
+  Tag:                  v0.7.0.0

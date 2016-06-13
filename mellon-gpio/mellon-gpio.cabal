@@ -1,5 +1,5 @@
 Name:                   mellon-gpio
-Version:                0.6.0.1
+Version:                0.7.0.0
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <src@drewhess.com>
@@ -33,7 +33,7 @@ Library
   Exposed-Modules:      Mellon.Device.GPIO
   Build-Depends:        base        >= 4.8     && < 5
                       , hpio        >= 0.8.0.2 && < 1
-                      , mellon-core
+                      , mellon-core == 0.7.*
 
 Test-Suite hlint
   Type:                 exitcode-stdio-1.0
@@ -54,4 +54,4 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/dhess/mellon.git
-  Tag:                  v0.6.0.1
+  Tag:                  v0.7.0.0
