@@ -13,18 +13,3 @@ of packages includes:
 
 * `mellon-web`, a web interface (with client and server bindings) for
   interacting with Mellon controllers.
-
-## Building from git
-
-You will need [bumper](https://hackage.haskell.org/package/bumper) in
-order to use the `bump-versions.sh` script.
-
-With `nix`:
-```shell
-./scripts/generate-nix-files.sh   # Get up-to-date shell.nix files
-```
-
-With `stack`:
-```shell
-stack build
-```
