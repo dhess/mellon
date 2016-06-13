@@ -75,23 +75,23 @@ Library
                       , MultiParamTypeClasses
                       , OverloadedStrings
                       , TypeOperators
-  Build-Depends:        base           >= 4 && < 5
-                      , aeson          >= 0.11.0 && < 0.12
-                      , bytestring
-                      , http-client    >= 0.4.28
-                      , http-types
-                      , lucid
+  Build-Depends:        base           >= 4.8    && < 5
+                      , aeson          == 0.11.*
+                      , bytestring     == 0.10.*
+                      , http-client    == 0.4.*
+                      , http-types     == 0.9.*
+                      , lucid          == 2.9.*
                       , mellon-core
-                      , servant
-                      , servant-client
-                      , servant-docs
-                      , servant-lucid
-                      , servant-server
-                      , text
-                      , time
-                      , transformers
-                      , wai
-                      , warp
+                      , servant        >= 0.7.1 && < 0.8
+                      , servant-client >= 0.7.1 && < 0.8
+                      , servant-docs   >= 0.7.1 && < 0.8
+                      , servant-lucid  >= 0.7.1 && < 0.8
+                      , servant-server >= 0.7.1 && < 0.8
+                      , text           == 1.2.*
+                      , time           == 1.5.*
+                      , transformers   >= 0.4.2 && < 0.6
+                      , wai            == 3.2.*
+                      , warp           == 3.2.*
 
 Executable mock-mellon-server
   Main-Is:              MockServer.hs
@@ -103,7 +103,7 @@ Executable mock-mellon-server
   If !flag(mock-example)
     Buildable:         False
   Else                        
-    Build-Depends:      base >= 4 && < 5
+    Build-Depends:      base
                       , mellon-core
                       , mellon-web
                       , warp
@@ -119,15 +119,15 @@ Executable gpio-mellon-server
   If !flag(gpio-example)
     Buildable:         False
   Else                        
-    Build-Depends:      base >= 4 && < 5
-                      , exceptions
-                      , hpio
+    Build-Depends:      base
+                      , exceptions           >= 0.8.0   && < 1
+                      , hpio                 >= 0.8.0.2 && < 1
                       , mellon-core
                       , mellon-gpio
                       , mellon-web
                       , mtl
-                      , network
-                      , optparse-applicative
+                      , network              == 2.6.*
+                      , optparse-applicative >= 0.11.0 && < 0.13
                       , time
                       , transformers
                       , warp
@@ -142,7 +142,7 @@ Test-Suite hlint
     Buildable:          False
   Else
     Build-Depends:      base
-                      , hlint
+                      , hlint == 1.9.*
 
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
@@ -155,8 +155,8 @@ Test-Suite spec
   Build-Depends:        base
                       , aeson
                       , bytestring
-                      , hspec
-                      , hspec-wai
+                      , hspec          == 2.2.*
+                      , hspec-wai      >= 0.6.6 && < 0.7
                       , http-client
                       , http-types
                       , lucid
@@ -171,7 +171,7 @@ Test-Suite spec
                       , time
                       , transformers
                       , wai
-                      , wai-extra
+                      , wai-extra      == 3.0.*
                       , warp
   Other-Modules:        Mellon.Web.Client
                       , Mellon.Web.Server

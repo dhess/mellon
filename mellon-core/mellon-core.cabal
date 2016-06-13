@@ -145,11 +145,11 @@ Library
   Other-Extensions:     DeriveDataTypeable
                       , DeriveGeneric
                       , Safe
-  Build-Depends:        base         >= 4.8 && < 5
-                      , async        > 2 && < 3
-                      , mtl
-                      , time
-                      , transformers
+  Build-Depends:        base         >= 4.8   && < 5
+                      , async        == 2.1.*
+                      , mtl          == 2.2.*
+                      , time         == 1.5.*
+                      , transformers >= 0.4.2 && < 0.6
 
 Test-Suite hlint
   Type:                 exitcode-stdio-1.0
@@ -161,7 +161,7 @@ Test-Suite hlint
     Buildable:          False
   Else
     Build-Depends:      base
-                      , hlint
+                      , hlint == 1.9.*
 
 Test-Suite doctest
   Type:                 exitcode-stdio-1.0
@@ -173,9 +173,9 @@ Test-Suite doctest
     Buildable:          False
   Else
     Build-Depends:      base
-                      , QuickCheck
-                      , quickcheck-instances
-                      , doctest
+                      , QuickCheck           == 2.8.*
+                      , quickcheck-instances == 0.3.*
+                      , doctest              == 0.11.*
 
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
@@ -186,7 +186,7 @@ Test-Suite spec
   Main-Is:              Main.hs
   Build-Depends:        base
                       , async
-                      , hspec
+                      , hspec        == 0.2.*
                       , mtl
                       , time
                       , transformers
