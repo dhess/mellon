@@ -13,3 +13,5 @@ of packages includes:
 
 * `mellon-web`, a web interface (with client and server bindings) for
   interacting with Mellon controllers.
+
+[![Travis CI build status](https://travis-ci.org/dhess/mellon.svg?branch=master)](https://travis-ci.org/dhess/mellon)

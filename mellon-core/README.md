@@ -25,3 +25,5 @@ Note that `mellon-core` does not provide authentication mechanisms or
 network services for interacting with controllers; that is the domain
 of higher-level packages which use the base `mellon-core` package
 (e.g., `mellon-web`).
+
+[![Travis CI build status](https://travis-ci.org/dhess/mellon.svg?branch=master)](https://travis-ci.org/dhess/mellon)
