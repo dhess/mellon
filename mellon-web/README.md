@@ -73,7 +73,7 @@ interpreter. (Currently, this is the only supported GPIO platform.)
 
 **NOTE**: the REST service provided by `gpio-mellon-server` offers no
 security/authentication for your access control device! You should
-always run it (or any @mellon-web@ server) behind a secure proxy web
+always run it (or any `mellon-web` server) behind a secure proxy web
 service or equivalent HTTP(S)-based authentication mechanism.
 
 [![Travis CI build status](https://travis-ci.org/dhess/mellon.svg?branch=master)](https://travis-ci.org/dhess/mellon)
