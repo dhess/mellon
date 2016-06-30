@@ -60,6 +60,11 @@ Flag gpio-example
   Default: True
   Manual: True
 
+-- Build the unlock client example
+Flag client-unlock-example
+  Default: True
+  Manual: True
+
 Library
   Default-Language:     Haskell2010
   HS-Source-Dirs:       src
@@ -132,6 +137,33 @@ Executable gpio-mellon-server
                       , transformers
                       , warp
 
+Executable mellon-schedule-unlock
+  Main-Is:              ScheduleUnlock.hs
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       examples
+  GHC-Options:          -Wall -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  If impl(ghc > 8)
+    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints
+  Other-Extensions:     LambdaCase
+                      , OverloadedStrings
+  If !flag(client-unlock-example)
+    Buildable:         False
+  Else                        
+    Build-Depends:      base
+                      , bytestring
+                      , exceptions
+                      , http-client
+                      , http-client-tls
+                      , http-types
+                      , mellon-core
+                      , mellon-web
+                      , mtl
+                      , network
+                      , optparse-applicative
+                      , servant-client
+                      , time
+                      , transformers
+                        
 Test-Suite hlint
   Type:                 exitcode-stdio-1.0
   Default-Language:     Haskell2010

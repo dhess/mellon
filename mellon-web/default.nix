@@ -1,8 +1,9 @@
 { mkDerivation, aeson, base, bytestring, exceptions, hlint, hpio
-, hspec, hspec-wai, http-client, http-types, lucid, mellon-core
-, mellon-gpio, mtl, network, optparse-applicative, servant
-, servant-client, servant-docs, servant-lucid, servant-server
-, stdenv, text, time, transformers, wai, wai-extra, warp
+, hspec, hspec-wai, http-client, http-client-tls, http-types, lucid
+, mellon-core, mellon-gpio, mtl, network, optparse-applicative
+, servant, servant-client, servant-docs, servant-lucid
+, servant-server, stdenv, text, time, transformers, wai, wai-extra
+, warp
 }:
 mkDerivation {
   pname = "mellon-web";
@@ -16,8 +17,9 @@ mkDerivation {
     text time transformers wai warp
   ];
   executableHaskellDepends = [
-    base exceptions hpio mellon-core mellon-gpio mtl network
-    optparse-applicative time transformers warp
+    base bytestring exceptions hpio http-client http-client-tls
+    http-types mellon-core mellon-gpio mtl network optparse-applicative
+    servant-client time transformers warp
   ];
   testHaskellDepends = [
     aeson base bytestring hlint hspec hspec-wai http-client http-types
