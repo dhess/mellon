@@ -1,3 +1,7 @@
+## 0.7.0.3 (2016-09-23)
+
+- No changes, version bump only.
+
 ## 0.7.0.2 (2016-09-23)
 
 - No changes, version bump only.
