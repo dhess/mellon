@@ -87,11 +87,11 @@ Library
                       , http-types     == 0.9.*
                       , lucid          == 2.9.*
                       , mellon-core    == 0.7.*
-                      , servant        >= 0.7.1 && < 0.8
-                      , servant-client >= 0.7.1 && < 0.8
-                      , servant-docs   >= 0.7.1 && < 0.8
-                      , servant-lucid  >= 0.7.1 && < 0.8
-                      , servant-server >= 0.7.1 && < 0.8
+                      , servant        >= 0.7.1 && < 0.10
+                      , servant-client >= 0.7.1 && < 0.10
+                      , servant-docs   >= 0.7.1 && < 0.10
+                      , servant-lucid  >= 0.7.1 && < 0.10
+                      , servant-server >= 0.7.1 && < 0.10
                       , text           == 1.2.*
                       , time           >= 1.5   && < 2
                       , transformers   >= 0.4.2 && < 0.6
