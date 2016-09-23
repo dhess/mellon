@@ -21,6 +21,7 @@ import System.GPIO.Linux.Sysfs (runSysfsGpioIO)
 data GlobalOptions =
   GlobalOptions {_port :: !Int
                 ,_minUnlockTime :: !Int
+                ,_activeLow :: !Bool
                 ,_cmd :: !Command}
 
 data Command
@@ -50,13 +51,20 @@ cmds =
                metavar "INT" <>
                value 1 <>
                help "Minimum unlock time in seconds") <*>
+  switch (long "active-low" <>
+          short 'l' <>
+          help "Pin is active low") <*>
   hsubparser
     (command "sysfs" (info sysfsCmd (progDesc "Use the Linux sysfs GPIO interpreter")))
 
-runTCPServerSysfs :: Pin -> Int -> NominalDiffTime -> IO ()
-runTCPServerSysfs pin port minUnlockTime = runSysfsGpioIO $
-  withOutputPin pin OutputDefault (Just ActiveHigh) Low $ \p ->
+runTCPServerSysfs :: Pin -> Int -> NominalDiffTime -> Bool -> IO ()
+runTCPServerSysfs pin port minUnlockTime lowFlag = runSysfsGpioIO $
+  withOutputPin pin OutputDefault (Just $ activeLevel lowFlag) Low $ \p ->
      liftIO $ runTCPServer minUnlockTime (sysfsGpioDevice p) port
+  where
+    activeLevel :: Bool -> PinActiveLevel
+    activeLevel False = ActiveHigh
+    activeLevel True = ActiveLow
 
 runTCPServer :: NominalDiffTime -> Device d -> Int -> IO ()
 runTCPServer minUnlock device port =
@@ -65,10 +73,10 @@ runTCPServer minUnlock device port =
      runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
 
 run :: GlobalOptions -> IO ()
-run (GlobalOptions listenPort minUnlockTime (Sysfs (SysfsOptions pinNumber))) =
+run (GlobalOptions listenPort minUnlockTime activeLow (Sysfs (SysfsOptions pinNumber))) =
   let pin = Pin pinNumber
   in
-    runTCPServerSysfs pin listenPort (fromIntegral minUnlockTime)
+    runTCPServerSysfs pin listenPort (fromIntegral minUnlockTime) activeLow
 
 main :: IO ()
 main = execParser opts >>= run
