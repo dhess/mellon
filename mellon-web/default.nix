@@ -7,7 +7,7 @@
 }:
 mkDerivation {
   pname = "mellon-web";
-  version = "0.7.0.1";
+  version = "0.7.0.2";
   src = ./.;
   isLibrary = true;
   isExecutable = true;
