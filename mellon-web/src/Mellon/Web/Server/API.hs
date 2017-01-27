@@ -44,10 +44,11 @@ import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import qualified Data.Aeson.Types as Aeson (Value(String))
 import Data.Aeson.Types
-       ((.=), (.:), FromJSON(..), Pair, Series, ToJSON(..), Value(Object),
-        defaultOptions, genericToJSON, genericParseJSON, object, pairs,
-        typeMismatch)
+       ((.=), (.:), (.:?), FromJSON(..), Pair, Series, ToJSON(..),
+        Value(Object), defaultOptions, genericToJSON, genericParseJSON,
+        object, pairs, typeMismatch)
 import Data.Data
+import Data.Maybe (maybe)
 import Data.Monoid ((<>))
 import Data.Swagger
        (NamedSchema(..), Referenced(Inline), SwaggerType(..),
@@ -72,7 +73,7 @@ import Servant.HTML.Lucid (HTML)
 
 -- $setup
 -- >>> :set -XOverloadedStrings
--- >>> import Data.Aeson (decode, encode)
+-- >>> import Data.Aeson (eitherDecode, encode)
 -- >>> import Data.Swagger.Schema.Validation
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
@@ -139,17 +140,34 @@ instance ToJSON State where
   toEncoding (Unlocked time) = pairs $ unlockedSeries <> untilSeries time
 
 -- $
--- >>> (decode $ encode $ toJSON $ Unlocked sampleDate) :: Maybe State
--- Just (Unlocked 2015-10-06 00:00:00 UTC)
--- >>> (decode $ encode $ toJSON Locked) :: Maybe State
--- Just Locked
+-- >>> (eitherDecode $ encode $ toJSON $ Unlocked sampleDate) :: Either String State
+-- Right (Unlocked 2015-10-06 00:00:00 UTC)
+-- >>> (eitherDecode $ encode $ toJSON Locked) :: Either String State
+-- Right Locked
+-- >>> eitherDecode $ "{\"state\":\"Unlocked\"}" :: Either String State
+-- Left "Error in $: 'Unlocked' state requires an expiration date"
+-- >>> eitherDecode $ "{\"state\":\"Locked\",\"until\":\"2015-10-06T00:00:00Z\"}" :: Either String State
+-- Left "Error in $: 'Locked' state takes no argument"
+-- >>> eitherDecode $ "{\"state\":\"Unlocked\",\"until\":\"2015\"}" :: Either String State
+-- Left "Error in $.until: failed to parse field until: could not parse date: '-': not enough input"
+-- >>> eitherDecode $ "{\"state\":\"Lokced\"}" :: Either String State -- note: typo
+-- Left "Error in $: Invalid 'state' value"
 instance FromJSON State where
   parseJSON (Object v) = do
-    state :: Maybe Text <- v .: stateName
+    state :: Text <- v .: stateName
+    until_ :: Maybe Time <- v .:? untilName
     case state of
-      Just "Locked" -> pure Locked
-      Just "Unlocked" -> Unlocked <$> v .: untilName
-      _ -> fail "Missing 'state' field"
+      "Locked" ->
+        maybe
+          (pure Locked)
+          (const $ fail "'Locked' state takes no argument")
+          until_
+      "Unlocked" ->
+        maybe
+          (fail "'Unlocked' state requires an expiration date")
+          (\(Time t) -> pure $ Unlocked t)
+          until_
+      _ -> fail "Invalid 'state' value"
   parseJSON invalid = typeMismatch "State" invalid
 
 -- $
