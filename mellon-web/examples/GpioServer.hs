@@ -9,7 +9,7 @@ import Control.Monad.IO.Class (liftIO)
 import Data.Time.Clock (NominalDiffTime)
 import Mellon.Controller (Device(..), controller)
 import Mellon.Device.GPIO (sysfsGpioDevice)
-import Mellon.Web.Server.DocsAPI (docsApp)
+import Mellon.Web.Server (swaggerApp)
 import Network (PortID(..), listenOn)
 import Network.Wai.Handler.Warp (defaultSettings, runSettingsSocket, setHost, setPort)
 import Options.Applicative
@@ -70,7 +70,7 @@ runTCPServer :: NominalDiffTime -> Device d -> Int -> IO ()
 runTCPServer minUnlock device port =
   do cc <- controller (Just minUnlock) device
      sock <- listenOn (PortNumber (fromIntegral port))
-     runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (docsApp cc)
+     runSettingsSocket (setPort port $ setHost "*" defaultSettings) sock (swaggerApp cc)
 
 run :: GlobalOptions -> IO ()
 run (GlobalOptions listenPort minUnlockTime activeLow (Sysfs (SysfsOptions pinNumber))) =

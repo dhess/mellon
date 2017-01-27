@@ -17,9 +17,12 @@ the REST service methods and document types.
 -}
 
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Mellon.Web.Server.API
@@ -34,6 +37,7 @@ module Mellon.Web.Server.API
          , server
          ) where
 
+import Control.Lens ((&), (?~), mapped)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -41,6 +45,10 @@ import Data.Aeson.Types
        (FromJSON(..), ToJSON(..), Options(..), SumEncoding(TaggedObject),
         defaultOptions, genericToJSON, genericParseJSON, tagFieldName,
         contentsFieldName)
+import Data.Data
+import Data.Swagger
+       (ToSchema(..), defaultSchemaOptions, description, example,
+        genericDeclareNamedSchema, schema)
 import Data.Time.Calendar (fromGregorian)
 import Data.Time.Clock (UTCTime(..), getCurrentTime)
 import GHC.Generics
@@ -56,6 +64,10 @@ import Servant
 import Servant.Docs (ToSample(..))
 import Servant.HTML.Lucid (HTML)
 
+-- $setup
+-- >>> :set -XOverloadedStrings
+-- >>> import Data.Swagger.Schema.Validation
+
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
 wrapBody title body =
   doctypehtml_ $
@@ -68,7 +80,7 @@ wrapBody title body =
 data State
   = Locked
   | Unlocked !UTCTime
-  deriving (Eq,Show,Generic)
+  deriving (Eq, Data, Read, Show, Generic, Typeable)
 
 stateToState :: Controller.State -> State
 stateToState Controller.StateLocked = Locked
@@ -85,6 +97,17 @@ instance ToJSON State where
 
 instance FromJSON State where
   parseJSON = genericParseJSON stateJSONOptions
+
+-- $
+-- >>> validateToJSON Locked
+-- []
+-- >>> validateToJSON $ Unlocked sampleDate
+-- []
+instance ToSchema State where
+  declareNamedSchema proxy =
+    genericDeclareNamedSchema defaultSchemaOptions proxy
+      & mapped.schema.description ?~ "The controller state"
+      & mapped.schema.example ?~ toJSON (Unlocked sampleDate)
 
 sampleDate :: UTCTime
 sampleDate = UTCTime { utctDay = fromGregorian 2015 10 06, utctDayTime = 0 }
@@ -105,13 +128,24 @@ instance ToHtml State where
 
 -- | A newtype wrapper around 'UTCTime', for serving HTML without
 -- orphan instances.
-newtype Time = Time UTCTime deriving (Eq, Show, Generic)
+newtype Time =
+  Time UTCTime
+  deriving (Eq, Data, Ord, Read, Show, Generic, Typeable)
 
 instance ToJSON Time where
   toJSON = genericToJSON defaultOptions
 
 instance FromJSON Time where
   parseJSON = genericParseJSON defaultOptions
+
+-- $
+-- >>> validateToJSON sampleDate
+-- []
+instance ToSchema Time where
+  declareNamedSchema proxy =
+    genericDeclareNamedSchema defaultSchemaOptions proxy
+      & mapped.schema.description ?~ "A UTC date"
+      & mapped.schema.example ?~ toJSON sampleDate
 
 instance ToSample Time where
   toSamples _ = [("2015-10-06",Time sampleDate)]

@@ -1,0 +1,108 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0",
+        "title": "Mellon API",
+        "license": {
+            "url": "https://opensource.org/licenses/BSD-3-Clause",
+            "name": "BSD3"
+        },
+        "description": "Control physical access devices"
+    },
+    "definitions": {
+        "State": {
+            "example": {
+                "state": "Unlocked",
+                "until": "2015-10-06T00:00:00Z"
+            },
+            "minProperties": 1,
+            "maxProperties": 1,
+            "type": "object",
+            "description": "The controller state",
+            "properties": {
+                "Locked": {
+                    "items": [],
+                    "type": "array"
+                },
+                "Unlocked": {
+                    "$ref": "#/definitions/UTCTime"
+                }
+            }
+        },
+        "Time": {
+            "example": "2015-10-06T00:00:00Z",
+            "format": "yyyy-mm-ddThh:MM:ssZ",
+            "type": "string",
+            "description": "A UTC date"
+        },
+        "UTCTime": {
+            "example": "2016-07-22T00:00:00Z",
+            "format": "yyyy-mm-ddThh:MM:ssZ",
+            "type": "string"
+        }
+    },
+    "paths": {
+        "/state": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/State"
+                        },
+                        "description": ""
+                    }
+                },
+                "produces": [
+                    "application/json",
+                    "text/html;charset=utf-8"
+                ]
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Invalid `body`"
+                    },
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/State"
+                        },
+                        "description": ""
+                    }
+                },
+                "produces": [
+                    "application/json",
+                    "text/html;charset=utf-8"
+                ],
+                "parameters": [
+                    {
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/State"
+                        },
+                        "in": "body",
+                        "name": "body"
+                    }
+                ]
+            }
+        },
+        "/time": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "schema": {
+                            "$ref": "#/definitions/Time"
+                        },
+                        "description": ""
+                    }
+                },
+                "produces": [
+                    "application/json",
+                    "text/html;charset=utf-8"
+                ]
+            }
+        }
+    }
+}

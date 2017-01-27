@@ -12,11 +12,9 @@ This module re-exports the @mellon-web@ server modules.
 -}
 
 module Mellon.Web.Server
-         ( -- * The standard server API
-           module Mellon.Web.Server.API
-           -- * The standard server API with self-hosted documentation
-         , module Mellon.Web.Server.DocsAPI
-         ) where
+  ( module X
+  ) where
 
-import Mellon.Web.Server.API
-import Mellon.Web.Server.DocsAPI
+import Mellon.Web.Server.API as X
+import Mellon.Web.Server.DocsAPI as X
+import Mellon.Web.Server.SwaggerAPI as X

@@ -45,6 +45,11 @@ Extra-Source-Files:     changelog.md
                       , examples/*.hs
                       , mellon-web.paw
 
+-- Build doctests
+Flag test-doctests
+  Default: True
+  Manual: True
+
 -- Build hlint test
 Flag test-hlint
   Default: True
@@ -75,6 +80,7 @@ Library
                       , Mellon.Web.Server
                       , Mellon.Web.Server.API
                       , Mellon.Web.Server.DocsAPI
+                      , Mellon.Web.Server.SwaggerAPI
   Other-Extensions:     DataKinds
                       , DeriveGeneric
                       , MultiParamTypeClasses
@@ -82,9 +88,11 @@ Library
                       , TypeOperators
   Build-Depends:        base           >= 4.8    && < 5
                       , aeson          == 0.11.*
+                      , aeson-pretty
                       , bytestring     == 0.10.*
                       , http-client    == 0.4.*
                       , http-types     == 0.9.*
+                      , lens
                       , lucid          == 2.9.*
                       , mellon-core    == 0.7.*
                       , servant        >= 0.7.1 && < 0.10
@@ -92,6 +100,9 @@ Library
                       , servant-docs   >= 0.7.1 && < 0.10
                       , servant-lucid  >= 0.7.1 && < 0.10
                       , servant-server >= 0.7.1 && < 0.10
+                      , servant-swagger
+                      , servant-swagger-ui
+                      , swagger2
                       , text           == 1.2.*
                       , time           >= 1.5   && < 2
                       , transformers   >= 0.4.2 && < 0.6
@@ -176,6 +187,20 @@ Test-Suite hlint
     Build-Depends:      base
                       , hlint == 1.9.*
 
+Test-Suite doctest
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       test
+  Ghc-Options:          -Wall -threaded
+  If impl(ghc > 8)
+    GHC-Options:        -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances -fno-warn-redundant-constraints -fno-warn-redundant-constraints
+  Main-Is:              doctest.hs
+  If !flag(test-doctests)
+    Buildable: False
+  Else
+    Build-Depends:      base
+                      , doctest >= 0.10.1 && < 1
+
 Test-Suite spec
   Type:                 exitcode-stdio-1.0
   Default-Language:     Haskell2010
@@ -185,12 +210,16 @@ Test-Suite spec
   Main-Is:              Main.hs
   Other-Extensions:     ScopedTypeVariables
   Build-Depends:        base
+                      , QuickCheck
+                      , quickcheck-instances
                       , aeson
+                      , aeson-pretty
                       , bytestring
                       , hspec          == 2.2.*
                       , hspec-wai      >= 0.6.6 && < 0.7
                       , http-client
                       , http-types
+                      , lens
                       , lucid
                       , mellon-core
                       , network
@@ -199,6 +228,9 @@ Test-Suite spec
                       , servant-docs
                       , servant-lucid
                       , servant-server
+                      , servant-swagger
+                      , servant-swagger-ui
+                      , swagger2
                       , text
                       , time
                       , transformers
@@ -209,9 +241,11 @@ Test-Suite spec
                       , Mellon.Web.Server
                       , Mellon.Web.Server.API
                       , Mellon.Web.Server.DocsAPI
+                      , Mellon.Web.Server.SwaggerAPI
                       , Spec
                       , Mellon.Web.ClientSpec
                       , Mellon.Web.ServerSpec
+                      , Mellon.Web.SwaggerAPISpec
 
 Source-Repository head
   Type:                 git
