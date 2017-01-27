@@ -23,6 +23,7 @@ the REST service methods and document types.
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Mellon.Web.Server.API
@@ -37,18 +38,23 @@ module Mellon.Web.Server.API
          , server
          ) where
 
-import Control.Lens ((&), (?~), mapped)
+import Control.Lens ((&), (.~), (?~), mapped)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
 import Control.Monad.Trans.Except (ExceptT)
 import Control.Monad.IO.Class (MonadIO, liftIO)
+import qualified Data.Aeson.Types as Aeson (Value(String))
 import Data.Aeson.Types
-       (FromJSON(..), ToJSON(..), Options(..), SumEncoding(TaggedObject),
-        defaultOptions, genericToJSON, genericParseJSON, tagFieldName,
-        contentsFieldName)
+       ((.=), (.:), FromJSON(..), Pair, Series, ToJSON(..), Value(Object),
+        defaultOptions, genericToJSON, genericParseJSON, object, pairs,
+        typeMismatch)
 import Data.Data
+import Data.Monoid ((<>))
 import Data.Swagger
-       (ToSchema(..), defaultSchemaOptions, description, example,
-        genericDeclareNamedSchema, schema)
+       (NamedSchema(..), Referenced(Inline), SwaggerType(..),
+        ToSchema(..), declareSchemaRef, defaultSchemaOptions, description,
+        enum_, example, genericDeclareNamedSchema, properties, required,
+        schema, type_)
+import Data.Text (Text)
 import Data.Time.Calendar (fromGregorian)
 import Data.Time.Clock (UTCTime(..), getCurrentTime)
 import GHC.Generics
@@ -66,6 +72,7 @@ import Servant.HTML.Lucid (HTML)
 
 -- $setup
 -- >>> :set -XOverloadedStrings
+-- >>> import Data.Aeson (decode, encode)
 -- >>> import Data.Swagger.Schema.Validation
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
@@ -86,17 +93,64 @@ stateToState :: Controller.State -> State
 stateToState Controller.StateLocked = Locked
 stateToState (Controller.StateUnlocked date) = Unlocked date
 
-stateJSONOptions :: Options
-stateJSONOptions = defaultOptions {sumEncoding = taggedObject}
-  where taggedObject =
-          TaggedObject {tagFieldName = "state"
-                       ,contentsFieldName = "until"}
+lockedName :: Text
+lockedName = "Locked"
 
+unlockedName :: Text
+unlockedName = "Unlocked"
+
+untilName :: Text
+untilName = "until"
+
+stateName :: Text
+stateName = "state"
+
+lockedPair :: Pair
+lockedPair = stateName .= lockedName
+
+unlockedPair :: Pair
+unlockedPair = stateName .= unlockedName
+
+untilPair :: UTCTime -> Pair
+untilPair t = untilName .= t
+
+lockedSeries :: Series
+lockedSeries = stateName .= lockedName
+
+unlockedSeries :: Series
+unlockedSeries = stateName .= unlockedName
+
+untilSeries :: UTCTime -> Series
+untilSeries t = untilName .= t
+
+-- $
+-- >>> toJSON Locked
+-- Object (fromList [("state",String "Locked")])
+-- >>> toJSON $ Unlocked sampleDate
+-- Object (fromList [("state",String "Unlocked"),("until",String "2015-10-06T00:00:00Z")])
+-- >>> encode $ toJSON Locked
+-- "{\"state\":\"Locked\"}"
+-- >>> encode $ toJSON $ Unlocked sampleDate
+-- "{\"state\":\"Unlocked\",\"until\":\"2015-10-06T00:00:00Z\"}"
 instance ToJSON State where
-  toJSON = genericToJSON stateJSONOptions
+  toJSON Locked = object [lockedPair]
+  toJSON (Unlocked time) = object [unlockedPair, untilPair time]
+  toEncoding Locked = pairs lockedSeries
+  toEncoding (Unlocked time) = pairs $ unlockedSeries <> untilSeries time
 
+-- $
+-- >>> (decode $ encode $ toJSON $ Unlocked sampleDate) :: Maybe State
+-- Just (Unlocked 2015-10-06 00:00:00 UTC)
+-- >>> (decode $ encode $ toJSON Locked) :: Maybe State
+-- Just Locked
 instance FromJSON State where
-  parseJSON = genericParseJSON stateJSONOptions
+  parseJSON (Object v) = do
+    state :: Maybe Text <- v .: stateName
+    case state of
+      Just "Locked" -> pure Locked
+      Just "Unlocked" -> Unlocked <$> v .: untilName
+      _ -> fail "Missing 'state' field"
+  parseJSON invalid = typeMismatch "State" invalid
 
 -- $
 -- >>> validateToJSON Locked
@@ -104,10 +158,18 @@ instance FromJSON State where
 -- >>> validateToJSON $ Unlocked sampleDate
 -- []
 instance ToSchema State where
-  declareNamedSchema proxy =
-    genericDeclareNamedSchema defaultSchemaOptions proxy
-      & mapped.schema.description ?~ "The controller state"
-      & mapped.schema.example ?~ toJSON (Unlocked sampleDate)
+  declareNamedSchema _ = do
+    utcTimeSchema <- declareSchemaRef (Proxy :: Proxy UTCTime)
+    let stateSchema =
+          mempty & enum_ ?~ [Aeson.String lockedName, Aeson.String unlockedName]
+                 & type_ .~ SwaggerString
+    return $
+      NamedSchema (Just "State") $
+        mempty & type_ .~ SwaggerObject
+               & properties .~ [(stateName, Inline stateSchema), (untilName, utcTimeSchema)]
+               & required .~ [stateName]
+               & description ?~ "The controller state; a variant type."
+               & example ?~ toJSON (Unlocked sampleDate)
 
 sampleDate :: UTCTime
 sampleDate = UTCTime { utctDay = fromGregorian 2015 10 06, utctDayTime = 0 }

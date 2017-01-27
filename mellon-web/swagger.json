@@ -15,16 +15,20 @@
                 "state": "Unlocked",
                 "until": "2015-10-06T00:00:00Z"
             },
-            "minProperties": 1,
-            "maxProperties": 1,
+            "required": [
+                "state"
+            ],
             "type": "object",
-            "description": "The controller state",
+            "description": "The controller state; a variant type.",
             "properties": {
-                "Locked": {
-                    "items": [],
-                    "type": "array"
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "Locked",
+                        "Unlocked"
+                    ]
                 },
-                "Unlocked": {
+                "until": {
                     "$ref": "#/definitions/UTCTime"
                 }
             }

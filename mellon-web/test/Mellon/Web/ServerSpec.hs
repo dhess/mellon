@@ -7,6 +7,7 @@ import Control.Concurrent (threadDelay)
 import Data.Aeson (decode, encode)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Lazy as LB (ByteString)
+import Data.Maybe (fromJust)
 import Data.Time.Clock
 import Mellon.Controller (controller)
 import Mellon.Device (mockLock, mockLockDevice)
@@ -15,8 +16,19 @@ import Network.Wai
 import Network.Wai.Test (SResponse, simpleBody)
 import Test.Hspec
 import Test.Hspec.Wai ((<:>), WaiSession, get, liftIO, matchHeaders, request, shouldRespondWith, with)
+import Test.QuickCheck
+       (Arbitrary(..), elements, genericShrink, oneof, property)
+import Test.QuickCheck.Instances ()
 
-import Mellon.Web.Server (State(..), app, docsApp)
+import Mellon.Web.Server (State(..), Time(..), app, docsApp)
+
+instance Arbitrary State where
+  arbitrary = oneof [pure Locked, Unlocked <$> arbitrary]
+  shrink = genericShrink
+
+instance Arbitrary Time where
+  arbitrary = Time <$> arbitrary
+  shrink = genericShrink
 
 sleep :: Int -> IO ()
 sleep = threadDelay . (* 1000000)
@@ -38,7 +50,11 @@ putJSON path = request methodPut path [(hContentType, "application/json;charset=
 
 spec :: Spec
 spec =
-  do describe "Server time" $
+  do describe "ToJSON/FromJSON" $
+       it "is isomorphic" $ property $
+         \(s :: State) -> fromJust (decode $ encode s) == s
+
+     describe "Server time" $
        do with runApp $
             do it "should be accurate" $
                  do now <- liftIO getCurrentTime
