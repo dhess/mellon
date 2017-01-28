@@ -20,7 +20,7 @@ import Test.QuickCheck
        (Arbitrary(..), elements, genericShrink, oneof, property)
 import Test.QuickCheck.Instances ()
 
-import Mellon.Web.Server (State(..), Time(..), app, docsApp)
+import Mellon.Web.Server (State(..), Time(..), app, swaggerApp)
 
 instance Arbitrary State where
   arbitrary = oneof [pure Locked, Unlocked <$> arbitrary]
@@ -39,11 +39,11 @@ runApp =
      cc <- controller Nothing $ mockLockDevice ml
      return (app cc)
 
-runDocsApp :: IO Application
-runDocsApp =
+runSwaggerApp :: IO Application
+runSwaggerApp =
   do ml <- mockLock
      cc <- controller Nothing $ mockLockDevice ml
-     return (docsApp cc)
+     return (swaggerApp cc)
 
 putJSON :: ByteString -> LB.ByteString -> WaiSession SResponse
 putJSON path = request methodPut path [(hContentType, "application/json;charset=utf-8")]
@@ -135,7 +135,7 @@ spec =
                     response <- putJSON "/state" (encode Locked)
                     liftIO $ decode (simpleBody response) `shouldBe` Just Locked
 
-     describe "Docs application" $
-       do with runDocsApp $
-            do it "serves docs" $
-                 get "/docs" `shouldRespondWith` 200 { matchHeaders = [hContentType <:> "text/plain"]}
+     describe "Swagger application" $
+       do with runSwaggerApp $
+            do it "serves the Swagger UI" $
+                 get "/swagger-ui/" `shouldRespondWith` 200 { matchHeaders = [hContentType <:> "text/html;charset=utf-8"]}

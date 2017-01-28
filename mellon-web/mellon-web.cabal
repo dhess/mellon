@@ -39,8 +39,7 @@ Description:
   Note that the @mellon-web@ server does not provide an authentication
   mechanism! You should proxy it behind a secure, authenticating HTTPS
   server such as Nginx.
-Extra-Doc-Files:        API.md
-                      , README.md
+Extra-Doc-Files:        README.md
 Extra-Source-Files:     changelog.md
                       , examples/*.hs
                       , mellon-web.paw
@@ -79,7 +78,6 @@ Library
   Exposed-Modules:      Mellon.Web.Client
                       , Mellon.Web.Server
                       , Mellon.Web.Server.API
-                      , Mellon.Web.Server.DocsAPI
                       , Mellon.Web.Server.SwaggerAPI
   Other-Extensions:     DataKinds
                       , DeriveGeneric
@@ -240,7 +238,6 @@ Test-Suite spec
   Other-Modules:        Mellon.Web.Client
                       , Mellon.Web.Server
                       , Mellon.Web.Server.API
-                      , Mellon.Web.Server.DocsAPI
                       , Mellon.Web.Server.SwaggerAPI
                       , Spec
                       , Mellon.Web.ClientSpec

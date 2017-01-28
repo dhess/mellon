@@ -16,5 +16,4 @@ module Mellon.Web.Server
   ) where
 
 import Mellon.Web.Server.API as X
-import Mellon.Web.Server.DocsAPI as X
 import Mellon.Web.Server.SwaggerAPI as X
