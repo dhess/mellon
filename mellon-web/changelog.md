@@ -1,3 +1,9 @@
+## 0.7.1.0 (2017-04-28)
+
+- Now requires servant-client >= 0.9.
+
+- Bump various dependency upper bounds.
+
 ## 0.7.0.3 (2016-09-23)
 
 - Bump servant upper bounds.

@@ -1,3 +1,7 @@
+## 0.7.1.0 (2017-04-28)
+
+- Bump hspec, QuickCheck upper bounds.
+
 ## 0.7.0.3 (2016-09-23)
 
 - No changes, version bump only.
