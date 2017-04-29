@@ -173,7 +173,7 @@ Test-Suite doctest
     Buildable:          False
   Else
     Build-Depends:      base
-                      , QuickCheck           == 2.8.*
+                      , QuickCheck           >= 2.8    && < 2.10
                       , quickcheck-instances == 0.3.*
                       , doctest              == 0.11.*
 
@@ -186,7 +186,7 @@ Test-Suite spec
   Main-Is:              Main.hs
   Build-Depends:        base
                       , async
-                      , hspec        == 2.2.*
+                      , hspec        >= 2.2 && < 2.5
                       , mtl
                       , time
                       , transformers

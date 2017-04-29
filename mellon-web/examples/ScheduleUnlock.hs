@@ -17,8 +17,8 @@
 module Main where
 
 import Control.Monad.Catch.Pure (runCatch)
-import Control.Monad.Trans.Except (runExceptT)
 import Data.ByteString.Char8 as C8 (unpack)
+import Data.Monoid ((<>))
 import Data.Time.Clock
        (NominalDiffTime, UTCTime(..), addUTCTime)
 import qualified Data.Time.LocalTime as Time
@@ -29,7 +29,9 @@ import Network.HTTP.Client (newManager)
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Network.HTTP.Types (Status(..))
 import Options.Applicative
-import Servant.Client (BaseUrl, ServantError(..), parseBaseUrl)
+import Servant.Client
+       (BaseUrl, ClientEnv(..), ServantError(..), parseBaseUrl,
+        runClientM)
 import System.Exit (ExitCode(..), exitWith)
 
 data GlobalOptions =
@@ -100,13 +102,14 @@ run (GlobalOptions baseUrl (LocalTime (LocalTimeOptions localStart localEnd))) =
                      then Unlocked end
                      else Locked
       in do manager <- newManager tlsManagerSettings
-            runExceptT (putState state manager url) >>= \case
-              Right status ->
-                do putStrLn $ show status
-                   exitWith ExitSuccess
-              Left e ->
-                do putStrLn $ "Mellon service error: " ++ prettyServantError e
-                   exitWith $ ExitFailure 1
+            let clientEnv = ClientEnv manager url
+            runClientM (putState state) clientEnv >>= \case
+                        Right status ->
+                          do putStrLn $ show status
+                             exitWith ExitSuccess
+                        Left e ->
+                          do putStrLn $ "Mellon service error: " ++ prettyServantError e
+                             exitWith $ ExitFailure 1
     prettyServantError :: ServantError -> String
     prettyServantError (FailureResponse status _ _) =
       show (statusCode status) ++ " " ++ (C8.unpack $ statusMessage status)

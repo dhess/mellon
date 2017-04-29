@@ -41,11 +41,9 @@ module Mellon.Web.Client
          , Time(..)
          ) where
 
-import Control.Monad.Trans.Except (ExceptT)
 import Data.Proxy (Proxy(..))
-import Network.HTTP.Client (Manager)
 import Servant.API ((:<|>)(..))
-import Servant.Client (BaseUrl, ServantError, client)
+import Servant.Client (ClientM, client)
 
 import Mellon.Web.Server (MellonAPI, State(..), Time(..))
 
@@ -55,13 +53,13 @@ clientAPI = Proxy
 
 -- | Get the server's time. This action is provided chiefly to verify
 -- the accuracy of the server's clock.
-getTime :: Manager -> BaseUrl -> ExceptT ServantError IO Time
+getTime :: ClientM Time
 
 -- | Get the current state of the server's
 -- 'Mellon.Controller.Controller'.
-getState :: Manager -> BaseUrl -> ExceptT ServantError IO State
+getState :: ClientM State
 
 -- | Lock or unlock the server's 'Mellon.Controller.Controller'.
-putState :: State -> Manager -> BaseUrl -> ExceptT ServantError IO State
+putState :: State -> ClientM State
 
 getTime :<|> getState :<|> putState = client clientAPI
