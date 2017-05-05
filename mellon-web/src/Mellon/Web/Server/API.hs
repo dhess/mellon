@@ -142,6 +142,8 @@ instance ToJSON State where
 -- $
 -- >>> (eitherDecode $ encode $ toJSON $ Unlocked sampleDate) :: Either String State
 -- Right (Unlocked 2015-10-06 00:00:00 UTC)
+-- >>> eitherDecode $ "{\"state\":\"Unlocked\",\"until\":\"2017-05-05T22:30-08:00\"}" :: Either String State
+-- Right (Unlocked 2017-05-06 06:30:00 UTC)
 -- >>> (eitherDecode $ encode $ toJSON Locked) :: Either String State
 -- Right Locked
 -- >>> eitherDecode $ "{\"state\":\"Unlocked\"}" :: Either String State
