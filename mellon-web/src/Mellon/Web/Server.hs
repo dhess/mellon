@@ -1,7 +1,7 @@
 {-|
 Module      : Mellon.Web.Server
 Description : Top-level server re-exports
-Copyright   : (c) 2016, Drew Hess
+Copyright   : (c) 2017, Quixoftic, LLC
 License     : BSD3
 Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental

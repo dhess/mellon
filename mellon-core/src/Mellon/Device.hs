@@ -1,7 +1,7 @@
 {-|
 Module      : Mellon.Device
 Description : An interface for physical access devices
-Copyright   : (c) 2016, Drew Hess
+Copyright   : (c) 2017, Quixoftic, LLC
 License     : BSD3
 Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental
