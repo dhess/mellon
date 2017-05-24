@@ -2,10 +2,10 @@ Name:                   mellon-web
 Version:                0.7.1.0
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
-Author:                 Drew Hess <src@drewhess.com>
-Maintainer:             Drew Hess <src@drewhess.com>
-Homepage:               https://github.com/dhess/mellon/
-Bug-Reports:            https://github.com/dhess/mellon/issues/
+Author:                 Drew Hess <dhess-src@quixoftic.com>
+Maintainer:             Drew Hess <dhess-src@quixoftic.com>
+Homepage:               https://github.com/quixoftic/mellon/
+Bug-Reports:            https://github.com/quixoftic/mellon/issues/
 Stability:              experimental
 License:                BSD3
 License-File:           LICENSE
@@ -247,9 +247,9 @@ Test-Suite spec
 
 Source-Repository head
   Type:                 git
-  Location:             git://github.com/dhess/mellon.git
+  Location:             git://github.com/quixoftic/mellon.git
 
 Source-Repository this
   Type:                 git
-  Location:             git://github.com/dhess/mellon.git
+  Location:             git://github.com/quixoftic/mellon.git
   Tag:                  v0.7.1.0

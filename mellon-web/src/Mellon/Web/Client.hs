@@ -3,7 +3,7 @@ Module      : Mellon.Web.Client
 Description : Client actions for the REST web service
 Copyright   : (c) 2017, Quixoftic, LLC
 License     : BSD3
-Maintainer  : Drew Hess <src@drewhess.com>
+Maintainer  : Drew Hess <dhess-src@quixoftic.com>
 Stability   : experimental
 Portability : non-portable
 

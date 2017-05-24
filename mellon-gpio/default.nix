@@ -5,7 +5,7 @@ mkDerivation {
   src = ./.;
   libraryHaskellDepends = [ base hpio mellon-core ];
   testHaskellDepends = [ base hlint ];
-  homepage = "https://github.com/dhess/mellon/";
+  homepage = "https://github.com/quixoftic/mellon/";
   description = "GPIO support for mellon";
   license = stdenv.lib.licenses.bsd3;
 }

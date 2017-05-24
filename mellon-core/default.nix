@@ -10,7 +10,7 @@ mkDerivation {
     async base doctest hlint hspec mtl QuickCheck quickcheck-instances
     time transformers
   ];
-  homepage = "https://github.com/dhess/mellon/";
+  homepage = "https://github.com/quixoftic/mellon/";
   description = "Control physical access devices";
   license = stdenv.lib.licenses.bsd3;
 }
