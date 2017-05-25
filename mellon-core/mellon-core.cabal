@@ -1,5 +1,5 @@
 Name:                   mellon-core
-Version:                0.7.1.0
+Version:                0.7.1.1
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <dhess-src@quixoftic.com>
@@ -204,4 +204,4 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/quixoftic/mellon.git
-  Tag:                  v0.7.1.0
+  Tag:                  v0.7.1.1

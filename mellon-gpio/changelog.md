@@ -1,3 +1,7 @@
+## 0.7.1.1 (2017-05-24)
+
+No changes; copyright has been assigned to Quixoftic, LLC.
+
 ## 0.7.1.0 (2017-04-28)
 
 - No changes, version bump only.
