@@ -43,7 +43,6 @@ Extra-Doc-Files:        README.md
                       , swagger.json
 Extra-Source-Files:     changelog.md
                       , examples/*.hs
-                      , mellon-web.paw
 
 -- Build doctests
 Flag test-doctests

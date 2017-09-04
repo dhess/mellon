@@ -35,9 +35,6 @@ support) is provided in the `examples` directory. You can run it with
 described in [API.md](API.md). The server is will run on the
 `localhost` loopback interface on port 8081.
 
-Also included is a [Paw](https://luckymarmot.com/paw) file with a
-pre-defined `localhost` environment for use with the example server.
-
 This particular example server uses a "mock lock" device which only
 internally logs lock and unlock events without depending on any actual
 hardware, so it will run anywhere.
