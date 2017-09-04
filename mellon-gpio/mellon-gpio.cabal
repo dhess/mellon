@@ -1,5 +1,5 @@
 Name:                   mellon-gpio
-Version:                0.8.0.1
+Version:                0.8.0.2
 Cabal-Version:          >= 1.18
 Build-Type:             Simple
 Author:                 Drew Hess <dhess-src@quixoftic.com>
@@ -54,4 +54,4 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/quixoftic/mellon.git
-  Tag:                  v0.8.0.1
+  Tag:                  v0.8.0.2

@@ -1,3 +1,7 @@
+## 0.8.0.2 (2017-09-04)
+
+- Fix .cabal file for now-removed Paw file.
+
 ## 0.8.0.1 (2017-09-04)
 
 - Hackage compliance fix.

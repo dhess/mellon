@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "mellon-core";
-  version = "0.8.0.1";
+  version = "0.8.0.2";
   src = ./.;
   libraryHaskellDepends = [ async base mtl time transformers ];
   testHaskellDepends = [
