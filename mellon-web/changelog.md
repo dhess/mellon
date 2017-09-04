@@ -1,3 +1,7 @@
+## 0.8.0.1 (2017-09-04)
+
+- Hackage compliance fix.
+
 ## 0.8.0.0 (2017-09-04)
 
 - Remove out-of-date Paw file.
