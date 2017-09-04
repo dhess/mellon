@@ -1,5 +1,5 @@
 Name:                   mellon-web
-Version:                0.7.1.1
+Version:                0.8.0.0
 Cabal-Version:          >= 1.10
 Build-Type:             Simple
 Author:                 Drew Hess <dhess-src@quixoftic.com>
@@ -93,7 +93,7 @@ Library
                       , http-types         == 0.9.*
                       , lens               >= 4     && < 5
                       , lucid              == 2.9.*
-                      , mellon-core        == 0.7.*
+                      , mellon-core        == 0.8.*
                       , servant            == 0.11.*
                       , servant-client     == 0.11.*
                       , servant-docs       >= 0.10  && < 0.12
@@ -138,7 +138,7 @@ Executable gpio-mellon-server
                       , exceptions           >= 0.8.0  && < 1
                       , hpio                 >= 0.8    && < 1
                       , mellon-core
-                      , mellon-gpio          == 0.7.*
+                      , mellon-gpio          == 0.8.*
                       , mellon-web
                       , mtl
                       , network              == 2.6.*
@@ -252,4 +252,4 @@ Source-Repository head
 Source-Repository this
   Type:                 git
   Location:             git://github.com/quixoftic/mellon.git
-  Tag:                  v0.7.1.1
+  Tag:                  v0.8.0.0

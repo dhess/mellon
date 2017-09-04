@@ -1,3 +1,11 @@
+## 0.8.0.0 (2017-09-04)
+
+- Remove out-of-date Paw file.
+
+- Port to Servant 0.11. Due to Servant 0.11 API changes, our API
+  has changed, as well (just the Haskell bits; the web API remains
+  the same).
+
 ## 0.7.1.1 (2017-05-24)
 
 No changes; copyright has been assigned to Quixoftic, LLC.
