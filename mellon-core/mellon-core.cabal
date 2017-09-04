@@ -161,7 +161,7 @@ Test-Suite hlint
     Buildable:          False
   Else
     Build-Depends:      base
-                      , hlint == 1.9.*
+                      , hlint >= 1.9 && < 2.1
 
 Test-Suite doctest
   Type:                 exitcode-stdio-1.0
