@@ -3,5 +3,5 @@ packages:
 - mellon-web/
 - mellon-gpio/
 extra-deps:
-- hpio-0.8.0.9
-resolver: lts-8.15
+- hpio-0.8.0.10
+resolver: lts-9.3

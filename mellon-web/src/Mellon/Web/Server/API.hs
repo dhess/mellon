@@ -19,7 +19,6 @@ the REST service methods and document types.
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE OverloadedLists #-}
@@ -40,8 +39,7 @@ module Mellon.Web.Server.API
 
 import Control.Lens ((&), (.~), (?~), mapped)
 import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
-import Control.Monad.Trans.Except (ExceptT)
-import Control.Monad.IO.Class (MonadIO, liftIO)
+import Control.Monad.IO.Class (liftIO)
 import qualified Data.Aeson.Types as Aeson (Value(String))
 import Data.Aeson.Types
        ((.=), (.:), (.:?), FromJSON(..), Pair, Series, ToJSON(..),
@@ -66,8 +64,8 @@ import Mellon.Controller
 import qualified Mellon.Controller as Controller (State(..))
 import Network.Wai (Application)
 import Servant
-       ((:>), (:<|>)(..), (:~>)(..), JSON, Get, ReqBody, Put, Proxy(..),
-        ServerT, Server, ServantErr, enter, serve)
+       ((:<|>)(..), (:>), (:~>)(..), Get, Handler, JSON, Proxy(..), Put,
+        ReqBody, Server, ServerT, enter, serve)
 import Servant.Docs (ToSample(..))
 import Servant.HTML.Lucid (HTML)
 
@@ -249,25 +247,25 @@ type MellonAPI =
   "state" :> Get '[JSON, HTML] State :<|>
   "state" :> ReqBody '[JSON] State :> Put '[JSON, HTML] State
 
-type AppM d m = ReaderT (Controller d) (ExceptT ServantErr m)
+type AppM d = ReaderT (Controller d) Handler
 
-serverT :: (MonadIO m) => ServerT MellonAPI (AppM d m)
+serverT :: ServerT MellonAPI (AppM d)
 serverT =
   getTime :<|>
   getState :<|>
   putState
   where
-    getTime :: (MonadIO m) => AppM d m Time
+    getTime :: AppM d Time
     getTime =
       do now <- liftIO getCurrentTime
          return $ Time now
 
-    getState :: (MonadIO m) => AppM d m State
+    getState :: AppM d State
     getState =
       do cc <- ask
          fmap stateToState (queryController cc)
 
-    putState :: (MonadIO m) => State -> AppM d m State
+    putState :: State -> AppM d State
     putState Locked =
       do cc <- ask
          fmap stateToState (lockController cc)
@@ -280,8 +278,8 @@ serverT =
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-serverToEither :: (MonadIO m) => Controller d -> AppM d m :~> ExceptT ServantErr m
-serverToEither cc = Nat $ \m -> runReaderT m cc
+appToHandler :: Controller d -> AppM d :~> Handler
+appToHandler cc = NT $ \m -> runReaderT m cc
 
 -- | A Servant 'Server' which serves the 'MellonAPI' on the given
 -- 'Controller'.
@@ -289,7 +287,7 @@ serverToEither cc = Nat $ \m -> runReaderT m cc
 -- Normally you will just use 'app', but this function is exported so
 -- that you can extend/wrap 'MellonAPI'.
 server :: Controller d -> Server MellonAPI
-server cc = enter (serverToEither cc) serverT
+server cc = enter (appToHandler cc) serverT
 
 -- | A WAI 'Network.Wai.Application' which runs the service, using the
 -- given 'Controller'.

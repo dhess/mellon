@@ -111,7 +111,7 @@ run (GlobalOptions baseUrl (LocalTime (LocalTimeOptions localStart localEnd))) =
                           do putStrLn $ "Mellon service error: " ++ prettyServantError e
                              exitWith $ ExitFailure 1
     prettyServantError :: ServantError -> String
-    prettyServantError (FailureResponse status _ _) =
+    prettyServantError (FailureResponse _ status _ _) =
       show (statusCode status) ++ " " ++ (C8.unpack $ statusMessage status)
     prettyServantError (DecodeFailure _ _ _) =
       "decode failure"
