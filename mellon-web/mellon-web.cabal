@@ -42,7 +42,6 @@ Description:
 Extra-Doc-Files:        README.md
                       , swagger.json
 Extra-Source-Files:     changelog.md
-                      , examples/*.hs
 
 -- Build doctests
 Flag test-doctests
