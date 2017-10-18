@@ -3,6 +3,15 @@
 # This Makefile is very much tailored to the maintainer's environment.
 # It might work for you, but don't expect much.
 
+# Implementation notes:
+#
+# The "test" and "build" targets simply build mellon-web, as it
+# depends on both of the other packages. Testing/building just this
+# package ensures that everything is built only once under Nix,
+# whereas building each package separately causes each dependent
+# "mellon" package to be built (and tested) again, needlessly.
+
+
 SUBPROJECTS = mellon-core \
 	      mellon-gpio \
 	      mellon-web
@@ -12,10 +21,8 @@ NIXFILES = nix/mellon-core.nix \
 	   nix/mellon-web.nix 
 
 test:	$(NIXFILES)
-	@for proj in $(SUBPROJECTS); do \
-	  $(MAKE) -C $$proj configure; \
-	  $(MAKE) -C $$proj test; \
-	done
+	$(MAKE) -C mellon-web configure
+	$(MAKE) -C mellon-web test
 
 help:
 	@echo "Targets:"
@@ -45,10 +52,8 @@ help:
 	@echo "    help  - show this message"
 
 build:	$(NIXFILES)
-	@for proj in $(SUBPROJECTS); do \
-	  $(MAKE) -C $$proj configure; \
-	  $(MAKE) -C $$proj build; \
-	done
+	$(MAKE) -C mellon-web configure
+	$(MAKE) -C mellon-web build
 
 sdist:	check
 	@for proj in $(SUBPROJECTS); do \
