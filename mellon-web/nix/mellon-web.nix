@@ -10,7 +10,7 @@
 mkDerivation {
   pname = "mellon-web";
   version = "0.8.0.2";
-  src = ./.;
+  src = ../.;
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
