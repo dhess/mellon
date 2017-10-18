@@ -1,3 +1,3 @@
 { compiler ? "ghc821" }:
 
-(import ./release.nix { inherit compiler; }).mellon-core.env
+(import ../release.nix { inherit compiler; }).mellon-core.env

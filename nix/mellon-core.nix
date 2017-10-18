@@ -4,7 +4,7 @@
 mkDerivation {
   pname = "mellon-core";
   version = "0.8.0.2";
-  src = ../.;
+  src = ../mellon-core;
   libraryHaskellDepends = [ async base mtl time transformers ];
   testHaskellDepends = [
     async base doctest hlint hspec mtl QuickCheck quickcheck-instances

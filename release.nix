@@ -45,8 +45,6 @@ let
 
           # More exotic overrides go here
           manualOverrides = haskellPackagesNew: haskellPackagesOld: {
-            mellon-core = haskellPackagesNew.callPackage ../mellon-core/nix/mellon-core.nix {};
-            mellon-gpio = haskellPackagesNew.callPackage ../mellon-gpio/nix/mellon-gpio.nix {};
           };
         in
           pkgs.haskell.packages.${compiler}.override {
@@ -64,5 +62,7 @@ let
   pkgs = import <nixpkgs> { inherit config; };
 
 in
-  { mellon-web = pkgs.haskellPackages.mellon-web;
+  { mellon-core = pkgs.haskellPackages.mellon-core;
+    mellon-gpio = pkgs.haskellPackages.mellon-gpio;
+    mellon-web =  pkgs.haskellPackages.mellon-web;
   }
