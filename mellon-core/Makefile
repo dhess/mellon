@@ -11,7 +11,11 @@ build:	configure
 	@echo "*** Building mellon-core"
 	cabal build
 
-sdist:	check
+doc:
+	@echo "*** Generating mellon-core docs"
+	cabal haddock --hyperlink-source
+
+sdist:	check doc
 	@echo "*** Creating mellon-core source distribution"
 	cabal sdist
 

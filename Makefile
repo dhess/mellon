@@ -55,7 +55,12 @@ build:	$(NIXFILES)
 	$(MAKE) -C mellon-web configure
 	$(MAKE) -C mellon-web build
 
-sdist:	check
+doc:
+	@for proj in $(SUBPROJECTS); do \
+	  $(MAKE) -C $$proj doc; \
+	done
+
+sdist:	check doc
 	@for proj in $(SUBPROJECTS); do \
 	  $(MAKE) -C $$proj sdist; \
 	done

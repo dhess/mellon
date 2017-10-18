@@ -11,7 +11,11 @@ build:	configure
 	@echo "*** Building mellon-gpio"
 	cabal build
 
-sdist:	check
+doc:
+	@echo "*** Generating mellon-gpio docs"
+	cabal haddock --hyperlink-source
+
+sdist:	check doc
 	@echo "*** Creating mellon-gpio source distribution"
 	cabal sdist
 
