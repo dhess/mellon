@@ -17,8 +17,7 @@ import Mellon.Controller.Async
        (Controller, State(..), controller, minUnlockTime, lockController,
         queryController, unlockController)
 import Mellon.Device
-       (Device(..), MockLock, MockLockEvent(..), events, mockLock,
-        mockLockDevice)
+       (Device(..), MockLockEvent(..), events, mockLock, mockLockDevice)
 
 sleep :: (MonadIO m) => Int -> m ()
 sleep = liftIO . threadDelay . (* 1000000)
@@ -32,8 +31,8 @@ timePlusN time n = (fromInteger n) `addUTCTime` time
 type TestController d a = RWST (Controller d) [MockLockEvent] () IO a
 
 testController :: Controller d -> IO [MockLockEvent]
-testController cc =
-  do (_, expectedResults) <- execRWST theTest cc ()
+testController ctrl =
+  do (_, expectedResults) <- execRWST theTest ctrl ()
      return expectedResults
 
   where theTest :: TestController d ()
@@ -153,7 +152,7 @@ asyncExceptionTest =
      cc <- controller Nothing $ exceptionLockDevice el -- 1st lock op
      now <- getCurrentTime
      let expire = timePlusN now 3
-     unlockController expire cc -- 2nd & 3rd lock op (unlock, timed lock)
+     void $ unlockController expire cc -- 2nd & 3rd lock op (unlock, timed lock)
      (sleep 5) `shouldThrow` isExceptionLockException -- async exception
      queryController cc `shouldReturn` StateUnlocked expire -- should have state prior to exception
 
