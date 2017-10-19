@@ -27,9 +27,9 @@ configure: mellon-core.cabal
 	@echo "*** Configuring mellon-core"
 	cabal configure
 
-#mellon-core.cabal: package.yaml
-#	@echo "*** Running hpack"
-#	hpack
+mellon-core.cabal: package.yaml
+	@echo "*** Running hpack for mellon-core"
+	hpack
 
 clean:
 	cabal clean
