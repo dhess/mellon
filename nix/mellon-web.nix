@@ -31,7 +31,7 @@ mkDerivation {
     servant-lucid servant-server servant-swagger servant-swagger-ui
     swagger2 text time transformers wai wai-extra warp
   ];
-  homepage = "https://github.com/quixoftic/mellon/";
+  homepage = "https://github.com/quixoftic/mellon#readme";
   description = "A REST web service for Mellon controllers";
   license = stdenv.lib.licenses.bsd3;
 }

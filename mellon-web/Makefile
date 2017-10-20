@@ -27,9 +27,9 @@ configure: mellon-web.cabal
 	@echo "*** Configuring mellon-web"
 	cabal configure
 
-#mellon-web.cabal: package.yaml
-#	@echo "*** Running hpack"
-#	hpack
+mellon-web.cabal: package.yaml
+	@echo "*** Running hpack for mellon-web"
+	hpack
 
 clean:
 	cabal clean
