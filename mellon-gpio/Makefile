@@ -27,9 +27,9 @@ configure: mellon-gpio.cabal
 	@echo "*** Configuring mellon-gpio"
 	cabal configure
 
-#mellon-gpio.cabal: package.yaml
-#	@echo "*** Running hpack"
-#	hpack
+mellon-gpio.cabal: package.yaml
+	@echo "*** Running hpack for mellon-gpio"
+	hpack
 
 clean:
 	cabal clean

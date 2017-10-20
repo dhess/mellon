@@ -1,0 +1,77 @@
+name:       mellon-gpio
+version:    0.8.0.2
+synopsis:   GPIO support for mellon
+category:   System
+stability:  experimental
+author:     Drew Hess <dhess-src@quixoftic.com>
+maintainer: Drew Hess <dhess-src@quixoftic.com>
+copyright:  Copyright (c) 2017, Quixoftic, LLC
+license:    BSD3
+github:     quixoftic/mellon
+
+description: ! '@mellon-gpio@ provides a GPIO-driven @mellon-core@ @Device@.
+
+  Currently, it provides support for Linux @sysfs@-based GPIO.'
+
+tested-with: GHC==7.10.3 GHC==8.0.1 GHC==8.0.2 GHC==8.2.1
+
+flags:
+  test-hlint:
+    description: Build hlint test
+    manual: true
+    default: true
+
+when:
+  - condition: impl(ghc >= 8.0)
+    then:
+      ghc-options:
+        - -Wall
+        - -Wincomplete-uni-patterns
+        - -Wincomplete-record-updates
+    else:
+      ghc-options:
+        - -Wall
+        - -fwarn-incomplete-uni-patterns
+        - -fwarn-incomplete-record-updates
+
+library:
+  when:
+    - condition: impl(ghc >= 8.0)
+      then:
+        ghc-options:
+          - -Wcompat
+          - -Wnoncanonical-monad-instances
+          - -Wnoncanonical-monadfail-instances
+      else:
+        # provide/emulate `Control.Monad.Fail` and `Data.Semigroups` API for pre-GHC8
+        dependencies:
+          - fail       == 4.9.*
+          - semigroups == 0.18.*
+  source-dirs: src
+  dependencies:
+    - base        >=4.8 && <5
+    - hpio        >=0.8 && <1
+    - mellon-core ==0.8.*
+
+tests:
+  hlint:
+    main: hlint.hs
+    source-dirs: test
+    other-modules: []
+    ghc-options:
+      - -w
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    when:
+      - condition: "!(flag(test-hlint))"
+        then:
+          buildable: false
+        else:
+          dependencies:
+            - base
+            - hlint >=1.9 && <2.1
+
+extra-source-files:
+- changelog.md
+- README.md
