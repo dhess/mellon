@@ -80,7 +80,7 @@ flag test-hlint
 library
   hs-source-dirs:
       src
-  other-extensions: DataKinds DeriveGeneric MultiParamTypeClasses OverloadedStrings TypeOperators
+  other-extensions: DataKinds DeriveDataTypeable DeriveGeneric MultiParamTypeClasses OverloadedStrings OverloadedLists ScopedTypeVariables TypeOperators
   build-depends:
       aeson >=0.11 && <1.3
     , aeson-pretty ==0.8.*
@@ -247,7 +247,7 @@ test-suite spec
   main-is: Main.hs
   hs-source-dirs:
       test
-  other-extensions: ScopedTypeVariables
+  other-extensions: OverloadedStrings ScopedTypeVariables
   ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuickCheck >=2.8 && <2.10

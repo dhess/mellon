@@ -293,6 +293,8 @@ tests:
     main: Main.hs
     source-dirs:
       - test
+    other-extensions:
+      - DeriveDataTypeable
     ghc-options:
       - -w
       - -threaded

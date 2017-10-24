@@ -106,9 +106,12 @@ library:
   source-dirs: src
   other-extensions:
     - DataKinds
+    - DeriveDataTypeable
     - DeriveGeneric
     - MultiParamTypeClasses
     - OverloadedStrings
+    - OverloadedLists
+    - ScopedTypeVariables
     - TypeOperators
   dependencies:
     - base               >=4.8    && <5
@@ -171,6 +174,7 @@ tests:
     source-dirs:
       - test
     other-extensions:
+      - OverloadedStrings
       - ScopedTypeVariables
     ghc-options:
       - -w
