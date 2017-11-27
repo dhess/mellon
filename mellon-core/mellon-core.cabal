@@ -1,6 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.19.2.
+-- This file has been generated from package.yaml by hpack version 0.20.0.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: dec485062a63b3a4cec85518715b3277281deb9cf280df045a8cf9588a3c389c
 
 name:                   mellon-core
 version:                0.8.0.2
@@ -118,7 +120,7 @@ maintainer:             Drew Hess <dhess-src@quixoftic.com>
 copyright:              Copyright (c) 2017, Quixoftic, LLC
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==7.10.3 GHC==8.0.1 GHC==8.0.2 GHC==8.2.1
+tested-with:            GHC==7.10.3 GHC==8.0.1 GHC==8.0.2 GHC==8.2.1 GHC==8.2.2
 build-type:             Simple
 cabal-version:          >= 1.10
 

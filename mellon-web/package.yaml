@@ -53,7 +53,7 @@ description: ! 'The @mellon-web@ package wraps a @mellon-core@ controller in a R
 
   server such as Nginx.'
 
-tested-with: GHC==7.10.3 GHC==8.0.1 GHC==8.0.2 GHC==8.2.1
+tested-with: GHC==7.10.3 GHC==8.0.1 GHC==8.0.2 GHC==8.2.1 GHC==8.2.2
 
 flags:
   test-hlint:
