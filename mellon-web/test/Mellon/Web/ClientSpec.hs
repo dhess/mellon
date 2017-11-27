@@ -45,7 +45,7 @@ spec = before runApp $ after killApp $
        do it "returns the server time" $ \(_, clientEnv) ->
             do now <- getCurrentTime
                Right (Time serverTime) <- runClientM getTime clientEnv
-               let delta = 1.0 :: NominalDiffTime
+               let delta = 2.0 :: NominalDiffTime
                ((serverTime `diffUTCTime` now) < delta) `shouldBe` True
 
      describe "getState" $
