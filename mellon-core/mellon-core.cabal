@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: be284ad9ac717a5a53272ee35de4e60b5a355d445350cf64e1fe7cb2ef6461ac
+-- hash: 03b9d6e60a651567d584825fe6863c4f050e9deb4b6986d9d668be39fb4bbdff
 
 name:                   mellon-core
-version:                0.8.0.2
+version:                0.8.0.3
 synopsis:               Control physical access devices
 description:            /Speak, friend, and enter./
                         .
