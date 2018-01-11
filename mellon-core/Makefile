@@ -23,9 +23,13 @@ check:
 	@echo "*** Checking mellon-core for errors"
 	cabal check
 
-configure: mellon-core.cabal
+configure: mellon-core.cabal ../nix/mellon-core.nix
 	@echo "*** Configuring mellon-core"
 	cabal configure
+
+../nix/mellon-core.nix: mellon-core.cabal
+	@echo "*** Generating ../nix/mellon-core.nix"
+	cd ../nix && cabal2nix ../mellon-core > mellon-core.nix
 
 mellon-core.cabal: package.yaml
 	@echo "*** Running hpack for mellon-core"

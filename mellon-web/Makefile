@@ -23,9 +23,13 @@ check:
 	@echo "*** Checking mellon-web for errors"
 	cabal check
 
-configure: mellon-web.cabal
+configure: mellon-web.cabal ../nix/mellon-web.nix
 	@echo "*** Configuring mellon-web"
 	cabal configure
+
+../nix/mellon-web.nix: mellon-web.cabal
+	@echo "*** Generating ../nix/mellon-web.nix"
+	cd ../nix && cabal2nix ../mellon-web > mellon-web.nix
 
 mellon-web.cabal: package.yaml
 	@echo "*** Running hpack for mellon-web"
