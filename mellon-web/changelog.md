@@ -1,3 +1,17 @@
+## 0.8.0.3 (2018-01-11)
+
+- Use hpack.
+
+- Support for GHC 8.2.2.
+
+- Bump swagger2, optparse-applicative, doctest, QuickCheck, hspec-wai
+  upper bounds.
+
+- Try to make the Mellon/Web/ClientSpec.hs test a little less
+  time-sensitive.
+
+- Maintainer-related changes (better Nix support, Makefile, etc.).
+
 ## 0.8.0.2 (2017-09-04)
 
 - Fix .cabal file for now-removed Paw file.
