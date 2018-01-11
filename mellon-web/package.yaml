@@ -130,7 +130,7 @@ library:
     - servant-server     ==0.11.*
     - servant-swagger    ==1.1.*
     - servant-swagger-ui ==0.2.*
-    - swagger2           ==2.1.*
+    - swagger2           >=2.1    && <2.3
     - text               ==1.2.*
     - time               >=1.5    && <2
     - transformers       >=0.4.2  && <0.6
@@ -168,7 +168,7 @@ tests:
         else:
           dependencies:
             - base
-            - doctest ==0.11.*
+            - doctest >=0.11 && <0.14
   spec:
     main: Main.hs
     source-dirs:
@@ -183,13 +183,13 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - base
-      - QuickCheck           >=2.8 && <2.10
+      - QuickCheck           >=2.8 && <2.11
       - quickcheck-instances ==0.3.*
       - aeson
       - aeson-pretty
       - bytestring
       - hspec                >=2.2 && <2.5
-      - hspec-wai            >=0.6.6 && <0.9
+      - hspec-wai            >=0.6.6 && <0.10
       - http-client
       - http-types
       - lens
@@ -243,7 +243,7 @@ executables:
             - mellon-web
             - mtl
             - network              ==2.6.*
-            - optparse-applicative >=0.11.0 && <0.14
+            - optparse-applicative >=0.11.0 && <0.15
             - time
             - transformers
             - warp
