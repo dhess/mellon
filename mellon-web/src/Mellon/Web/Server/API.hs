@@ -256,9 +256,7 @@ serverT =
   putState
   where
     getTime :: AppM d Time
-    getTime =
-      do now <- liftIO getCurrentTime
-         return $ Time now
+    getTime = Time <$> liftIO getCurrentTime
 
     getState :: AppM d State
     getState =
