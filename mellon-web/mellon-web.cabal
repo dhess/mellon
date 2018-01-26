@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6f888996b5b3eb2e33aad7453edcf072a41751dc7e2fa46cfed52530a1a930d1
+-- hash: 92553f34225c98767ff5d57dcfd157d6d360d852c8e30842e863e8284d5bfa9c
 
 name:                   mellon-web
 version:                0.8.0.3
@@ -47,6 +47,8 @@ cabal-version:          >= 1.10
 
 extra-source-files:
     changelog.md
+    Hlint.hs
+    package.yaml
     README.md
     swagger.json
 

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 492822d6892b4ca0c57555614ee7dec63e5ed288bd0dc031e8ac701fc74fc433
+-- hash: e2552e93d76f72b88723f6ab5415c387fc635604949282f808b6a61608bec428
 
 name:                   mellon-gpio
 version:                0.8.0.3
@@ -24,6 +24,8 @@ cabal-version:          >= 1.10
 
 extra-source-files:
     changelog.md
+    Hlint.hs
+    package.yaml
     README.md
 
 source-repository head

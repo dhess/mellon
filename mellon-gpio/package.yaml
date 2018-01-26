@@ -75,3 +75,6 @@ tests:
 extra-source-files:
 - changelog.md
 - README.md
+- Hlint.hs
+- package.yaml
+

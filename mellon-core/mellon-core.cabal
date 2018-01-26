@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 03b9d6e60a651567d584825fe6863c4f050e9deb4b6986d9d668be39fb4bbdff
+-- hash: 7b82cfc1c5199e6377699a9d3d5a37d719e7a76ce5a1fc6875c72af388a944e4
 
 name:                   mellon-core
 version:                0.8.0.3
@@ -126,6 +126,8 @@ cabal-version:          >= 1.10
 
 extra-source-files:
     changelog.md
+    Hlint.hs
+    package.yaml
     README.md
 
 source-repository head

@@ -313,3 +313,5 @@ extra-source-files:
 - changelog.md
 - README.md
 - swagger.json
+- Hlint.hs
+- package.yaml
