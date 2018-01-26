@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5496a9a21ffc35c17ff98b8a9210126a808a61622630fd684c50ef7720bdf23c
+-- hash: a9487a8a210c186753d613c0da759adc43eff2eef6a18ea865efb5add7474532
 
 name:                   mellon-web
-version:                0.8.0.3
+version:                0.8.0.4
 synopsis:               A REST web service for Mellon controllers
 description:            The @mellon-web@ package wraps a @mellon-core@ controller in a REST
                         web service, making it possible to control physical access devices

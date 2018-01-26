@@ -1,3 +1,11 @@
+## 0.8.0.4 (2018-01-26)
+
+- Require hlint 2.0.x.
+
+- Bump QuickCheck bounds.
+
+- New and improved Nix packaging.
+
 ## 0.8.0.3 (2018-01-11)
 
 - Use hpack.
