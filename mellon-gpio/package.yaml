@@ -70,11 +70,10 @@ tests:
         else:
           dependencies:
             - base
-            - hlint >=1.9 && <2.1
+            - hlint ==2.0.*
 
 extra-source-files:
 - changelog.md
 - README.md
-- Hlint.hs
 - package.yaml
 

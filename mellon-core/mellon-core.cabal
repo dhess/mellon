@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5b022c6c45f5c4a74c6e728cb3e715df7a02f181c4e1fdee9bba137ad356b964
+-- hash: 52cf616f7026fdd3079a455cbabb983d7186f1832b939f154237f21a09eb2097
 
 name:                   mellon-core
 version:                0.8.0.3
@@ -125,8 +125,8 @@ build-type:             Simple
 cabal-version:          >= 1.10
 
 extra-source-files:
+    .hlint.yaml
     changelog.md
-    Hlint.hs
     package.yaml
     README.md
 
@@ -208,7 +208,7 @@ test-suite hlint
   else
     build-depends:
         base
-      , hlint >=1.9 && <2.1
+      , hlint ==2.0.*
   default-language: Haskell2010
 
 test-suite spec

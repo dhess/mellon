@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e2552e93d76f72b88723f6ab5415c387fc635604949282f808b6a61608bec428
+-- hash: c710c53017736d2f93b8dea3fcf7809c549960c5840ab83606e190355a8be38f
 
 name:                   mellon-gpio
 version:                0.8.0.3
@@ -24,7 +24,6 @@ cabal-version:          >= 1.10
 
 extra-source-files:
     changelog.md
-    Hlint.hs
     package.yaml
     README.md
 
@@ -75,5 +74,5 @@ test-suite hlint
   else
     build-depends:
         base
-      , hlint >=1.9 && <2.1
+      , hlint ==2.0.*
   default-language: Haskell2010

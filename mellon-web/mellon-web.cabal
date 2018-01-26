@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d5c52cbb4847562c99b406b0f19c1b87eb626840e722b94d18043dcebb441c93
+-- hash: 5496a9a21ffc35c17ff98b8a9210126a808a61622630fd684c50ef7720bdf23c
 
 name:                   mellon-web
 version:                0.8.0.3
@@ -47,7 +47,6 @@ cabal-version:          >= 1.10
 
 extra-source-files:
     changelog.md
-    Hlint.hs
     package.yaml
     README.md
     swagger.json
@@ -243,7 +242,7 @@ test-suite hlint
   else
     build-depends:
         base
-      , hlint >=1.9 && <2.1
+      , hlint ==2.0.*
   default-language: Haskell2010
 
 test-suite spec

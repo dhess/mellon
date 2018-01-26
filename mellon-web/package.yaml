@@ -154,7 +154,7 @@ tests:
         else:
           dependencies:
             - base
-            - hlint >=1.9 && <2.1
+            - hlint ==2.0.*
   doctest:
     main: doctest.hs
     source-dirs: test
@@ -313,5 +313,4 @@ extra-source-files:
 - changelog.md
 - README.md
 - swagger.json
-- Hlint.hs
 - package.yaml
