@@ -27,7 +27,7 @@ configure: mellon-web.cabal ../nix/pkgs/mellon-web.nix
 	@echo "*** Configuring mellon-web"
 	cabal configure
 
-../nix/pkgs/mellon-web.nix: mellon-web.cabal
+nix ../nix/pkgs/mellon-web.nix: mellon-web.cabal
 	@echo "*** Generating ../nix/pkgs/mellon-web.nix"
 	cd ../nix/pkgs && cabal2nix ../../mellon-web > mellon-web.nix
 

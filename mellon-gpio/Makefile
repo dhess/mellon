@@ -27,7 +27,7 @@ configure: mellon-gpio.cabal ../nix/pkgs/mellon-gpio.nix
 	@echo "*** Configuring mellon-gpio"
 	cabal configure
 
-../nix/pkgs/mellon-gpio.nix: mellon-gpio.cabal
+nix ../nix/pkgs/mellon-gpio.nix: mellon-gpio.cabal
 	@echo "*** Generating ../nix/pkgs/mellon-gpio.nix"
 	cd ../nix/pkgs && cabal2nix ../../mellon-gpio > mellon-gpio.nix
 

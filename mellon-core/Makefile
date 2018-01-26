@@ -27,7 +27,7 @@ configure: mellon-core.cabal ../nix/pkgs/mellon-core.nix
 	@echo "*** Configuring mellon-core"
 	cabal configure
 
-../nix/pkgs/mellon-core.nix: mellon-core.cabal
+nix ../nix/pkgs/mellon-core.nix: mellon-core.cabal
 	@echo "*** Generating ../nix/mellon-core.nix"
 	cd ../nix/pkgs && cabal2nix ../../mellon-core > mellon-core.nix
 
