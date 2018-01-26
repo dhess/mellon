@@ -16,9 +16,9 @@ SUBPROJECTS = mellon-core \
 	      mellon-gpio \
 	      mellon-web
 
-NIXFILES = nix/mellon-core.nix \
-	   nix/mellon-gpio.nix \
-	   nix/mellon-web.nix 
+NIXFILES = nix/pkgs/mellon-core.nix \
+	   nix/pkgs/mellon-gpio.nix \
+	   nix/pkgs/mellon-web.nix 
 
 test:	$(NIXFILES)
 	$(MAKE) -C mellon-web configure
@@ -80,7 +80,7 @@ lts-9: 	$(NIXFILES)
 # Currently disabled, as Nix no longer supports GHC 8.0.1 out of the
 # box.
 
-#lts-7: 	mellon-web.cabal nix/mellon-web.nix
+#lts-7: 	mellon-web.cabal nix/pkgs/mellon-web.nix
 #	$(call nix-stack,lts-7,stack-lts-7.yaml)
 
 lts-6: 	$(NIXFILES)
@@ -92,17 +92,17 @@ lts-3: 	$(NIXFILES)
 lts-2: 	$(NIXFILES)
 	$(call nix-stack,lts-2,stack-lts-2.yaml)
 
-nix/mellon-core.nix: mellon-core/mellon-core.cabal
-	@echo "*** Generating nix/mellon-core.nix"
-	cd nix && cabal2nix ../mellon-core > mellon-core.nix
+nix/pkgs/mellon-core.nix: mellon-core/mellon-core.cabal
+	@echo "*** Generating nix/pkgs/mellon-core.nix"
+	cd nix/pkgs && cabal2nix ../../mellon-core > mellon-core.nix
 
-nix/mellon-gpio.nix: mellon-gpio/mellon-gpio.cabal
-	@echo "*** Generating nix/mellon-gpio.nix"
-	cd nix && cabal2nix ../mellon-gpio > mellon-gpio.nix
+nix/pkgs/mellon-gpio.nix: mellon-gpio/mellon-gpio.cabal
+	@echo "*** Generating nix/pkgs/mellon-gpio.nix"
+	cd nix/pkgs && cabal2nix ../../mellon-gpio > mellon-gpio.nix
 
-nix/mellon-web.nix: mellon-web/mellon-web.cabal
-	@echo "*** Generating nix/mellon-web.nix"
-	cd nix && cabal2nix ../mellon-web > mellon-web.nix
+nix/pkgs/mellon-web.nix: mellon-web/mellon-web.cabal
+	@echo "*** Generating nix/pkgs/mellon-web.nix"
+	cd nix/pkgs && cabal2nix ../../mellon-web > mellon-web.nix
 
 clean:
 	@for proj in $(SUBPROJECTS); do \

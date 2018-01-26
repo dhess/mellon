@@ -1,3 +1,15 @@
-{ compiler ? "ghc822" }:
+{ compiler ? "ghc822"
+, overlays ? [ (import ../.) ]
+}:
 
-(import ../release.nix { inherit compiler; }).mellon-core.env
+let
+
+  fixedNixPkgs = (import ../nix/lib.nix).fetchNixPkgs;
+
+  pkgs = (import fixedNixPkgs) { inherit overlays; };
+
+  drv = pkgs.haskellPackages.mellon-core;
+
+in
+
+  if pkgs.lib.inNixShell then drv.env else drv

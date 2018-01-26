@@ -1,0 +1,30 @@
+let
+
+  fixedNixPkgs = (import ../lib.nix).fetchNixPkgs;
+
+in
+
+{ supportedSystems ? [ "x86_64-darwin" ]
+, scrubJobs ? true
+, nixpkgsArgs ? {
+    config = { allowUnfree = true; allowBroken = true; inHydra = true; };
+    overlays = [ (import ../../.) ];
+  }
+}:
+
+with import (fixedNixPkgs + "/pkgs/top-level/release-lib.nix") {
+  inherit supportedSystems scrubJobs nixpkgsArgs;
+};
+
+let
+
+  jobs = (mapTestOn ({
+    haskellPackages = packagePlatforms pkgs.haskellPackages;
+  }));
+
+in
+{
+  inherit (jobs.haskellPackages) mellon-core;
+  inherit (jobs.haskellPackages) mellon-gpio;
+  inherit (jobs.haskellPackages) mellon-web;
+}

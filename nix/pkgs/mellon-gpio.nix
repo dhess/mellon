@@ -2,7 +2,7 @@
 mkDerivation {
   pname = "mellon-gpio";
   version = "0.8.0.3";
-  src = ../mellon-gpio;
+  src = ../../mellon-gpio;
   libraryHaskellDepends = [ base hpio mellon-core ];
   testHaskellDepends = [ base hlint ];
   homepage = "https://github.com/quixoftic/mellon#readme";
