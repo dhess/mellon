@@ -286,7 +286,7 @@ tests:
         else:
           dependencies:
             - base
-            - QuickCheck           >=2.8    && <2.11
+            - QuickCheck           >=2.8    && <2.12
             - quickcheck-instances ==0.3.*
             - doctest              >=0.11 && <0.14
   spec:

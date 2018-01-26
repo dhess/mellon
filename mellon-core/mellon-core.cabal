@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7b82cfc1c5199e6377699a9d3d5a37d719e7a76ce5a1fc6875c72af388a944e4
+-- hash: 5b022c6c45f5c4a74c6e728cb3e715df7a02f181c4e1fdee9bba137ad356b964
 
 name:                   mellon-core
 version:                0.8.0.3
@@ -187,7 +187,7 @@ test-suite doctest
     buildable: False
   else
     build-depends:
-        QuickCheck >=2.8 && <2.11
+        QuickCheck >=2.8 && <2.12
       , base
       , doctest >=0.11 && <0.14
       , quickcheck-instances ==0.3.*

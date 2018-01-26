@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 92553f34225c98767ff5d57dcfd157d6d360d852c8e30842e863e8284d5bfa9c
+-- hash: d5c52cbb4847562c99b406b0f19c1b87eb626840e722b94d18043dcebb441c93
 
 name:                   mellon-web
 version:                0.8.0.3
@@ -254,7 +254,7 @@ test-suite spec
   other-extensions: OverloadedStrings ScopedTypeVariables
   ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      QuickCheck >=2.8 && <2.11
+      QuickCheck >=2.8 && <2.12
     , aeson
     , aeson-pretty
     , base

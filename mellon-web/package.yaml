@@ -183,7 +183,7 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - base
-      - QuickCheck           >=2.8 && <2.11
+      - QuickCheck           >=2.8 && <2.12
       - quickcheck-instances ==0.3.*
       - aeson
       - aeson-pretty
