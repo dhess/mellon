@@ -16,6 +16,9 @@ SUBPROJECTS = mellon-core \
 	      mellon-gpio \
 	      mellon-web
 
+nix-build: nix
+	nix-build nix/jobsets/release.nix
+
 test:	build
 	$(MAKE) -C mellon-web test
 
@@ -25,11 +28,14 @@ build:	nix
 help:
 	@echo "Targets:"
 	@echo
+	@echo "(Default is 'nix-build')"
+	@echo
 	@echo "Cabal/Nix:"
 	@echo
 	@echo "The following targets assume that you are running Nix with some version"
 	@echo "of cabal and GHC in your environment."
 	@echo
+	@echo "    nix-build - Build all nix/jobsets/release.nix attrs"
 	@echo "    test      - configure and build the package, then run the tests"
 	@echo "    build     - configure and build the package"
 	@echo "    nix       - make sure Nix files are up-to-date"
@@ -67,4 +73,4 @@ clean:
 	  $(MAKE) -C $$proj clean; \
 	done
 
-.PHONY: clean nix
+.PHONY: clean nix nix-build
