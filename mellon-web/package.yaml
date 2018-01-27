@@ -309,8 +309,10 @@ executables:
             - mellon-web
             - warp
 
+data-files:
+- swagger.json
+
 extra-source-files:
 - changelog.md
 - README.md
-- swagger.json
 - package.yaml

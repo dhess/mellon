@@ -13,6 +13,7 @@ mkDerivation {
   src = ../../mellon-web;
   isLibrary = true;
   isExecutable = true;
+  enableSeparateDataOutput = true;
   libraryHaskellDepends = [
     aeson aeson-pretty base bytestring http-client http-types lens
     lucid mellon-core servant servant-client servant-docs servant-lucid

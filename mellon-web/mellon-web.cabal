@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a9487a8a210c186753d613c0da759adc43eff2eef6a18ea865efb5add7474532
+-- hash: 4e7c11a76ae6b1cb065128c13b6b3e8df1d05bf1f441726ce7336ba3b40901c1
 
 name:                   mellon-web
 version:                0.8.0.4
@@ -49,6 +49,8 @@ extra-source-files:
     changelog.md
     package.yaml
     README.md
+
+data-files:
     swagger.json
 
 source-repository head
