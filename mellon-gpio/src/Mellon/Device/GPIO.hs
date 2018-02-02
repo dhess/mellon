@@ -1,7 +1,7 @@
 {-|
 Module      : Mellon.Device.GPIO
 Description : GPIO-driven @mellon-core@ devices
-Copyright   : (c) 2017, Quixoftic, LLC
+Copyright   : (c) 2018, Quixoftic, LLC
 License     : BSD3
 Maintainer  : Drew Hess <dhess-src@quixoftic.com>
 Stability   : experimental
