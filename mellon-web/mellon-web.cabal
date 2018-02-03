@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9dd46111974d234a2f196ba08e02ea885652db98efccbc782fd783100ab71512
+-- hash: a9910c351aebf85e04bfba7bb041498d4e66b0a300f51faf589373b5ffef38ee
 
 name:                   mellon-web
 version:                0.8.0.4
@@ -194,6 +194,7 @@ executable mock-mellon-server
   main-is: MockServer.hs
   hs-source-dirs:
       examples
+  other-extensions: OverloadedStrings
   ghc-options: -threaded -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
   if impl(ghc >= 8.0)
     ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates

@@ -213,7 +213,7 @@ tests:
       - warp
 
 executables:
-  gpio-mellon-server:
+  gpio-mellon-server: &executable
     main: GpioServer.hs
     source-dirs: examples
     other-modules: []
@@ -248,16 +248,11 @@ executables:
             - transformers
             - warp
   mellon-schedule-unlock:
+    <<: *executable
     main: ScheduleUnlock.hs
-    source-dirs: examples
-    other-modules: []
     other-extensions:
       - LambdaCase
       - OverloadedStrings
-    ghc-options:
-      - -threaded
-      - -fwarn-incomplete-uni-patterns
-      - -fwarn-incomplete-record-updates
     when:
       - condition: impl(ghc >= 8.0)
         ghc-options:
@@ -285,13 +280,8 @@ executables:
             - time
             - transformers
   mock-mellon-server:
+    <<: *executable
     main: MockServer.hs
-    source-dirs: examples
-    other-modules: []
-    ghc-options:
-      - -threaded
-      - -fwarn-incomplete-uni-patterns
-      - -fwarn-incomplete-record-updates
     when:
       - condition: impl(ghc >= 8.0)
         ghc-options:
