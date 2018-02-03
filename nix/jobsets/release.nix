@@ -33,34 +33,54 @@ let
 
   jobs = {
 
-    x86_64-darwin = pkgs.releaseTools.aggregate {
-      name = "mellon-x86_64-darwin";
-      meta.description = "mellon packages (x86_64-darwin)";
+    nixpkgs = pkgs.releaseTools.aggregate {
+      name = "nixpkgs";
+      meta.description = "mellon packages built against nixpkgs haskellPackages";
       constituents = with jobs; [
         haskellPackages.mellon-core.x86_64-darwin
-        haskellPackages.mellon-gpio.x86_64-darwin
-        haskellPackages.mellon-web.x86_64-darwin
-      ];
-    };
-
-    x86_64-linux = pkgs.releaseTools.aggregate {
-      name = "mellon-x86_64-linux";
-      meta.description = "mellon packages (x86_64-linux)";
-      constituents = with jobs; [
         haskellPackages.mellon-core.x86_64-linux
+        haskellPackages.mellon-gpio.x86_64-darwin
         haskellPackages.mellon-gpio.x86_64-linux
+        haskellPackages.mellon-web.x86_64-darwin
         haskellPackages.mellon-web.x86_64-linux
       ];
     };
 
+    lts-10 = pkgs.releaseTools.aggregate {
+      name = "lts-10";
+      meta.description = "mellon packages built against Stackage LTS 10 package set";
+      constituents = with jobs; [
+        lts10Packages.mellon-core.x86_64-darwin
+        lts10Packages.mellon-core.x86_64-linux
+        lts10Packages.mellon-gpio.x86_64-darwin
+        lts10Packages.mellon-gpio.x86_64-linux
+        lts10Packages.mellon-web.x86_64-darwin
+        lts10Packages.mellon-web.x86_64-linux
+      ];
+    };
+
+    lts-9 = pkgs.releaseTools.aggregate {
+      name = "lts-9";
+      meta.description = "mellon packages built against Stackage LTS 9 package set";
+      constituents = with jobs; [
+        lts9Packages.mellon-core.x86_64-darwin
+        lts9Packages.mellon-core.x86_64-linux
+        lts9Packages.mellon-gpio.x86_64-darwin
+        lts9Packages.mellon-gpio.x86_64-linux
+        lts9Packages.mellon-web.x86_64-darwin
+        lts9Packages.mellon-web.x86_64-linux
+      ];
+    };
+
   } // (mapTestOn ({
+
     haskellPackages = packagePlatforms pkgs.haskellPackages;
+    lts10Packages = packagePlatforms pkgs.lts10Packages;
+    lts9Packages = packagePlatforms pkgs.lts9Packages;
+
   }));
 
 in
 {
-  inherit (jobs) x86_64-darwin;
-  inherit (jobs) x86_64-linux;
+  inherit (jobs) nixpkgs lts-10 lts-9;
 }
-// enumerateConstituents jobs.x86_64-darwin
-// enumerateConstituents jobs.x86_64-linux

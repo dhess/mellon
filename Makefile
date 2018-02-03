@@ -16,19 +16,27 @@ SUBPROJECTS = mellon-core \
 	      mellon-gpio \
 	      mellon-web
 
-nix-build-testing-attr = nix-build --no-out-link nix/jobsets/testing.nix -A $(1)
+NIXPKGS := $(shell nix-build -Q --no-out-link ./nix/fetch-nixpkgs-stackage-nixpkgs.nix 2>/dev/null)
 
-nix-build-testing = nix-build --no-out-link nix/jobsets/testing.nix
+nix-build-testing-attr = nix-build --no-out-link nix/jobsets/testing.nix -I nixpkgs=$(NIXPKGS) -A $(1)
 
-nix-build-attr = nix-build --no-out-link nix/jobsets/release.nix -A $(1)
+nix-build-testing = nix-build --no-out-link nix/jobsets/testing.nix -I nixpkgs=$(NIXPKGS)
 
-nix-build = nix-build --no-out-link nix/jobsets/release.nix
+nix-build-attr = nix-build --no-out-link nix/jobsets/release.nix -I nixpkgs=$(NIXPKGS) -A $(1)
+
+nix-build = nix-build --no-out-link nix/jobsets/release.nix -I nixpkgs=$(NIXPKGS)
 
 mellon:	nix
 	$(call nix-build-testing)
 
 mellon-%:	nix
 		$(call nix-build-testing-attr,mellon-$*)
+
+nixpkgs:	nix
+		$(call nix-build-attr,nixpkgs)
+
+lts-%:	nix
+	$(call nix-build-attr,lts-$*)
 
 release:	nix
 		$(call nix-build)
