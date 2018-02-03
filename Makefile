@@ -16,8 +16,22 @@ SUBPROJECTS = mellon-core \
 	      mellon-gpio \
 	      mellon-web
 
-nix-build: nix
-	nix-build nix/jobsets/release.nix
+nix-build-testing-attr = nix-build --no-out-link nix/jobsets/testing.nix -A $(1)
+
+nix-build-testing = nix-build --no-out-link nix/jobsets/testing.nix
+
+nix-build-attr = nix-build --no-out-link nix/jobsets/release.nix -A $(1)
+
+nix-build = nix-build --no-out-link nix/jobsets/release.nix
+
+mellon:	nix
+	$(call nix-build-testing)
+
+mellon-%:	nix
+		$(call nix-build-testing-attr,mellon-$*)
+
+release:	nix
+		$(call nix-build)
 
 test:	build
 	$(MAKE) -C mellon-web test
