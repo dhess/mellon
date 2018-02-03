@@ -1,5 +1,1 @@
-packages:
-- mellon-core/
-- mellon-web/
-- mellon-gpio/
-resolver: lts-10.3
+stack-lts-10.yaml

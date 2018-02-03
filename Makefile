@@ -73,4 +73,11 @@ clean:
 	  $(MAKE) -C $$proj clean; \
 	done
 
+nix-stack = nix-shell -p stack-env zlib libiconv ncurses --run 'stack test --stack-yaml $(1)'
+
+stack-lts:      stack-lts-10
+
+stack-lts-%:    nix
+		$(call nix-stack, stack-lts-$*.yaml)
+
 .PHONY: clean nix nix-build
