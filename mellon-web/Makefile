@@ -23,13 +23,14 @@ check:
 	@echo "*** Checking mellon-web for errors"
 	cabal check
 
-configure: mellon-web.cabal ../nix/pkgs/mellon-web.nix
+configure: nix mellon-web.cabal
 	@echo "*** Configuring mellon-web"
-	cabal configure
+	cabal configure -f test-hlint
 
-nix ../nix/pkgs/mellon-web.nix: mellon-web.cabal
-	@echo "*** Generating ../nix/pkgs/mellon-web.nix"
+nix: 	mellon-web.cabal
+	@echo "*** Generating mellon-web Nix files"
 	cd ../nix/pkgs && cabal2nix ../../mellon-web > mellon-web.nix
+	cd ../nix/pkgs && cabal2nix --flag test-hlint ../../mellon-web > mellon-web-hlint.nix
 
 mellon-web.cabal: package.yaml
 	@echo "*** Running hpack for mellon-web"
@@ -38,4 +39,4 @@ mellon-web.cabal: package.yaml
 clean:
 	cabal clean
 
-.PHONY: clean
+.PHONY: clean nix mellon-web.cabal

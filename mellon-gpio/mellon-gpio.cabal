@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5d0131e44b39a6d83e0f72ecd4cdd7e84764a20bb89537904b1bd6b9ead0ede4
+-- hash: 275e8a16219f8a86e6c76424ffed75fbbea013202697143d8e3f56d93b5970c6
 
 name:                   mellon-gpio
 version:                0.8.0.4

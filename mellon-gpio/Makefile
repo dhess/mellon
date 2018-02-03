@@ -23,13 +23,14 @@ check:
 	@echo "*** Checking mellon-gpio for errors"
 	cabal check
 
-configure: mellon-gpio.cabal ../nix/pkgs/mellon-gpio.nix
+configure: nix mellon-gpio.cabal
 	@echo "*** Configuring mellon-gpio"
-	cabal configure
+	cabal configure -f test-hlint
 
-nix ../nix/pkgs/mellon-gpio.nix: mellon-gpio.cabal
-	@echo "*** Generating ../nix/pkgs/mellon-gpio.nix"
+nix: 	mellon-gpio.cabal
+	@echo "*** Generating mellon-gpio Nix files"
 	cd ../nix/pkgs && cabal2nix ../../mellon-gpio > mellon-gpio.nix
+	cd ../nix/pkgs && cabal2nix --flag test-hlint ../../mellon-gpio > mellon-gpio-hlint.nix
 
 mellon-gpio.cabal: package.yaml
 	@echo "*** Running hpack for mellon-gpio"
@@ -38,4 +39,4 @@ mellon-gpio.cabal: package.yaml
 clean:
 	cabal clean
 
-.PHONY: clean
+.PHONY: clean nix mellon-gpio.cabal

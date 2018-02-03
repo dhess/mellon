@@ -23,13 +23,14 @@ check:
 	@echo "*** Checking mellon-core for errors"
 	cabal check
 
-configure: mellon-core.cabal ../nix/pkgs/mellon-core.nix
+configure: nix mellon-core.cabal
 	@echo "*** Configuring mellon-core"
-	cabal configure
+	cabal configure -f test-hlint
 
-nix ../nix/pkgs/mellon-core.nix: mellon-core.cabal
-	@echo "*** Generating ../nix/mellon-core.nix"
+nix: 	mellon-core.cabal
+	@echo "*** Generating mellon-core Nix files"
 	cd ../nix/pkgs && cabal2nix ../../mellon-core > mellon-core.nix
+	cd ../nix/pkgs && cabal2nix --flag test-hlint ../../mellon-core > mellon-core-hlint.nix
 
 mellon-core.cabal: package.yaml
 	@echo "*** Running hpack for mellon-core"
@@ -38,4 +39,4 @@ mellon-core.cabal: package.yaml
 clean:
 	cabal clean
 
-.PHONY: clean
+.PHONY: clean nix mellon-core.cabal

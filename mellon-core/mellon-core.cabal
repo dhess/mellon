@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c241c1dea92ace19196c4e4721144b03ede6c6f16f531f177adb9296e10611b0
+-- hash: b27fc8afc5f21ed107696baca91eb1210c2d7f12d75e60348aa190428da81667
 
 name:                   mellon-core
 version:                0.8.0.4
