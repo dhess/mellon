@@ -15,7 +15,15 @@ let
     emailresponsible = false;
   };
 
-  nixpkgs-src = builtins.fromJSON (builtins.readFile ../nixpkgs-src.json);
+  ## nixpkgs-stackage wants a <nixpkgs> path so that it can import
+  ## Haskell stuff. Which we use doesn't particularly matter, as
+  ## it's only used for importing functions. Here we use a stable
+  ## one.
+  nixpkgs-src = builtins.fromJSON (builtins.readFile ../nixpkgs-stackage-nixpkgs-src.json);
+  nixpkgs-spec = {
+    url = "https://github.com/${nixpkgs-src.owner}/${nixpkgs-src.repo}.git";
+    rev = "${nixpkgs-src.rev}";
+  };
 
   pkgs = import nixpkgs {};
 
@@ -31,22 +39,32 @@ let
     nixexprinput = "mellon";
     description = "mellon";
     inputs = {
+
+      ## Note: the nixpkgs input here is for nixpkgs-stackage's
+      ## <nixpkgs>. It is not used by hpio.
+      nixpkgs = mkFetchGithub "${nixpkgs-spec.url} ${nixpkgs-spec.rev}";
+
       mellon = mkFetchGithub "${mellonUri} master";
+
     };
   };
 
-  mkChannelAlt = mellonBranch: nixpkgsRev: {
-    checkinterval = 60;
-    schedulingshares = 100;
+  mkChannelAlt = mellonBranch: nixpkgsRev: nixpkgsStackageRev: {
     inputs = {
+
+      ## Note: the nixpkgs input here is for nixpkgs-stackage's
+      ## <nixpkgs>. It is not used by hpio.
+      nixpkgs = mkFetchGithub "${nixpkgs-spec.url} ${nixpkgs-spec.rev}";
+
       nixpkgs_override = mkFetchGithub "https://github.com/NixOS/nixpkgs-channels.git ${nixpkgsRev}";
+      nixpkgs_stackage_override = mkFetchGithub "https://github.com/typeable/nixpkgs-stackage.git ${nixpkgsStackageRev}";
       mellon = mkFetchGithub "${mellonUri} ${mellonBranch}";
     };
   };
 
   mainJobsets = with pkgs.lib; mapAttrs (name: settings: defaultSettings // settings) (rec {
     master = {};
-    nixpkgs-unstable = mkChannelAlt "master" "nixpkgs-unstable";
+    nixpkgs-unstable = mkChannelAlt "master" "nixpkgs-unstable" "master";
   });
 
   jobsetsAttrs = mainJobsets;
