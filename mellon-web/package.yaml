@@ -122,7 +122,7 @@ library:
     - http-types         ==0.9.*
     - lens               >=4      && <5
     - lucid              ==2.9.*
-    - mellon-core        ==0.8.*
+    - mellon-core        ==0.8.0.4
     - servant            ==0.11.*
     - servant-client     ==0.11.*
     - servant-docs       >=0.10   && <0.12
@@ -183,20 +183,20 @@ tests:
       - -with-rtsopts=-N
     dependencies:
       - base
-      - QuickCheck           >=2.8 && <2.12
+      - QuickCheck           >=2.8   && <2.12
       - quickcheck-instances ==0.3.*
       - aeson
       - aeson-pretty
       - bytestring
-      - hspec                >=2.2 && <2.5
+      - hspec                >=2.2   && <2.5
       - hspec-wai            >=0.6.6 && <0.10
       - http-client
       - http-types
       - lens
       - lucid
       - mellon-core
-      - mellon-web
-      - network
+      - mellon-web           ==0.8.0.4
+      - network              ==2.6.*
       - servant
       - servant-client
       - servant-docs
@@ -236,13 +236,13 @@ executables:
         else:
           dependencies:
             - base
-            - exceptions           >=0.8.0 && <1
-            - hpio                 >=0.8 && <1
+            - exceptions           >=0.8.0  && <1
+            - hpio                 >=0.8    && <1
             - mellon-core
-            - mellon-gpio          ==0.8.*
+            - mellon-gpio
             - mellon-web
-            - mtl
-            - network              ==2.6.*
+            - mtl                  >=2.1.3  && <2.3
+            - network
             - optparse-applicative >=0.11.0 && <0.15
             - time
             - transformers
@@ -274,7 +274,7 @@ executables:
             - bytestring
             - exceptions
             - http-client
-            - http-client-tls
+            - http-client-tls       ==0.3.*
             - http-types
             - mellon-core
             - mellon-web

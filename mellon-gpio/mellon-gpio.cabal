@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 275e8a16219f8a86e6c76424ffed75fbbea013202697143d8e3f56d93b5970c6
+-- hash: d345ba8fd98315ebeb9027e28143d34bf7f82dfda2c95a12635ca0452f24b62c
 
 name:                   mellon-gpio
 version:                0.8.0.4
@@ -42,7 +42,7 @@ library
   build-depends:
       base >=4.8 && <5
     , hpio >=0.8 && <1
-    , mellon-core ==0.8.*
+    , mellon-core ==0.8.0.4
   if impl(ghc >= 8.0)
     ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
   else
