@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b27fc8afc5f21ed107696baca91eb1210c2d7f12d75e60348aa190428da81667
+-- hash: cc2c88b58624c51e0de58d88b337f49cfbee0683503ff0f3dff09b83d20179ab
 
 name:                   mellon-core
 version:                0.8.0.4
@@ -142,7 +142,7 @@ flag test-doctests
 flag test-hlint
   description: Build hlint test
   manual: True
-  default: True
+  default: False
 
 library
   hs-source-dirs:

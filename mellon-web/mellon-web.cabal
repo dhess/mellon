@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a9910c351aebf85e04bfba7bb041498d4e66b0a300f51faf589373b5ffef38ee
+-- hash: e9e743a5555c456c587ff19af5ea9febdd0e3160cb1efa18de533084f7e5b987
 
 name:                   mellon-web
 version:                0.8.0.4
@@ -80,7 +80,7 @@ flag test-doctests
 flag test-hlint
   description: Build hlint test
   manual: True
-  default: True
+  default: False
 
 library
   hs-source-dirs:

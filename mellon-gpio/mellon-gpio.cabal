@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d345ba8fd98315ebeb9027e28143d34bf7f82dfda2c95a12635ca0452f24b62c
+-- hash: e67646b1c65f822e68273ea07041566022b553332b303dc2b249456b8c235076
 
 name:                   mellon-gpio
 version:                0.8.0.4
@@ -34,7 +34,7 @@ source-repository head
 flag test-hlint
   description: Build hlint test
   manual: True
-  default: True
+  default: False
 
 library
   hs-source-dirs:
