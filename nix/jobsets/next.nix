@@ -27,7 +27,7 @@ let
     ghc841 = pkgs.releaseTools.aggregate {
       name = "ghc841";
       meta.description = "mellon packages built against nixpkgs haskellPackages using GHC 8.4.1";
-      meta.maintainers = lib.maintainers.dhess-qx;
+      meta.maintainers = pkgs.lib.maintainers.dhess-qx;
       constituents = with jobs; [
         haskellPackages841.mellon-core.x86_64-darwin
         haskellPackages841.mellon-core.x86_64-linux

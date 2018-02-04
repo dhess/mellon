@@ -36,7 +36,7 @@ let
     nixpkgs = pkgs.releaseTools.aggregate {
       name = "nixpkgs";
       meta.description = "mellon packages built against nixpkgs haskellPackages";
-      meta.maintainers = lib.maintainers.dhess-qx;
+      meta.maintainers = pkgs.lib.maintainers.dhess-qx;
       constituents = with jobs; [
         haskellPackages.mellon-core.x86_64-darwin
         haskellPackages.mellon-core.x86_64-linux
@@ -50,7 +50,7 @@ let
     lts-10 = pkgs.releaseTools.aggregate {
       name = "lts-10";
       meta.description = "mellon packages built against Stackage LTS 10 package set";
-      meta.maintainers = lib.maintainers.dhess-qx;
+      meta.maintainers = pkgs.lib.maintainers.dhess-qx;
       constituents = with jobs; [
         lts10Packages.mellon-core.x86_64-darwin
         lts10Packages.mellon-core.x86_64-linux
@@ -64,7 +64,7 @@ let
     lts-9 = pkgs.releaseTools.aggregate {
       name = "lts-9";
       meta.description = "mellon packages built against Stackage LTS 9 package set";
-      meta.maintainers = lib.maintainers.dhess-qx;
+      meta.maintainers = pkgs.lib.maintainers.dhess-qx;
       constituents = with jobs; [
         lts9Packages.mellon-core.x86_64-darwin
         lts9Packages.mellon-core.x86_64-linux
