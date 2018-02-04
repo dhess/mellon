@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f3ae26c67875bab222cb3a467f70e41dcfff435ad0eacc151aac30c515f82960
+-- hash: 55af04fb959faaa66f7f850ad4ce3d6ebb14a32c54b20fb5450b1fe5a51ef64a
 
 name:                   mellon-web
 version:                0.8.0.5
@@ -26,8 +26,8 @@ description:            The @mellon-web@ package wraps a @mellon-core@ controlle
                         * @PUT /state@ sets the controller's current state. Use this method to
                         lock and unlock the controller.
                         .
-                        See the included <API.md API.md> document for detailed documentation
-                        on the REST service.
+                        For detailed documentation, the server includes a self-documenting
+                        Swagger spec.
                         .
                         Note that the @mellon-web@ server does not provide an authentication
                         mechanism! You should proxy it behind a secure, authenticating HTTPS

@@ -19,7 +19,8 @@ is quite simple. There are only 3 methods:
 * `PUT /state` sets the controller's current state. Use this method to
   lock and unlock the controller.
 
-See [API.md](API.md) for detailed documentation on the REST service.
+For detailed documentation, the server includes a self-documenting
+Swagger spec.
 
 Note that the `mellon-web` server does not provide an authentication
 mechanism! You should proxy it behind a secure, authenticating HTTPS
@@ -31,8 +32,7 @@ server such as Nginx.
 
 An extremely simple example server (with on-line documentation
 support) is provided in the `examples` directory. You can run it with
-`cabal run mock-mellon-server` and test it using the endpoints
-described in [API.md](API.md). The server is will run on the
+`cabal run mock-mellon-server`. The server is will run on the
 `localhost` loopback interface on port 8081.
 
 This particular example server uses a "mock lock" device which only

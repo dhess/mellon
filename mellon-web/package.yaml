@@ -42,9 +42,9 @@ description: ! 'The @mellon-web@ package wraps a @mellon-core@ controller in a R
   lock and unlock the controller.
 
 
-  See the included <API.md API.md> document for detailed documentation
+  For detailed documentation, the server includes a self-documenting
 
-  on the REST service.
+  Swagger spec.
 
 
   Note that the @mellon-web@ server does not provide an authentication
