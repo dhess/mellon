@@ -41,6 +41,10 @@ lts-%:	nix
 release:	nix
 		$(call nix-build)
 
+# Note: does not depend on nixpkgs.
+next:	nix
+	nix-build --no-out-link nix/jobsets/next.nix
+
 test:	build
 	$(MAKE) -C mellon-web test
 

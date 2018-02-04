@@ -49,6 +49,7 @@ let
     };
   };
 
+
   mkChannelAlt = mellonBranch: nixpkgsRev: nixpkgsStackageRev: {
     inputs = {
 
@@ -62,9 +63,31 @@ let
     };
   };
 
+
+  ## "next" builds; these are expected to fail from time to time and
+  ## don't run as often. They also build from nixpkgs and not
+  ## nixpkgs-channels as we always want to be testing the latest,
+  ## greatest GHC pre-releases. (We don't bother overriding
+  ## nixpkgs-stackage because it's not used in these evaluations.)
+
+  mkNext = mellonBranch: nixpkgsRev: {
+    nixexprpath = "nix/jobsets/next.nix";
+    checkinterval = 60 * 60 * 24;
+    inputs = {
+
+      ## Note: does not depend on nixpkgs because we don't use
+      ## nixpkgs-stackage for these builds.
+
+      nixpkgs_override = mkFetchGithub "https://github.com/NixOS/nixpkgs.git ${nixpkgsRev}";
+      mellon = mkFetchGithub "${mellonUri} ${mellonBranch}";
+    };
+  };
+
+
   mainJobsets = with pkgs.lib; mapAttrs (name: settings: defaultSettings // settings) (rec {
     master = {};
     nixpkgs-unstable = mkChannelAlt "master" "nixpkgs-unstable" "master";
+    next-ghc = mkNext "master" "master";
   });
 
   jobsetsAttrs = mainJobsets;
