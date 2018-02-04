@@ -71,8 +71,8 @@ import Servant.HTML.Lucid (HTML)
 
 -- $setup
 -- >>> :set -XOverloadedStrings
--- >>> import Data.String (String)
 -- >>> import Data.Aeson (eitherDecode, encode)
+-- >>> import Data.String (String)
 -- >>> import Data.Swagger.Schema.Validation
 
 wrapBody :: Monad m => HtmlT m () -> HtmlT m a -> HtmlT m a
@@ -123,15 +123,17 @@ unlockedSeries = stateName .= unlockedName
 untilSeries :: UTCTime -> Series
 untilSeries t = untilName .= t
 
+-- Aeson 'Object' is unordered, so we have to be careful when
+-- validating values here.
+
 -- $
 -- >>> toJSON Locked
 -- Object (fromList [("state",String "Locked")])
--- >>> toJSON $ Unlocked sampleDate
--- Object (fromList [("state",String "Unlocked"),("until",String "2015-10-06T00:00:00Z")])
 -- >>> encode $ toJSON Locked
 -- "{\"state\":\"Locked\"}"
--- >>> encode $ toJSON $ Unlocked sampleDate
--- "{\"state\":\"Unlocked\",\"until\":\"2015-10-06T00:00:00Z\"}"
+-- >>> let x = encode $ toJSON $ Unlocked sampleDate
+-- >>> x == "{\"state\":\"Unlocked\",\"until\":\"2015-10-06T00:00:00Z\"}" || x == "{\"until\":\"2015-10-06T00:00:00Z\",\"state\":\"Unlocked\"}"
+-- True
 instance ToJSON State where
   toJSON Locked = object [lockedPair]
   toJSON (Unlocked time) = object [unlockedPair, untilPair time]
