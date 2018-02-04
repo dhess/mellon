@@ -54,20 +54,35 @@ build:	nix
 help:
 	@echo "Targets:"
 	@echo
-	@echo "(Default is 'nix-build')"
+	@echo "(Default is 'mellon')"
 	@echo
 	@echo "Cabal/Nix:"
 	@echo
 	@echo "The following targets assume that you are running Nix with some version"
 	@echo "of cabal and GHC in your environment."
 	@echo
-	@echo "    nix-build - Build all nix/jobsets/release.nix attrs"
-	@echo "    test      - configure and build the package, then run the tests"
-	@echo "    build     - configure and build the package"
-	@echo "    nix       - make sure Nix files are up-to-date"
-	@echo "    doc	     - build docs"
-	@echo "    sdist     - build source distributions for upload to Hackage"
-	@echo "    check     - run 'cabal check' on each subproject"
+	@echo "    mellon      - build all mellon packages against nixpkgs using nix-build (quick)"
+	@echo "    mellon-core - build just mellon-core against nixpkgs using nix-build (quick)"
+	@echo "    mellon-gpio - build just mellon-gpio against nixpkgs using nix-build (quick)"
+	@echo "    mellon-web  - build just mellon-web against nixpkgs using nix-build (quick)"
+	@echo "    nixpkgs     - build mellon against nixpkgs using nix-build"
+	@echo "    lts-10      - build mellon against LTS 10 package set using nix-build"
+	@echo "    lts-9       - build mellon against LTS 9 package set using nix-build"
+	@echo "    release     - Run nix-build on all release.nix targets"
+	@echo "    next        - Run nix-build on all next.nix targets"
+	@echo
+	@echo "    test        - configure and build the package, then run the tests (cabal)"
+	@echo "    build       - configure and build the package (cabal)"
+	@echo "    configure   - configure the package (cabal)"
+	@echo
+	@echo "Stack/Nix:"
+	@echo
+	@echo "The following targets build and test the package with Stack, using the"
+	@echo "given version of Stackage LTS as configured by the file stack-<target>.yaml."
+	@echo
+	@echo "    stack-lts    [build all supported LTS targets]"
+	@echo "    stack-lts-10"
+	@echo "    stack-lts-9"
 	@echo
 	@echo "General:"
 	@echo
