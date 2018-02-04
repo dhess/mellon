@@ -1,5 +1,5 @@
 name:       mellon-gpio
-version:    0.8.0.4
+version:    0.8.0.5
 synopsis:   GPIO support for mellon
 category:   System
 stability:  experimental

@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "mellon-core";
-  version = "0.8.0.4";
+  version = "0.8.0.5";
   src = ../../mellon-core;
   configureFlags = [ "-ftest-hlint" ];
   libraryHaskellDepends = [

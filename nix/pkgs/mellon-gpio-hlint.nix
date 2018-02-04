@@ -2,7 +2,7 @@
 }:
 mkDerivation {
   pname = "mellon-gpio";
-  version = "0.8.0.4";
+  version = "0.8.0.5";
   src = ../../mellon-gpio;
   configureFlags = [ "-ftest-hlint" ];
   libraryHaskellDepends = [ base hpio mellon-core protolude ];
