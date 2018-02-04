@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e9e743a5555c456c587ff19af5ea9febdd0e3160cb1efa18de533084f7e5b987
+-- hash: 98fc748e6cb615a170cb841805390efe81effa5649afcee66ef7cd50c3468dbe
 
 name:                   mellon-web
 version:                0.8.0.4
@@ -95,7 +95,7 @@ library
     , http-types ==0.9.*
     , lens >=4 && <5
     , lucid ==2.9.*
-    , mellon-core ==0.8.0.4
+    , mellon-core
     , servant ==0.11.*
     , servant-client ==0.11.*
     , servant-docs >=0.10 && <0.12
@@ -268,7 +268,7 @@ test-suite spec
     , lens
     , lucid
     , mellon-core
-    , mellon-web ==0.8.0.4
+    , mellon-web
     , network ==2.6.*
     , quickcheck-instances ==0.3.*
     , servant
