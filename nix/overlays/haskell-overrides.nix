@@ -48,6 +48,8 @@ in
   lts9Packages =
     noHaddocks (withLocalMellon localMellonPaths (self.haskell.packages.stackage.lts-921.extend (self: super:
       {
+        protolude = self.callPackage ../pkgs/protolude-0.2.nix {};
+
         # Doesn't currently check on macOS.
         foundation = dontCheck super.foundation;
 

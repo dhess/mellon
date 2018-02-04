@@ -1,10 +1,11 @@
 module Mellon.Web.ClientSpec (spec) where
 
+import Protolude hiding (state)
 import Control.Concurrent (ThreadId, forkIO, killThread, threadDelay)
 import Data.Time.Clock
 import Mellon.Controller (controller)
 import Mellon.Device (mockLock, mockLockDevice)
-import Network.HTTP.Client (Manager, newManager, defaultManagerSettings)
+import Network.HTTP.Client (newManager, defaultManagerSettings)
 import Network.Socket
 import Network.Wai.Handler.Warp
 import Servant.Client

@@ -2,6 +2,7 @@
 
 module Main where
 
+import Protolude
 import Mellon.Controller (controller)
 import Mellon.Device (mockLock, mockLockDevice)
 import Mellon.Web.Server (swaggerApp)

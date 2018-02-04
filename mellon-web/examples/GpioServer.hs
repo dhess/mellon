@@ -5,6 +5,7 @@
 
 module Main where
 
+import Protolude hiding (option)
 import Control.Monad.IO.Class (liftIO)
 import Data.Monoid ((<>))
 import Data.Time.Clock (NominalDiffTime)

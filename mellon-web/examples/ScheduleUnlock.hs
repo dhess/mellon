@@ -16,9 +16,10 @@
 
 module Main where
 
+import Protolude hiding (State, state)
 import Control.Monad.Catch.Pure (runCatch)
-import Data.ByteString.Char8 as C8 (unpack)
 import Data.Monoid ((<>))
+import Data.String (String)
 import Data.Time.Clock
        (NominalDiffTime, UTCTime(..), addUTCTime)
 import qualified Data.Time.LocalTime as Time
@@ -105,14 +106,14 @@ run (GlobalOptions baseUrl (LocalTime (LocalTimeOptions localStart localEnd))) =
             let clientEnv = ClientEnv manager url
             runClientM (putState state) clientEnv >>= \case
                         Right status ->
-                          do putStrLn $ show status
+                          do putStrLn $ ((show status) :: String)
                              exitWith ExitSuccess
                         Left e ->
                           do putStrLn $ "Mellon service error: " ++ prettyServantError e
                              exitWith $ ExitFailure 1
     prettyServantError :: ServantError -> String
     prettyServantError (FailureResponse _ status _ _) =
-      show (statusCode status) ++ " " ++ (C8.unpack $ statusMessage status)
+      show (statusCode status) ++ " " ++ (toS $ statusMessage status)
     prettyServantError (DecodeFailure _ _ _) =
       "decode failure"
     prettyServantError (UnsupportedContentType _ _) =

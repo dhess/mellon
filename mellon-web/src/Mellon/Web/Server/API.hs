@@ -37,8 +37,9 @@ module Mellon.Web.Server.API
          , server
          ) where
 
+import Protolude hiding (State, state)
 import Control.Lens ((&), (.~), (?~), mapped)
-import Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
+import Control.Monad.Fail (fail)
 import Control.Monad.IO.Class (liftIO)
 import qualified Data.Aeson.Types as Aeson (Value(String))
 import Data.Aeson.Types
@@ -56,7 +57,6 @@ import Data.Swagger
 import Data.Text (Text)
 import Data.Time.Calendar (fromGregorian)
 import Data.Time.Clock (UTCTime(..), getCurrentTime)
-import GHC.Generics
 import Lucid
        (ToHtml(..), HtmlT, doctypehtml_, head_, title_, body_)
 import Mellon.Controller
@@ -71,6 +71,7 @@ import Servant.HTML.Lucid (HTML)
 
 -- $setup
 -- >>> :set -XOverloadedStrings
+-- >>> import Data.String (String)
 -- >>> import Data.Aeson (eitherDecode, encode)
 -- >>> import Data.Swagger.Schema.Validation
 
@@ -203,7 +204,7 @@ stateDocument = wrapBody "Mellon state"
 
 instance ToHtml State where
   toHtml Locked = stateDocument "Locked"
-  toHtml (Unlocked time) = stateDocument $ "Unlocked until " >> toHtml (show time)
+  toHtml (Unlocked time) = stateDocument $ "Unlocked until " >> toHtml (Time time)
   toHtmlRaw = toHtml
 
 -- | A newtype wrapper around 'UTCTime', for serving HTML without

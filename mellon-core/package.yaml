@@ -230,6 +230,9 @@ when:
         - -fwarn-incomplete-uni-patterns
         - -fwarn-incomplete-record-updates
 
+default-extensions:
+  - NoImplicitPrelude
+
 library:
   when:
     - condition: impl(ghc >= 8.0)
@@ -252,6 +255,7 @@ library:
     - base         >=4.8 && <5
     - async        ==2.1.*
     - mtl          ==2.2.*
+    - protolude    ==0.2.*
     - time         >=1.5 && <2
     - transformers >=0.4.2 && <0.6
 
@@ -272,7 +276,8 @@ tests:
         else:
           dependencies:
             - base
-            - hlint ==2.0.*
+            - hlint     ==2.0.*
+            - protolude
   doctest:
     main: doctest.hs
     source-dirs: test
@@ -287,8 +292,9 @@ tests:
           dependencies:
             - base
             - QuickCheck           >=2.8    && <2.12
-            - quickcheck-instances ==0.3.*
             - doctest              >=0.11 && <0.14
+            - protolude
+            - quickcheck-instances ==0.3.*
   spec:
     main: Main.hs
     source-dirs:
@@ -306,6 +312,7 @@ tests:
       - hspec        >=2.2 && <2.5
       - mellon-core
       - mtl
+      - protolude
       - time
       - transformers
 

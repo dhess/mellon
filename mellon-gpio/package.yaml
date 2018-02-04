@@ -34,6 +34,9 @@ when:
         - -fwarn-incomplete-uni-patterns
         - -fwarn-incomplete-record-updates
 
+default-extensions:
+  - NoImplicitPrelude
+
 library:
   when:
     - condition: impl(ghc >= 8.0)
@@ -52,6 +55,7 @@ library:
     - base        >=4.8 && <5
     - hpio        >=0.8 && <1
     - mellon-core
+    - protolude   ==0.2.*
 
 tests:
   hlint:
@@ -71,6 +75,7 @@ tests:
           dependencies:
             - base
             - hlint ==2.0.*
+            - protolude
 
 extra-source-files:
 - changelog.md

@@ -3,3 +3,5 @@ packages:
 - mellon-web/
 - mellon-gpio/
 resolver: lts-9.21
+extra-deps:
+- protolude-0.2

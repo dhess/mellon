@@ -37,12 +37,12 @@ module Mellon.Device
        , mockLockDevice
        ) where
 
+import Protolude
 import Control.Concurrent
        (MVar, newMVar, putMVar, readMVar, takeMVar)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Data.Data
 import Data.Time (UTCTime, getCurrentTime)
-import GHC.Generics
 
 -- | A parametric device type which provides two "methods," one to
 -- lock the device, and the other to unlock it.

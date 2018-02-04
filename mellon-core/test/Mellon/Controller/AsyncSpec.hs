@@ -1,14 +1,15 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
 module Mellon.Controller.AsyncSpec (spec) where
 
+import Protolude
 import Control.Concurrent (MVar, newMVar, modifyMVar, threadDelay)
 import Control.Concurrent.Async (race)
-import Control.Exception (Exception(..), throwIO)
+import Control.Exception (Exception(..))
 import Control.Monad (void, when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
 import Control.Monad.RWS.Strict (RWST, execRWST, ask, tell)
-import Data.Data
 import Data.Time (NominalDiffTime, UTCTime, addUTCTime, diffUTCTime)
 import qualified Data.Time as Time (getCurrentTime)
 import Test.Hspec
@@ -88,7 +89,7 @@ testController ctrl =
           do _ <- unlockIt duration
              return ()
 
-type CheckedResults = Either ((MockLockEvent, MockLockEvent), String) String
+type CheckedResults = Either ((MockLockEvent, MockLockEvent), Text) Text
 
 checkResults :: [MockLockEvent]
              -> [MockLockEvent]

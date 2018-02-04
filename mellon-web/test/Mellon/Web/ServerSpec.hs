@@ -1,8 +1,10 @@
+{-# OPTIONS_GHC -fno-warn-orphans -fno-warn-incomplete-uni-patterns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Mellon.Web.ServerSpec (spec) where
 
+import Protolude hiding (State, get)
 import Control.Concurrent (threadDelay)
 import Data.Aeson (decode, encode)
 import Data.ByteString (ByteString)
@@ -17,7 +19,7 @@ import Network.Wai.Test (SResponse, simpleBody)
 import Test.Hspec
 import Test.Hspec.Wai ((<:>), WaiSession, get, liftIO, matchHeaders, request, shouldRespondWith, with)
 import Test.QuickCheck
-       (Arbitrary(..), elements, genericShrink, oneof, property)
+       (Arbitrary(..), genericShrink, oneof, property)
 import Test.QuickCheck.Instances ()
 
 import Mellon.Web.Server (State(..), Time(..), app, swaggerApp)

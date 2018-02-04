@@ -2,16 +2,17 @@
 
 module Mellon.Web.SwaggerAPISpec (spec) where
 
-import Mellon.Web.Server (State(..), Time(..), mellonAPI, mellonSwagger)
-
+import Protolude hiding (State)
 import Data.Aeson (eitherDecode)
 import qualified Data.ByteString.Lazy.Char8 as C8 (readFile)
 import Paths_mellon_web
 import Servant.Swagger.Test
 import Test.Hspec
 import Test.QuickCheck
-       (Arbitrary(..), elements, genericShrink, oneof, property)
+       (Arbitrary(..), genericShrink, oneof)
 import Test.QuickCheck.Instances ()
+
+import Mellon.Web.Server (State(..), Time(..), mellonAPI, mellonSwagger)
 
 spec :: Spec
 spec =

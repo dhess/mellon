@@ -1,5 +1,6 @@
 module Main where
 
+import Protolude
 import Test.Hspec
 import Spec
 

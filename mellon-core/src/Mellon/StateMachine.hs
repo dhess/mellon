@@ -53,9 +53,9 @@ module Mellon.StateMachine
        , transition
        ) where
 
+import Protolude hiding (State)
 import Data.Data
 import Data.Time (UTCTime)
-import GHC.Generics
 
 {- $setup
 

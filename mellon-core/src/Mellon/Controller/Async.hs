@@ -42,6 +42,7 @@ module Mellon.Controller.Async
        , State(..)
        ) where
 
+import Protolude hiding (State, state)
 import Control.Concurrent
        (MVar, modifyMVar, newMVar, readMVar, threadDelay)
 import Control.Concurrent.Async (async, link)
