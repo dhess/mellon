@@ -2,7 +2,8 @@ self: super:
 
 let
 
-  inherit (self) haskell withLocalMellon;
+  inherit (self) haskell;
+  inherit (self.lib) withLocalMellon;
   inherit (haskell.lib) dontCheck noHaddocks;
 
   localMellonPathsHlint = {
