@@ -1,3 +1,26 @@
+## 0.8.0.5 (2018-02-04)
+
+Changes:
+
+  - This package now uses Protolude.
+
+  - Disable hlint tests by default.
+
+  - Add a `stack-lts-9.yaml` file for LTS 9 Stack builds.
+
+  - Pare down support to just GHC 8.0.2 and GHC 8.2.2.
+
+Fixes:
+
+  - Fix the `swagger.json` test on Stack.
+
+  - Add PVP bounds for `mtl`, `http-client-tls`, `network`
+    dependencies.
+
+  - Remove references in the documentation to the no-longer-present
+    `API.md` file. The `SwaggerAPI` server includes a self-documenting
+    Swagger spec; please see that for detailed REST API documentation.
+
 ## 0.8.0.4 (2018-01-26)
 
 - Require hlint 2.0.x.
