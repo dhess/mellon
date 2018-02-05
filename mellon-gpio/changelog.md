@@ -1,3 +1,7 @@
+## 0.8.0.6 (2018-02-04)
+
+No changes, version bump only.
+
 ## 0.8.0.5 (2018-02-04)
 
 Changes:

@@ -1,3 +1,12 @@
+## 0.8.0.6 (2018-02-04)
+
+Fixes:
+
+  - Don't run time-sensitive tests by default (fixes spurious failures
+    on loaded CI servers).
+
+  - Work around order-sensitive `toJSON` decoding in doctests.
+
 ## 0.8.0.5 (2018-02-04)
 
 Changes:
