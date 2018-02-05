@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 34cb673100a26e616e49cefa75525fb248fa592422e78a03ab2dd5bd9d4ee0a5
+-- hash: c3d20201bf5bf3a31fc8883922d424de093ab4f270fe9e66061312328e656e9f
 
 name:                   mellon-gpio
-version:                0.8.0.5
+version:                0.8.0.6
 synopsis:               GPIO support for mellon
 description:            @mellon-gpio@ provides a GPIO-driven @mellon-core@ @Device@.
                         Currently, it provides support for Linux @sysfs@-based GPIO.

@@ -1,5 +1,5 @@
 name:       mellon-web
-version:    0.8.0.5
+version:    0.8.0.6
 synopsis:   A REST web service for Mellon controllers
 category:   Web
 stability:  experimental
