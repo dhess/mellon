@@ -64,6 +64,10 @@ flags:
     description: Build doctests
     manual: true
     default: true
+  enable-timing-sensitive-tests:
+    description: Enable tests that are timing-sensitive (may fail on loaded machines like CI servers)
+    manual: true
+    default: false
   gpio-example:
     description: Build the GPIO server example
     manual: true
@@ -180,6 +184,7 @@ tests:
     source-dirs:
       - test
     other-extensions:
+      - CPP
       - OverloadedStrings
       - ScopedTypeVariables
     ghc-options:
@@ -187,6 +192,9 @@ tests:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
+    when:
+      - condition: flag(enable-timing-sensitive-tests)
+        cpp-options: -DENABLE_TIMING_SENSITIVE_TESTS
     dependencies:
       - base
       - QuickCheck           >=2.8   && <2.12

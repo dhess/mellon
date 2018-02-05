@@ -216,6 +216,10 @@ flags:
     description: Build doctests
     manual: true
     default: true
+  enable-timing-sensitive-tests:
+    description: Enable tests that are timing-sensitive (may fail on loaded machines like CI servers)
+    manual: true
+    default: false
 
 when:
   - condition: impl(ghc >= 8.0)
@@ -300,12 +304,16 @@ tests:
     source-dirs:
       - test
     other-extensions:
+      - CPP
       - DeriveDataTypeable
     ghc-options:
       - -w
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
+    when:
+      - condition: flag(enable-timing-sensitive-tests)
+        cpp-options: -DENABLE_TIMING_SENSITIVE_TESTS
     dependencies:
       - base
       - async

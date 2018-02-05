@@ -25,12 +25,12 @@ check:
 
 configure: nix mellon-web.cabal
 	@echo "*** Configuring mellon-web"
-	cabal configure -f test-hlint
+	cabal configure -f test-hlint -f enable-timing-sensitive-tests
 
 nix: 	mellon-web.cabal
 	@echo "*** Generating mellon-web Nix files"
 	cd ../nix/pkgs && cabal2nix ../../mellon-web > mellon-web.nix
-	cd ../nix/pkgs && cabal2nix --flag test-hlint ../../mellon-web > mellon-web-hlint.nix
+	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-web > mellon-web-all-tests.nix
 
 mellon-web.cabal: package.yaml
 	@echo "*** Running hpack for mellon-web"

@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-orphans -fno-warn-incomplete-uni-patterns -fno-warn-unused-top-binds #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 
@@ -200,7 +202,13 @@ spec :: Spec
 spec = do
   describe "Controller tests" $ do
     it "should produce the correct lock sequence plus or minus a few hundred milliseconds" $ do
+       -- This test is too timing-sensitive to run on a CI server, so
+       -- it's disabled by default.
+#ifdef ENABLE_TIMING_SENSITIVE_TESTS
       controllerTest >>= (`shouldBe` Right "OK")
+#else
+      pendingWith "disabled (enable with 'cabal configure -f enable-timing-sensitive-tests')"
+#endif
     it "should recover from asynchronous exceptions" $ do
       asyncExceptionTest
     it "should recover from synchronous exceptions" $ do

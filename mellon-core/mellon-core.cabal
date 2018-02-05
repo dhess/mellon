@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 230c051b3a9aee836cded92a01acf529ac1e0e4fc62e0a333b929a0ae1744a06
+-- hash: f901fdc68e5949702bada1953d73fadbffc2105dd2c5259a8580bc491f686a56
 
 name:                   mellon-core
 version:                0.8.0.5
@@ -134,6 +134,11 @@ source-repository head
   type: git
   location: https://github.com/quixoftic/mellon
 
+flag enable-timing-sensitive-tests
+  description: Enable tests that are timing-sensitive (may fail on loaded machines like CI servers)
+  manual: True
+  default: False
+
 flag test-doctests
   description: Build doctests
   manual: True
@@ -223,7 +228,7 @@ test-suite spec
   hs-source-dirs:
       test
   default-extensions: NoImplicitPrelude
-  other-extensions: DeriveDataTypeable
+  other-extensions: CPP DeriveDataTypeable
   ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       async
@@ -238,6 +243,8 @@ test-suite spec
     ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
   else
     ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  if flag(enable-timing-sensitive-tests)
+    cpp-options: -DENABLE_TIMING_SENSITIVE_TESTS
   other-modules:
       Mellon.Controller.AsyncSpec
       Spec

@@ -6,10 +6,10 @@ let
   inherit (self.lib)  withLocalMellon;
   inherit (haskell.lib) dontCheck noHaddocks;
 
-  localMellonPathsHlint = {
-    mellon-core = ../pkgs/mellon-core-hlint.nix;
-    mellon-gpio = ../pkgs/mellon-gpio-hlint.nix;
-    mellon-web = ../pkgs/mellon-web-hlint.nix;
+  localMellonPathsAllTests = {
+    mellon-core = ../pkgs/mellon-core-all-tests.nix;
+    mellon-gpio = ../pkgs/mellon-gpio-all-tests.nix;
+    mellon-web = ../pkgs/mellon-web-all-tests.nix;
   };
 
   localMellonPaths = {
@@ -24,7 +24,7 @@ in
   ## The default Nixpkgs package set. Note that we use hlint tests here.
 
   haskellPackages =
-    withLocalMellon localMellonPathsHlint (super.haskellPackages.extend (self: super:
+    withLocalMellon localMellonPathsAllTests (super.haskellPackages.extend (self: super:
       {
         # Doesn't currently check.
         hpio = dontCheck super.hpio;

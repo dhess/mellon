@@ -6,10 +6,10 @@ let
   inherit (self.lib) withLocalMellon;
   inherit (haskell.lib) dontCheck noHaddocks;
 
-  localMellonPathsHlint = {
-    mellon-core = ../pkgs/mellon-core-hlint.nix;
-    mellon-gpio = ../pkgs/mellon-gpio-hlint.nix;
-    mellon-web = ../pkgs/mellon-web-hlint.nix;
+  localMellonPathsAllTests = {
+    mellon-core = ../pkgs/mellon-core-all-tests.nix;
+    mellon-gpio = ../pkgs/mellon-gpio-all-tests.nix;
+    mellon-web = ../pkgs/mellon-web-all-tests.nix;
   };
 
   localMellonPaths = {
@@ -25,7 +25,7 @@ in
   ## these as they're unlikely to be cached by upstream Hydra.
 
   haskellPackages841 =
-    noHaddocks (withLocalMellon localMellonPaths (self.haskell.packages.ghc841.extend (self: super:
+    noHaddocks (withLocalMellon localMellonPathsAllTests (self.haskell.packages.ghc841.extend (self: super:
       {
         # Doesn't currently check.
         hpio = dontCheck super.hpio;

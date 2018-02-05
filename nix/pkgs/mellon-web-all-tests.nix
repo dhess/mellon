@@ -11,7 +11,9 @@ mkDerivation {
   pname = "mellon-web";
   version = "0.8.0.5";
   src = ../../mellon-web;
-  configureFlags = [ "-ftest-hlint" ];
+  configureFlags = [
+    "-fenable-timing-sensitive-tests" "-ftest-hlint"
+  ];
   isLibrary = true;
   isExecutable = true;
   enableSeparateDataOutput = true;

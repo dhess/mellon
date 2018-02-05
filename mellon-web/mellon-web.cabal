@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 55af04fb959faaa66f7f850ad4ce3d6ebb14a32c54b20fb5450b1fe5a51ef64a
+-- hash: 66d7ed437f01e7678b6872a838c981f4649039fc852a9ce0fe9fcb0ed78683a3
 
 name:                   mellon-web
 version:                0.8.0.5
@@ -61,6 +61,11 @@ flag client-unlock-example
   description: Build the unlock client example
   manual: True
   default: True
+
+flag enable-timing-sensitive-tests
+  description: Enable tests that are timing-sensitive (may fail on loaded machines like CI servers)
+  manual: True
+  default: False
 
 flag gpio-example
   description: Build the GPIO server example
@@ -266,7 +271,7 @@ test-suite spec
   hs-source-dirs:
       test
   default-extensions: NoImplicitPrelude
-  other-extensions: OverloadedStrings ScopedTypeVariables
+  other-extensions: CPP OverloadedStrings ScopedTypeVariables
   ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       QuickCheck >=2.8 && <2.12
@@ -303,6 +308,8 @@ test-suite spec
     ghc-options: -Wall -Wincomplete-uni-patterns -Wincomplete-record-updates
   else
     ghc-options: -Wall -fwarn-incomplete-uni-patterns -fwarn-incomplete-record-updates
+  if flag(enable-timing-sensitive-tests)
+    cpp-options: -DENABLE_TIMING_SENSITIVE_TESTS
   other-modules:
       Mellon.Web.ClientSpec
       Mellon.Web.ServerSpec

@@ -25,12 +25,12 @@ check:
 
 configure: nix mellon-core.cabal
 	@echo "*** Configuring mellon-core"
-	cabal configure -f test-hlint
+	cabal configure -f test-hlint -f enable-timing-sensitive-tests
 
 nix: 	mellon-core.cabal
 	@echo "*** Generating mellon-core Nix files"
 	cd ../nix/pkgs && cabal2nix ../../mellon-core > mellon-core.nix
-	cd ../nix/pkgs && cabal2nix --flag test-hlint ../../mellon-core > mellon-core-hlint.nix
+	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-core > mellon-core-all-tests.nix
 
 mellon-core.cabal: package.yaml
 	@echo "*** Running hpack for mellon-core"

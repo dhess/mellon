@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-orphans -fno-warn-incomplete-uni-patterns #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -101,6 +102,7 @@ spec =
                     secondResponse <- get "/state"
                     liftIO $ decode (simpleBody secondResponse) `shouldBe` Just Locked
 
+#ifdef ENABLE_TIMING_SENSITIVE_TESTS
      describe "Unlocking" $
        do with runApp $
             do it "expires at the specified date" $
@@ -126,6 +128,7 @@ spec =
                     liftIO $ sleep 9
                     secondResponse <- get "/state"
                     liftIO $ decode (simpleBody secondResponse) `shouldBe` Just Locked
+#endif
 
      describe "Locking" $
        do with runApp $
