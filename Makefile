@@ -16,7 +16,7 @@ SUBPROJECTS = mellon-core \
 	      mellon-gpio \
 	      mellon-web
 
-NIXPKGS := $(shell nix-build -Q --no-out-link ./nix/fetch-nixpkgs-stackage-nixpkgs.nix 2>/dev/null)
+NIXPKGS := $(shell nix-build -Q --no-out-link ./nix/fetch-nixpkgs.nix 2>/dev/null)
 
 nix-build-testing-attr = nix-build --no-out-link nix/jobsets/testing.nix -I nixpkgs=$(NIXPKGS) -A $(1)
 
