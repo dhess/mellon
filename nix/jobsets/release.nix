@@ -18,19 +18,6 @@ with import (fixedNixPkgs + "/pkgs/top-level/release-lib.nix") {
 
 let
 
-  enumerateConstituents = aggregate: lib.listToAttrs (
-    map (d:
-           let
-             name = (builtins.parseDrvName d.name).name;
-             system = d.system;
-           in
-             { name = name + "." + system;
-               value = d;
-             }
-         )
-        aggregate.constituents
-  );
-
   jobs = {
 
     nixpkgs = pkgs.releaseTools.aggregate {
