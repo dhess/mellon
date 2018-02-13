@@ -74,7 +74,7 @@ tests:
         else:
           dependencies:
             - base
-            - hlint ==2.0.*
+            - hlint     >=2.0 && <2.2
             - protolude
 
 extra-source-files:

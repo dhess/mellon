@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c3d20201bf5bf3a31fc8883922d424de093ab4f270fe9e66061312328e656e9f
+-- hash: 86b547a94702c62fbc251c7e6ebc4c82d7a3380fc0dd640618aa07193ce787bd
 
 name:                   mellon-gpio
 version:                0.8.0.6
@@ -77,6 +77,6 @@ test-suite hlint
   else
     build-depends:
         base
-      , hlint ==2.0.*
+      , hlint >=2.0 && <2.2
       , protolude
   default-language: Haskell2010

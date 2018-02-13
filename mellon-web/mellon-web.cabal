@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1f6be6c884c3ebe5ad3e9cc23e01642a2104485a9d38263856e26947381a37b0
+-- hash: 4e09da0aae0339e3128a4887a7c5bea4963d4fd7509ded444516ec6d9c4e3d38
 
 name:                   mellon-web
 version:                0.8.0.6
@@ -261,7 +261,7 @@ test-suite hlint
   else
     build-depends:
         base
-      , hlint ==2.0.*
+      , hlint >=2.0 && <2.2
       , protolude
   default-language: Haskell2010
 

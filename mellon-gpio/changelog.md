@@ -1,3 +1,7 @@
+Changes:
+
+  - Bump hlint upper bound.
+
 ## 0.8.0.6 (2018-02-04)
 
 No changes, version bump only.
