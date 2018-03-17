@@ -48,4 +48,3 @@ in
 {
   inherit (jobs) ghc841;
 }
-// pkgs.lib.testing.enumerateConstituents jobs.ghc841

@@ -4,7 +4,7 @@ let
 
   inherit (self) haskell;
   inherit (self.lib) withLocalMellon;
-  inherit (haskell.lib) dontCheck noHaddocks;
+  inherit (haskell.lib) doJailbreak dontCheck;
 
   localMellonPathsAllTests = {
     mellon-core = ../pkgs/mellon-core-all-tests.nix;
@@ -21,15 +21,15 @@ let
 in
 {
 
-  ## Testing with upcoming GHC releases. Don't bother Haddock-ing
-  ## these as they're unlikely to be cached by upstream Hydra.
+  ## Testing with upcoming GHC releases.
 
   haskellPackages841 =
-    noHaddocks (withLocalMellon localMellonPathsAllTests (self.haskell.packages.ghc841.extend (self: super:
+    withLocalMellon localMellonPathsAllTests (self.haskell.packages.ghc841.extend (self: super:
       {
-        # Doesn't currently check.
-        hpio = dontCheck super.hpio;
+        http-media = doJailbreak super.http-media;
+        servant = doJailbreak super.servant;
+        swagger2 = doJailbreak super.swagger2;
       }
-    )));
+    ));
 
 }
