@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.21.2.
+-- This file has been generated from package.yaml by hpack version 0.27.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86897e711c99cb409b35b570392b8928064f6210e6ec07a8550c127e26e186b3
+-- hash: 916545895dd5c862a246bfd81a7dd1552702fe56873cfad1a19690a88292f6c9
 
 name:                   mellon-core
 version:                0.8.0.6
@@ -197,7 +197,7 @@ test-suite doctest
     build-depends:
         QuickCheck >=2.8 && <2.12
       , base
-      , doctest >=0.11 && <0.14
+      , doctest >=0.11 && <0.16
       , protolude
       , quickcheck-instances ==0.3.*
   default-language: Haskell2010

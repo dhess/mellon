@@ -256,11 +256,11 @@ library:
     - DeriveGeneric
     - Safe
   dependencies:
-    - base         >=4.8 && <5
+    - base         >=4.8   && <5
     - async        ==2.1.*
     - mtl          ==2.2.*
     - protolude    ==0.2.*
-    - time         >=1.5 && <2
+    - time         >=1.5   && <2
     - transformers >=0.4.2 && <0.6
 
 tests:
@@ -295,8 +295,8 @@ tests:
         else:
           dependencies:
             - base
-            - QuickCheck           >=2.8    && <2.12
-            - doctest              >=0.11 && <0.14
+            - QuickCheck           >=2.8  && <2.12
+            - doctest              >=0.11 && <0.16
             - protolude
             - quickcheck-instances ==0.3.*
   spec:
