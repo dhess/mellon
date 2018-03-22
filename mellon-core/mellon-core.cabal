@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 916545895dd5c862a246bfd81a7dd1552702fe56873cfad1a19690a88292f6c9
+-- hash: 96539d448acd94b7ff79ed99f40b15a9a00b5fd9383d10ce2516b7fc910ad24c
 
 name:                   mellon-core
 version:                0.8.0.6
@@ -120,7 +120,7 @@ maintainer:             Drew Hess <dhess-src@quixoftic.com>
 copyright:              Copyright (c) 2018, Quixoftic, LLC
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==8.0.2 GHC==8.2.2
+tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.1
 build-type:             Simple
 cabal-version:          >= 1.10
 

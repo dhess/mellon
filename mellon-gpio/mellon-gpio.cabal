@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.21.2.
+-- This file has been generated from package.yaml by hpack version 0.27.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 86b547a94702c62fbc251c7e6ebc4c82d7a3380fc0dd640618aa07193ce787bd
+-- hash: 89a370b708ad8c349de020638400965ed540f0c0ab8c2822531fe4e5406cdbbe
 
 name:                   mellon-gpio
 version:                0.8.0.6
@@ -18,7 +18,7 @@ maintainer:             Drew Hess <dhess-src@quixoftic.com>
 copyright:              Copyright (c) 2018, Quixoftic, LLC
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==8.0.2 GHC==8.2.2
+tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.1
 build-type:             Simple
 cabal-version:          >= 1.10
 

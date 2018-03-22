@@ -205,7 +205,7 @@ description: ! '/Speak, friend, and enter./
 
   properly, and you should look for an alternative solution.'
 
-tested-with: GHC==8.0.2 GHC==8.2.2
+tested-with: GHC==8.0.2 GHC==8.2.2 GHC==8.4.1
 
 flags:
   test-hlint:
