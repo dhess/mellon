@@ -37,6 +37,20 @@ let
       ];
     };
 
+    ghc841 = pkgs.releaseTools.aggregate {
+      name = "ghc841";
+      meta.description = "mellon packages built against nixpkgs haskellPackages using GHC 8.4.1";
+      meta.maintainers = pkgs.lib.maintainers.dhess-qx;
+      constituents = with jobs; [
+        haskellPackages841.mellon-core.x86_64-darwin
+        haskellPackages841.mellon-core.x86_64-linux
+        haskellPackages841.mellon-gpio.x86_64-darwin
+        haskellPackages841.mellon-gpio.x86_64-linux
+        haskellPackages841.mellon-web.x86_64-darwin
+        haskellPackages841.mellon-web.x86_64-linux
+      ];
+    };
+
     lts-10 = pkgs.releaseTools.aggregate {
       name = "lts-10";
       meta.description = "mellon packages built against Stackage LTS 10 package set";
@@ -68,6 +82,7 @@ let
   } // (mapTestOn ({
 
     haskellPackages = packagePlatforms pkgs.haskellPackages;
+    haskellPackages841 = packagePlatforms pkgs.haskellPackages841;
     haskellPackagesArmv7l = packagePlatforms pkgs.haskellPackagesArmv7l;
     lts10Packages = packagePlatforms pkgs.lts10Packages;
     lts9Packages = packagePlatforms pkgs.lts9Packages;
@@ -76,5 +91,5 @@ let
 
 in
 {
-  inherit (jobs) nixpkgs lts-10 lts-9;
+  inherit (jobs) nixpkgs ghc841 lts-10 lts-9;
 }

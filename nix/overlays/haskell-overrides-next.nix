@@ -23,13 +23,4 @@ in
 
   ## Testing with upcoming GHC releases.
 
-  haskellPackages841 =
-    withLocalMellon localMellonPathsAllTests (self.haskell.packages.ghc841.extend (self: super:
-      {
-        http-media = doJailbreak super.http-media;
-        servant = doJailbreak super.servant;
-        swagger2 = doJailbreak super.swagger2;
-      }
-    ));
-
 }
