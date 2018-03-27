@@ -64,10 +64,11 @@ import Mellon.Controller
 import qualified Mellon.Controller as Controller (State(..))
 import Network.Wai (Application)
 import Servant
-       ((:<|>)(..), (:>), (:~>)(..), Get, Handler, JSON, Proxy(..), Put,
-        ReqBody, Server, ServerT, enter, serve)
+       ((:<|>)(..), (:>), Get, Handler, JSON, Proxy(..), Put,
+        ReqBody, Server, ServerT, serve)
 import Servant.Docs (ToSample(..))
 import Servant.HTML.Lucid (HTML)
+import Servant.Server (hoistServer)
 
 -- $setup
 -- >>> :set -XOverloadedStrings
@@ -279,16 +280,13 @@ serverT =
 mellonAPI :: Proxy MellonAPI
 mellonAPI = Proxy
 
-appToHandler :: Controller d -> AppM d :~> Handler
-appToHandler cc = NT $ \m -> runReaderT m cc
-
 -- | A Servant 'Server' which serves the 'MellonAPI' on the given
 -- 'Controller'.
 --
 -- Normally you will just use 'app', but this function is exported so
 -- that you can extend/wrap 'MellonAPI'.
 server :: Controller d -> Server MellonAPI
-server cc = enter (appToHandler cc) serverT
+server cc = hoistServer mellonAPI (`runReaderT` cc) serverT
 
 -- | A WAI 'Network.Wai.Application' which runs the service, using the
 -- given 'Controller'.

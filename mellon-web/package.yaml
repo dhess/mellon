@@ -121,29 +121,30 @@ library:
     - ScopedTypeVariables
     - TypeOperators
   dependencies:
-    - base               >=4.8    && <5
-    - aeson              >=0.11   && <1.3
-    - aeson-pretty       ==0.8.*
-    - bytestring         ==0.10.*
-    - http-client        >=0.4    && <0.6
-    - http-types         ==0.9.*
-    - lens               >=4      && <5
-    - lucid              ==2.9.*
+    - base                >=4.8    && <5
+    - aeson               >=0.11   && <1.3
+    - aeson-pretty        ==0.8.*
+    - bytestring          ==0.10.*
+    - http-client         >=0.4    && <0.6
+    - http-types          >=0.9    && <0.13
+    - lens                >=4      && <5
+    - lucid               ==2.9.*
     - mellon-core
-    - protolude          ==0.2.*
-    - servant            ==0.11.*
-    - servant-client     ==0.11.*
-    - servant-docs       >=0.10   && <0.12
-    - servant-lucid      ==0.7.*
-    - servant-server     ==0.11.*
-    - servant-swagger    ==1.1.*
-    - servant-swagger-ui ==0.2.*
-    - swagger2           >=2.1    && <2.3
-    - text               ==1.2.*
-    - time               >=1.5    && <2
-    - transformers       >=0.4.2  && <0.6
-    - wai                ==3.2.*
-    - warp               ==3.2.*
+    - protolude           ==0.2.*
+    - servant             ==0.13.*
+    - servant-client      ==0.13.*
+    - servant-client-core ==0.13.*
+    - servant-docs        >=0.10   && <0.12
+    - servant-lucid       >=0.7    && <0.9
+    - servant-server      ==0.13.*
+    - servant-swagger     ==1.1.*
+    - servant-swagger-ui  ==0.2.*
+    - swagger2            >=2.1    && <2.3
+    - text                ==1.2.*
+    - time                >=1.5    && <2
+    - transformers        >=0.4.2  && <0.6
+    - wai                 ==3.2.*
+    - warp                ==3.2.*
 
 tests:
   hlint:
@@ -202,7 +203,7 @@ tests:
       - aeson
       - aeson-pretty
       - bytestring
-      - hspec                >=2.2   && <2.5
+      - hspec                >=2.2   && <2.6
       - hspec-wai            >=0.6.6 && <0.10
       - http-client
       - http-types
@@ -214,6 +215,7 @@ tests:
       - protolude
       - servant
       - servant-client
+      - servant-client-core
       - servant-docs
       - servant-lucid
       - servant-server
@@ -294,6 +296,7 @@ executables:
             - optparse-applicative
             - protolude
             - servant-client
+            - servant-client-core
             - time
             - transformers
   mock-mellon-server:

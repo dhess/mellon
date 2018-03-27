@@ -1,6 +1,10 @@
 Changes:
 
-  - Bump hlint upper bound.
+  - Bump several package upper bounds.
+  
+  - Requires servant 0.13.
+  
+  - Drop support for Stackage LTS < 11.
 
 ## 0.8.0.6 (2018-02-04)
 

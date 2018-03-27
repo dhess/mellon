@@ -33,8 +33,8 @@ runApp =
      (port, sock) <- openTestSocket
      let settings = setPort port $ defaultSettings
      threadId <- forkIO $ runSettingsSocket settings sock (app cc)
-     manager <- newManager defaultManagerSettings
-     let clientEnv = ClientEnv manager $ BaseUrl Http "localhost" port ""
+     mgr <- newManager defaultManagerSettings
+     let clientEnv = mkClientEnv mgr $ BaseUrl Http "localhost" port ""
      return (threadId, clientEnv)
 
 killApp :: (ThreadId, ClientEnv) -> IO ()

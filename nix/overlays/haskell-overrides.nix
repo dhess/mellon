@@ -48,37 +48,16 @@ in
 
   # Currently, armv7l-linux on Nixpkgs must use ghc802.
 
-  haskellPackagesArmv7l =
-    withLocalMellon localMellonPaths (self.haskell.packages.ghc802.extend (self: super:
-      {
-      }
-    ));
+  haskellPackagesArmv7l = withLocalMellon localMellonPaths (self.haskell.packages.ghc802.extend (self: super:
+    with haskell.lib;
+    rec {
+      monad-logger = doJailbreak super.monad-logger;
+    }
+  ));
 
 
   ## Package sets equivalent to the latest(-ish) Stackage LTS sets.
   ## Only supported LTS versions are defined here.
 
-  lts10Packages =
-    withLocalMellon localMellonPaths (self.haskell.packages.stackage.lts-104.extend (self: super:
-      {
-        # Doesn't currently check on macOS.
-        foundation = dontCheck super.foundation;
-      }
-    ));
-
-  # Don't waste time Haddock-ing these.
-
-  lts9Packages =
-    noHaddocks (withLocalMellon localMellonPaths (self.haskell.packages.stackage.lts-921.extend (self: super:
-      {
-        protolude = self.callPackage ../pkgs/protolude-0.2.nix {};
-
-        # Doesn't currently check on macOS.
-        foundation = dontCheck super.foundation;
-
-        # Doesn't check.
-        zlib = dontCheck super.zlib;
-      }
-    )));
-
+  # Currently none, until nixpkgs-stackage catches up with LTS-11.
 }

@@ -66,8 +66,7 @@ help:
 	@echo "    mellon-gpio - build just mellon-gpio against nixpkgs using nix-build (quick)"
 	@echo "    mellon-web  - build just mellon-web against nixpkgs using nix-build (quick)"
 	@echo "    nixpkgs     - build mellon against nixpkgs using nix-build"
-	@echo "    lts-10      - build mellon against LTS 10 package set using nix-build"
-	@echo "    lts-9       - build mellon against LTS 9 package set using nix-build"
+	@echo "    ghc841      - build mellon with GHC 8.4.1 against nixpkgs using nix-build"
 	@echo "    release     - Run nix-build on all release.nix targets"
 	@echo "    next        - Run nix-build on all next.nix targets"
 	@echo
@@ -81,8 +80,6 @@ help:
 	@echo "given version of Stackage LTS as configured by the file stack-<target>.yaml."
 	@echo
 	@echo "    stack-lts    [build all supported LTS targets]"
-	@echo "    stack-lts-10"
-	@echo "    stack-lts-9"
 	@echo
 	@echo "General:"
 	@echo
@@ -116,7 +113,7 @@ clean:
 
 nix-stack = nix-shell -p stack-env zlib libiconv ncurses --run 'stack test --stack-yaml $(1)'
 
-stack-lts:      stack-lts-10
+stack-lts:      stack-lts-11
 
 stack-lts-%:    nix
 		$(call nix-stack, stack-lts-$*.yaml)

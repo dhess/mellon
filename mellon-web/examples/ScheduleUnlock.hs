@@ -31,8 +31,14 @@ import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Network.HTTP.Types (Status(..))
 import Options.Applicative
 import Servant.Client
-       (BaseUrl, ClientEnv(..), ServantError(..), parseBaseUrl,
-        runClientM)
+  ( BaseUrl
+  , ClientEnv
+  , ServantError(..)
+  , mkClientEnv
+  , parseBaseUrl
+  , runClientM
+  )
+import Servant.Client.Core (GenResponse(responseBody, responseStatusCode))
 import System.Exit (ExitCode(..), exitWith)
 
 data GlobalOptions =
@@ -103,7 +109,7 @@ run (GlobalOptions baseUrl (LocalTime (LocalTimeOptions localStart localEnd))) =
                      then Unlocked end
                      else Locked
       in do manager <- newManager tlsManagerSettings
-            let clientEnv = ClientEnv manager url
+            let clientEnv = mkClientEnv manager url
             runClientM (putState state) clientEnv >>= \case
                         Right status ->
                           do putStrLn $ ((show status) :: String)
@@ -112,16 +118,16 @@ run (GlobalOptions baseUrl (LocalTime (LocalTimeOptions localStart localEnd))) =
                           do putStrLn $ "Mellon service error: " ++ prettyServantError e
                              exitWith $ ExitFailure 1
     prettyServantError :: ServantError -> String
-    prettyServantError (FailureResponse _ status _ _) =
-      show (statusCode status) ++ " " ++ (toS $ statusMessage status)
-    prettyServantError (DecodeFailure _ _ _) =
+    prettyServantError (FailureResponse response) =
+      show (responseStatusCode response) ++ " " ++ (toS $ responseBody response)
+    prettyServantError (DecodeFailure _ _) =
       "decode failure"
     prettyServantError (UnsupportedContentType _ _) =
       "unsupported content type"
-    prettyServantError (InvalidContentTypeHeader _ _) =
+    prettyServantError (InvalidContentTypeHeader _) =
       "invalid content type header"
     prettyServantError (ConnectionError _) =
-      "connection refused"
+      "connection error"
 
 main :: IO ()
 main = execParser opts >>= run

@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 96539d448acd94b7ff79ed99f40b15a9a00b5fd9383d10ce2516b7fc910ad24c
+-- hash: d66a01e51a6f1d8b8e768fa08e229656df5243cb9f53b10428bc29afd7ab30da
 
 name:                   mellon-core
 version:                0.8.0.6
@@ -233,7 +233,7 @@ test-suite spec
   build-depends:
       async
     , base
-    , hspec >=2.2 && <2.5
+    , hspec >=2.2 && <2.6
     , mellon-core
     , mtl
     , protolude

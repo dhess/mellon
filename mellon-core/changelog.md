@@ -2,6 +2,8 @@ Changes:
 
   - Bump hlint upper bound.
 
+  - Drop support for Stackage LTS < 11.
+
 ## 0.8.0.6 (2018-02-04)
 
 Fixes:
