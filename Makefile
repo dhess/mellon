@@ -35,6 +35,9 @@ mellon-%:	nix
 nixpkgs:	nix
 		$(call nix-build-attr,nixpkgs)
 
+ghc841:		nix
+		$(call nix-build-attr,ghc841)
+
 lts-%:	nix
 	$(call nix-build-attr,lts-$*)
 
