@@ -9,7 +9,7 @@
 }:
 mkDerivation {
   pname = "mellon-web";
-  version = "0.8.0.6";
+  version = "0.8.0.7";
   src = ../../mellon-web;
   configureFlags = [
     "-fenable-timing-sensitive-tests" "-ftest-hlint"

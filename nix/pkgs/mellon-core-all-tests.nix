@@ -3,7 +3,7 @@
 }:
 mkDerivation {
   pname = "mellon-core";
-  version = "0.8.0.6";
+  version = "0.8.0.7";
   src = ../../mellon-core;
   configureFlags = [
     "-fenable-timing-sensitive-tests" "-ftest-hlint"
