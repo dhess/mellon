@@ -4,7 +4,7 @@ let
 
 in
 
-{ supportedSystems ? [ "x86_64-darwin" "x86_64-linux" "armv7l-linux" ]
+{ supportedSystems ? [ "x86_64-darwin" "x86_64-linux" ]
 , scrubJobs ? true
 , nixpkgsArgs ? {
     config = { allowUnfree = true; allowBroken = true; inHydra = true; };
@@ -27,13 +27,10 @@ let
       constituents = with jobs; [
         haskellPackages.mellon-core.x86_64-darwin
         haskellPackages.mellon-core.x86_64-linux
-        haskellPackagesArmv7l.mellon-core.armv7l-linux
         haskellPackages.mellon-gpio.x86_64-darwin
         haskellPackages.mellon-gpio.x86_64-linux
-        haskellPackagesArmv7l.mellon-gpio.armv7l-linux
         haskellPackages.mellon-web.x86_64-darwin
         haskellPackages.mellon-web.x86_64-linux
-        haskellPackagesArmv7l.mellon-web.armv7l-linux
       ];
     };
 
@@ -55,7 +52,6 @@ let
 
     haskellPackages = packagePlatforms pkgs.haskellPackages;
     haskellPackages841 = packagePlatforms pkgs.haskellPackages841;
-    haskellPackagesArmv7l = packagePlatforms pkgs.haskellPackagesArmv7l;
 
   }));
 
