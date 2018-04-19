@@ -86,8 +86,7 @@ let
     master = {};
     nixpkgs-unstable = mkChannelAlt "master" "nixpkgs-unstable" "master";
 
-    # Disabled for now, no GHC "next" builds in the pipeline.
-    #next-ghc = mkNext "master" "master";
+    next-ghc = mkNext "master" "master";
   });
 
   jobsetsAttrs = mainJobsets;

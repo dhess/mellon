@@ -23,4 +23,13 @@ in
 
   ## Testing with upcoming GHC releases.
 
+  ## GHC 8.4.2.
+
+  haskellPackages842 =
+    withLocalMellon localMellonPathsAllTests (self.haskell.packages.ghc842.extend (self: super:
+      with haskell.lib;
+      rec {
+      }
+    ));
+
 }

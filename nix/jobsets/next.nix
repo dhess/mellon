@@ -24,12 +24,28 @@ let
 
   jobs = {
 
-    # None for now.
+    ghc842 = pkgs.releaseTools.aggregate {
+      name = "ghc842";
+      meta.description = "mellon packages built against nixpkgs haskellPackages using GHC 8.4.2";
+      meta.maintainers = pkgs.lib.maintainers.dhess-qx;
+      constituents = with jobs; [
+        haskellPackages842.mellon-core.x86_64-darwin
+        haskellPackages842.mellon-core.x86_64-linux
+        haskellPackages842.mellon-gpio.x86_64-darwin
+        haskellPackages842.mellon-gpio.x86_64-linux
+        haskellPackages842.mellon-web.x86_64-darwin
+        haskellPackages842.mellon-web.x86_64-linux
+      ];
+    };
 
   } // (mapTestOn ({
+
+    haskellPackages842 = packagePlatforms pkgs.haskellPackages842;
 
   }));
 
 in
 {
+  inherit (jobs) ghc842;
 }
+// pkgs.lib.testing.enumerateConstituents jobs.ghc842
