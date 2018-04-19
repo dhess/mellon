@@ -70,6 +70,7 @@ help:
 	@echo "    mellon-web  - build just mellon-web against nixpkgs using nix-build (quick)"
 	@echo "    nixpkgs     - build mellon against nixpkgs using nix-build"
 	@echo "    ghc841      - build mellon with GHC 8.4.1 against nixpkgs using nix-build"
+	@echo "    lts-11      - build mellon against LTS 11 package set using nix-build"
 	@echo "    release     - Run nix-build on all release.nix targets"
 	@echo "    next        - Run nix-build on all next.nix targets"
 	@echo

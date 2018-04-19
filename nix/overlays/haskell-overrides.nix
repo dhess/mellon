@@ -18,6 +18,11 @@ let
     mellon-web = ../pkgs/mellon-web.nix;
   };
 
+  withLts11Extras = hp: (hp.extend (self: super: (
+    rec {
+    }
+  )));
+
 in
 {
 
@@ -49,5 +54,7 @@ in
   ## Package sets equivalent to the latest(-ish) Stackage LTS sets.
   ## Only supported LTS versions are defined here.
 
-  # Currently none, until nixpkgs-stackage catches up with LTS-11.
+  lts11Packages =
+    withLocalMellon localMellonPaths (withLts11Extras self.haskell.packages.stackage.lts-113);
+
 }
