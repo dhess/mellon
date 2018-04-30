@@ -46,7 +46,6 @@ in
         servant-server = doJailbreak super.servant-server;
         servant-swagger = super.callPackage ../pkgs/servant-swagger-ghc841.nix {};
         servant-swagger-ui = doJailbreak super.servant-swagger-ui;
-        swagger2 = super.callPackage ../pkgs/swagger2-2.2.1.nix {};
       }
     ));
 
