@@ -2,4 +2,4 @@ packages:
 - mellon-core/
 - mellon-web/
 - mellon-gpio/
-resolver: lts-11.3
+resolver: lts-11.6
