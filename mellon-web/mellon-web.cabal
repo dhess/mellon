@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 37fd9457219bddae1b0efb878b9f204202aaf16601dc4e139c38f8f16087cf2a
+-- hash: 25a21e089cd116c375a8870cc291743cbc8c9f61532e4f353efeeaca1518915c
 
 name:                   mellon-web
 version:                0.8.0.7
@@ -41,7 +41,7 @@ maintainer:             Drew Hess <dhess-src@quixoftic.com>
 copyright:              Copyright (c) 2018, Quixoftic, LLC
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.1
+tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3
 build-type:             Simple
 cabal-version:          >= 1.10
 

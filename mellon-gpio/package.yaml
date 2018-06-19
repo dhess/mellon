@@ -13,7 +13,7 @@ description: ! '@mellon-gpio@ provides a GPIO-driven @mellon-core@ @Device@.
 
   Currently, it provides support for Linux @sysfs@-based GPIO.'
 
-tested-with: GHC==8.0.2 GHC==8.2.2 GHC==8.4.1
+tested-with: GHC==8.0.2 GHC==8.2.2 GHC==8.4.3
 
 flags:
   test-hlint:

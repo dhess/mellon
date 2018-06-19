@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: d4acf53839c39f9a43381fac22e545c71ec65beaebbf795df02c4924bacc8d05
+-- hash: 5997c94f5ac3f3a6af9e95851814495ef85fbc5500dc0f89dcd9b8325569e3bb
 
 name:                   mellon-gpio
 version:                0.8.0.7
@@ -18,7 +18,7 @@ maintainer:             Drew Hess <dhess-src@quixoftic.com>
 copyright:              Copyright (c) 2018, Quixoftic, LLC
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.1
+tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3
 build-type:             Simple
 cabal-version:          >= 1.10
 

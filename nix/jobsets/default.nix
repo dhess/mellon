@@ -86,7 +86,9 @@ let
     master = {};
     nixpkgs-unstable = mkChannelAlt "master" "nixpkgs-unstable" "master";
 
-    next-ghc = mkNext "master" "master";
+    # None at the moment.
+
+    #next-ghc = mkNext "master" "master";
   });
 
   jobsetsAttrs = mainJobsets;

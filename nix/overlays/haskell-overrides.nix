@@ -35,16 +35,16 @@ in
     ));
 
 
-  ## GHC 8.4.1. Note that we use hlint tests here.
+  ## GHC 8.4.3. Note that we use hlint tests here.
 
-  haskellPackages841 =
-    withLocalMellon localMellonPathsAllTests (self.haskell.packages.ghc841.extend (self: super:
+  haskellPackages843 =
+    withLocalMellon localMellonPathsAllTests (self.haskell.packages.ghc843.extend (self: super:
       {
         http-media = doJailbreak super.http-media;
         servant = doJailbreak super.servant;
         servant-client = doJailbreak super.servant-client;
         servant-server = doJailbreak super.servant-server;
-        servant-swagger = super.callPackage ../pkgs/servant-swagger-ghc841.nix {};
+        servant-swagger = super.callPackage ../pkgs/servant-swagger-ghc843.nix {};
         servant-swagger-ui = doJailbreak super.servant-swagger-ui;
       }
     ));
