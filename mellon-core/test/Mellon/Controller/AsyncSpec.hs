@@ -7,7 +7,7 @@ module Mellon.Controller.AsyncSpec (spec) where
 
 import Protolude
 import Control.Concurrent (MVar, newMVar, modifyMVar, threadDelay)
-import Control.Concurrent.Async (race)
+import Control.Concurrent.Async (ExceptionInLinkedThread, race)
 import Control.Exception (Exception(..))
 import Control.Monad (void, when)
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -149,6 +149,9 @@ exceptionLockDevice l =
 isExceptionLockException :: ExceptionLockException -> Bool
 isExceptionLockException = const True
 
+isExceptionInLinkedThread :: ExceptionInLinkedThread -> Bool
+isExceptionInLinkedThread = const True
+
 asyncExceptionTest :: IO ()
 asyncExceptionTest =
   do el <- exceptionLock 3
@@ -156,7 +159,7 @@ asyncExceptionTest =
      now <- getCurrentTime
      let expire = timePlusN now 3
      void $ unlockController expire cc -- 2nd & 3rd lock op (unlock, timed lock)
-     (sleep 5) `shouldThrow` isExceptionLockException -- async exception
+     ((sleep 5) `shouldThrow` isExceptionLockException) `shouldThrow` isExceptionInLinkedThread-- async exception
      queryController cc `shouldReturn` StateUnlocked expire -- should have state prior to exception
 
 syncExceptionTest :: IO ()
@@ -209,8 +212,8 @@ spec = do
 #else
       pendingWith "disabled (enable with 'cabal configure -f enable-timing-sensitive-tests')"
 #endif
-    -- it "should recover from asynchronous exceptions" $ do
-    --   asyncExceptionTest
+    it "should recover from asynchronous exceptions" $ do
+      asyncExceptionTest
     it "should recover from synchronous exceptions" $ do
       syncExceptionTest
     it "should not wait forever if the unlock time is in the past" $ do
