@@ -209,8 +209,8 @@ spec = do
 #else
       pendingWith "disabled (enable with 'cabal configure -f enable-timing-sensitive-tests')"
 #endif
-    it "should recover from asynchronous exceptions" $ do
-      asyncExceptionTest
+    -- it "should recover from asynchronous exceptions" $ do
+    --   asyncExceptionTest
     it "should recover from synchronous exceptions" $ do
       syncExceptionTest
     it "should not wait forever if the unlock time is in the past" $ do

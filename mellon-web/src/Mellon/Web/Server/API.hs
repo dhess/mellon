@@ -153,7 +153,7 @@ instance ToJSON State where
 -- >>> eitherDecode $ "{\"state\":\"Locked\",\"until\":\"2015-10-06T00:00:00Z\"}" :: Either String State
 -- Left "Error in $: 'Locked' state takes no argument"
 -- >>> eitherDecode $ "{\"state\":\"Unlocked\",\"until\":\"2015\"}" :: Either String State
--- Left "Error in $.until: could not parse date: '-': not enough input"
+-- Left "Error in $.until: could not parse date: Failed reading: date must be of form [+,-]YYYY-MM-DD"
 -- >>> eitherDecode $ "{\"state\":\"Lokced\"}" :: Either String State -- note: typo
 -- Left "Error in $: Invalid 'state' value"
 instance FromJSON State where

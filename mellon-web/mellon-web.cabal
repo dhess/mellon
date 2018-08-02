@@ -1,8 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.27.0.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 25a21e089cd116c375a8870cc291743cbc8c9f61532e4f353efeeaca1518915c
+-- hash: 88a847c9ede66e6bc38921032b4e890693805ae12b029ea91433da651ea27e2a
 
 name:                   mellon-web
 version:                0.8.0.7
@@ -44,12 +44,10 @@ license-file:           LICENSE
 tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3
 build-type:             Simple
 cabal-version:          >= 1.10
-
 extra-source-files:
     changelog.md
     package.yaml
     README.md
-
 data-files:
     swagger.json
 
@@ -93,7 +91,7 @@ library
   default-extensions: NoImplicitPrelude
   other-extensions: DataKinds DeriveDataTypeable DeriveGeneric MultiParamTypeClasses OverloadedStrings OverloadedLists ScopedTypeVariables TypeOperators
   build-depends:
-      aeson >=0.11 && <1.3
+      aeson >=0.11 && <1.4
     , aeson-pretty ==0.8.*
     , base >=4.8 && <5
     , bytestring ==0.10.*
@@ -103,14 +101,14 @@ library
     , lucid ==2.9.*
     , mellon-core
     , protolude ==0.2.*
-    , servant ==0.13.*
-    , servant-client ==0.13.*
-    , servant-client-core ==0.13.*
+    , servant >=0.13 && <0.15
+    , servant-client >=0.13 && <0.15
+    , servant-client-core >=0.13 && <0.15
     , servant-docs >=0.10 && <0.12
     , servant-lucid >=0.7 && <0.9
-    , servant-server ==0.13.*
+    , servant-server >=0.13 && <0.15
     , servant-swagger ==1.1.*
-    , servant-swagger-ui ==0.2.*
+    , servant-swagger-ui >=0.2 && <0.4
     , swagger2 >=2.1 && <2.3
     , text ==1.2.*
     , time >=1.5 && <2
@@ -243,7 +241,7 @@ test-suite doctest
   else
     build-depends:
         base
-      , doctest >=0.11 && <0.16
+      , doctest >=0.11 && <0.17
       , protolude
   default-language: Haskell2010
 

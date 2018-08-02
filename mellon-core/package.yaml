@@ -257,7 +257,7 @@ library:
     - Safe
   dependencies:
     - base         >=4.8   && <5
-    - async        ==2.1.*
+    - async        >= 2.1  && < 2.3
     - mtl          ==2.2.*
     - protolude    ==0.2.*
     - time         >=1.5   && <2
@@ -296,7 +296,7 @@ tests:
           dependencies:
             - base
             - QuickCheck           >=2.8  && <2.12
-            - doctest              >=0.11 && <0.16
+            - doctest              >=0.11 && <0.17
             - protolude
             - quickcheck-instances ==0.3.*
   spec:

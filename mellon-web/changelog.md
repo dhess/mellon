@@ -1,3 +1,9 @@
+Changes:
+
+  - GHC 8.4.3 is now the default.
+  
+  - Stackage LTS 12 support.
+
 ## 0.8.0.7 (2018-04-03)
 
 Changes:
