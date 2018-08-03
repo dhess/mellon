@@ -46,6 +46,6 @@ in
   lts11Packages =
     withLocalMellon localMellonPaths (withLts11Extras self.haskell.packages.stackage.lts-1118);
   lts12Packages =
-    withLocalMellon localMellonPaths (withLts11Extras self.haskell.packages.stackage.lts-122);
+    withLocalMellon localMellonPaths (withLts12Extras self.haskell.packages.stackage.lts-122);
 
 }
