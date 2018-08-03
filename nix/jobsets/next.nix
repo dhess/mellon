@@ -24,28 +24,28 @@ let
 
   jobs = {
 
-    # ghc843 = pkgs.releaseTools.aggregate {
-    #   name = "ghc843";
-    #   meta.description = "mellon packages built against nixpkgs haskellPackages using GHC 8.4.3";
-    #   meta.maintainers = pkgs.lib.maintainers.dhess-qx;
-    #   constituents = with jobs; [
-    #     haskellPackages843.mellon-core.x86_64-darwin
-    #     haskellPackages843.mellon-core.x86_64-linux
-    #     haskellPackages843.mellon-gpio.x86_64-darwin
-    #     haskellPackages843.mellon-gpio.x86_64-linux
-    #     haskellPackages843.mellon-web.x86_64-darwin
-    #     haskellPackages843.mellon-web.x86_64-linux
-    #   ];
-    # };
+    ghc861 = pkgs.releaseTools.aggregate {
+      name = "ghc861";
+      meta.description = "mellon packages built against nixpkgs haskellPackages using GHC 8.4.3";
+      meta.maintainers = pkgs.lib.maintainers.dhess-qx;
+      constituents = with jobs; [
+        haskellPackages861.mellon-core.x86_64-darwin
+        haskellPackages861.mellon-core.x86_64-linux
+        haskellPackages861.mellon-gpio.x86_64-darwin
+        haskellPackages861.mellon-gpio.x86_64-linux
+        haskellPackages861.mellon-web.x86_64-darwin
+        haskellPackages861.mellon-web.x86_64-linux
+      ];
+    };
 
   } // (mapTestOn ({
 
-    #haskellPackages843 = packagePlatforms pkgs.haskellPackages843;
+    haskellPackages861 = packagePlatforms pkgs.haskellPackages861;
 
   }));
 
 in
 {
-  #inherit (jobs) ghc843;
+  inherit (jobs) ghc861;
 }
-#// pkgs.lib.testing.enumerateConstituents jobs.ghc843
+// pkgs.lib.testing.enumerateConstituents jobs.ghc861

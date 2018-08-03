@@ -85,10 +85,7 @@ let
   mainJobsets = with pkgs.lib; mapAttrs (name: settings: defaultSettings // settings) (rec {
     master = {};
     nixpkgs-unstable = mkChannelAlt "master" "nixpkgs-unstable" "master";
-
-    # None at the moment.
-
-    #next-ghc = mkNext "master" "master";
+    next-ghc = mkNext "master" "master";
   });
 
   jobsetsAttrs = mainJobsets;
