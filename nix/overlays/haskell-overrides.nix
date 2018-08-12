@@ -44,8 +44,8 @@ in
   ## Only supported LTS versions are defined here.
 
   lts11Packages =
-    withLocalMellon localMellonPaths (withLts11Extras self.haskell.packages.stackage.lts-1118);
+    withLocalMellon localMellonPaths (withLts11Extras self.haskell.packages.stackage.lts-1119);
   lts12Packages =
-    withLocalMellon localMellonPaths (withLts12Extras self.haskell.packages.stackage.lts-122);
+    withLocalMellon localMellonPaths (withLts12Extras self.haskell.packages.stackage.lts-124);
 
 }
