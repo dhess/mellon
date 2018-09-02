@@ -32,11 +32,7 @@ nix: 	mellon-core.cabal
 	cd ../nix/pkgs && cabal2nix ../../mellon-core > mellon-core.nix
 	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-core > mellon-core-all-tests.nix
 
-mellon-core.cabal: package.yaml
-	@echo "*** Running hpack for mellon-core"
-	hpack
-
 clean:
 	cabal clean
 
-.PHONY: clean nix mellon-core.cabal
+.PHONY: clean nix

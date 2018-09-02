@@ -1,5 +1,5 @@
 { mkDerivation, aeson, aeson-pretty, base, bytestring, doctest
-, exceptions, hlint, hpio, hspec, hspec-wai, http-client
+, exceptions, hlint, hpack, hpio, hspec, hspec-wai, http-client
 , http-client-tls, http-types, lens, lucid, mellon-core
 , mellon-gpio, mtl, network, optparse-applicative, protolude
 , QuickCheck, quickcheck-instances, servant, servant-client
@@ -24,6 +24,7 @@ mkDerivation {
     servant-swagger servant-swagger-ui swagger2 text time transformers
     wai warp
   ];
+  libraryToolDepends = [ hpack ];
   executableHaskellDepends = [
     base bytestring exceptions hpio http-client http-client-tls
     http-types mellon-core mellon-gpio mtl network optparse-applicative
@@ -37,6 +38,7 @@ mkDerivation {
     servant-swagger servant-swagger-ui swagger2 text time transformers
     wai wai-extra warp
   ];
+  preConfigure = "hpack";
   homepage = "https://github.com/quixoftic/mellon#readme";
   description = "A REST web service for Mellon controllers";
   license = stdenv.lib.licenses.bsd3;

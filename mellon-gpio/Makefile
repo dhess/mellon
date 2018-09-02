@@ -32,11 +32,7 @@ nix: 	mellon-gpio.cabal
 	cd ../nix/pkgs && cabal2nix ../../mellon-gpio > mellon-gpio.nix
 	cd ../nix/pkgs && cabal2nix --flag test-hlint ../../mellon-gpio > mellon-gpio-all-tests.nix
 
-mellon-gpio.cabal: package.yaml
-	@echo "*** Running hpack for mellon-gpio"
-	hpack
-
 clean:
 	cabal clean
 
-.PHONY: clean nix mellon-gpio.cabal
+.PHONY: clean nix

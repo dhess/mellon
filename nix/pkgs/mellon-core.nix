@@ -1,4 +1,4 @@
-{ mkDerivation, async, base, doctest, hspec, mtl, protolude
+{ mkDerivation, async, base, doctest, hpack, hspec, mtl, protolude
 , QuickCheck, quickcheck-instances, stdenv, time, transformers
 }:
 mkDerivation {
@@ -8,10 +8,12 @@ mkDerivation {
   libraryHaskellDepends = [
     async base mtl protolude time transformers
   ];
+  libraryToolDepends = [ hpack ];
   testHaskellDepends = [
     async base doctest hspec mtl protolude QuickCheck
     quickcheck-instances time transformers
   ];
+  preConfigure = "hpack";
   homepage = "https://github.com/quixoftic/mellon#readme";
   description = "Control physical access devices";
   license = stdenv.lib.licenses.bsd3;

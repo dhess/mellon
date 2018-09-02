@@ -32,11 +32,7 @@ nix: 	mellon-web.cabal
 	cd ../nix/pkgs && cabal2nix ../../mellon-web > mellon-web.nix
 	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-web > mellon-web-all-tests.nix
 
-mellon-web.cabal: package.yaml
-	@echo "*** Running hpack for mellon-web"
-	hpack
-
 clean:
 	cabal clean
 
-.PHONY: clean nix mellon-web.cabal
+.PHONY: clean nix
