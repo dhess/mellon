@@ -1,5 +1,8 @@
 Changes:
 
+  - The copyright for this project has been re-assigned to Drew Hess,
+    the original author.
+
   - GHC 8.4.3 is now the default.
   
   - Stackage LTS 12 support.

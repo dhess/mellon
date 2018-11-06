@@ -3,9 +3,9 @@ version:    0.8.0.7
 synopsis:   A REST web service for Mellon controllers
 category:   Web
 stability:  experimental
-author:     Drew Hess <dhess-src@quixoftic.com>
-maintainer: Drew Hess <dhess-src@quixoftic.com>
-copyright:  Copyright (c) 2018, Quixoftic, LLC
+author:     Drew Hess <src@drewhess.com>
+maintainer: Drew Hess <src@drewhess.com>
+copyright:  Copyright (c) 2018, Drew Hess
 license:    BSD3
 github:     quixoftic/mellon
 

@@ -1,9 +1,9 @@
 {-|
 Module      : Mellon.Controller
 Description : The default @mellon-core@ controller
-Copyright   : (c) 2018, Quixoftic, LLC
+Copyright   : (c) 2018, Drew Hess
 License     : BSD3
-Maintainer  : Drew Hess <dhess-src@quixoftic.com>
+Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental
 Portability : non-portable
 
