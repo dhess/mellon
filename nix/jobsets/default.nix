@@ -7,7 +7,7 @@
 
 let
 
-  mellonUri = "https://github.com/quixoftic/mellon.git";
+  mellonUri = "https://github.com/dhess/mellon.git";
 
   mkFetchGithub = value: {
     inherit value;

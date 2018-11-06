@@ -36,7 +36,7 @@ mkDerivation {
     wai wai-extra warp
   ];
   preConfigure = "hpack";
-  homepage = "https://github.com/quixoftic/mellon#readme";
+  homepage = "https://github.com/dhess/mellon#readme";
   description = "A REST web service for Mellon controllers";
   license = stdenv.lib.licenses.bsd3;
 }

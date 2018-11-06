@@ -18,7 +18,7 @@ mkDerivation {
     quickcheck-instances time transformers
   ];
   preConfigure = "hpack";
-  homepage = "https://github.com/quixoftic/mellon#readme";
+  homepage = "https://github.com/dhess/mellon#readme";
   description = "Control physical access devices";
   license = stdenv.lib.licenses.bsd3;
 }

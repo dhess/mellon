@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 88a847c9ede66e6bc38921032b4e890693805ae12b029ea91433da651ea27e2a
+-- hash: 6fb3c0ac7a7d536286ad1f3eb6cfd55a8fab2ec9558081c027704eb04bcb3a33
 
 name:                   mellon-web
 version:                0.8.0.7
@@ -34,8 +34,8 @@ description:            The @mellon-web@ package wraps a @mellon-core@ controlle
                         server such as Nginx.
 category:               Web
 stability:              experimental
-homepage:               https://github.com/quixoftic/mellon#readme
-bug-reports:            https://github.com/quixoftic/mellon/issues
+homepage:               https://github.com/dhess/mellon#readme
+bug-reports:            https://github.com/dhess/mellon/issues
 author:                 Drew Hess <src@drewhess.com>
 maintainer:             Drew Hess <src@drewhess.com>
 copyright:              Copyright (c) 2018, Drew Hess
@@ -53,7 +53,7 @@ data-files:
 
 source-repository head
   type: git
-  location: https://github.com/quixoftic/mellon
+  location: https://github.com/dhess/mellon
 
 flag client-unlock-example
   description: Build the unlock client example
