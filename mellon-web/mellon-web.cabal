@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6fb3c0ac7a7d536286ad1f3eb6cfd55a8fab2ec9558081c027704eb04bcb3a33
+-- hash: 76b0715ea535ab07e0eefb8ee5bff1cc17d6f959e8d524554512125bcaea2bb1
 
 name:                   mellon-web
 version:                0.8.0.7
@@ -41,7 +41,7 @@ maintainer:             Drew Hess <src@drewhess.com>
 copyright:              Copyright (c) 2018, Drew Hess
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3
+tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3
 build-type:             Simple
 cabal-version:          >= 1.10
 extra-source-files:
@@ -91,7 +91,7 @@ library
   default-extensions: NoImplicitPrelude
   other-extensions: DataKinds DeriveDataTypeable DeriveGeneric MultiParamTypeClasses OverloadedStrings OverloadedLists ScopedTypeVariables TypeOperators
   build-depends:
-      aeson >=0.11 && <1.4
+      aeson >=0.11 && <1.5
     , aeson-pretty ==0.8.*
     , base >=4.8 && <5
     , bytestring ==0.10.*
@@ -101,15 +101,15 @@ library
     , lucid ==2.9.*
     , mellon-core
     , protolude ==0.2.*
-    , servant >=0.13 && <0.15
-    , servant-client >=0.13 && <0.15
-    , servant-client-core >=0.13 && <0.15
+    , servant >=0.13 && <0.16
+    , servant-client >=0.13 && <0.16
+    , servant-client-core >=0.13 && <0.16
     , servant-docs >=0.10 && <0.12
     , servant-lucid >=0.7 && <0.9
-    , servant-server >=0.13 && <0.15
+    , servant-server >=0.13 && <0.16
     , servant-swagger ==1.1.*
     , servant-swagger-ui >=0.2 && <0.4
-    , swagger2 >=2.1 && <2.3
+    , swagger2 >=2.1 && <2.4
     , text ==1.2.*
     , time >=1.5 && <2
     , transformers >=0.4.2 && <0.6
@@ -274,12 +274,12 @@ test-suite spec
   other-extensions: CPP OverloadedStrings ScopedTypeVariables
   ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      QuickCheck >=2.8 && <2.12
+      QuickCheck >=2.8 && <2.13
     , aeson
     , aeson-pretty
     , base
     , bytestring
-    , hspec >=2.2 && <2.6
+    , hspec >=2.2 && <2.7
     , hspec-wai >=0.6.6 && <0.10
     , http-client
     , http-types
@@ -287,7 +287,7 @@ test-suite spec
     , lucid
     , mellon-core
     , mellon-web
-    , network ==2.6.*
+    , network >=2.6 && <2.9
     , protolude
     , quickcheck-instances ==0.3.*
     , servant

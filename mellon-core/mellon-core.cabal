@@ -2,7 +2,7 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b91cdf0b8ee707acc6e33e213e69264068c823222a40fb6de307b600340d0272
+-- hash: 649ced8bd4be819734316984ae7ae776a91b7cab926f724797948232cf358545
 
 name:                   mellon-core
 version:                0.8.0.7
@@ -120,7 +120,7 @@ maintainer:             Drew Hess <src@drewhess.com>
 copyright:              Copyright (c) 2018, Drew Hess
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3
+tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3
 build-type:             Simple
 cabal-version:          >= 1.10
 extra-source-files:
@@ -194,7 +194,7 @@ test-suite doctest
     buildable: False
   else
     build-depends:
-        QuickCheck >=2.8 && <2.12
+        QuickCheck >=2.8 && <2.13
       , base
       , doctest >=0.11 && <0.17
       , protolude
@@ -232,7 +232,7 @@ test-suite spec
   build-depends:
       async
     , base
-    , hspec >=2.2 && <2.6
+    , hspec >=2.2 && <2.7
     , mellon-core
     , mtl
     , protolude

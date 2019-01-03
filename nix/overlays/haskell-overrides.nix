@@ -18,34 +18,14 @@ let
     mellon-web = ../pkgs/mellon-web.nix;
   };
 
-  withLts11Extras = hp: (hp.extend (self: super: (
-    rec {
-    }
-  )));
-
-  withLts12Extras = hp: (hp.extend (self: super: (
-    rec {
-    }
-  )));
-
 in
 {
-
-  ## The default Nixpkgs package set. Note that we use hlint tests here.
-
   haskellPackages =
     withLocalMellon localMellonPathsAllTests (super.haskellPackages.extend (self: super:
       {
+        servant-docs = doJailbreak super.servant-docs;
+        insert-ordered-containers = doJailbreak super.insert-ordered-containers;
+        tdigest = doJailbreak super.tdigest;
       }
     ));
-
-
-  ## Package sets equivalent to the latest(-ish) Stackage LTS sets.
-  ## Only supported LTS versions are defined here.
-
-  lts11Packages =
-    withLocalMellon localMellonPaths (withLts11Extras self.haskell.packages.stackage.lts-1119);
-  lts12Packages =
-    withLocalMellon localMellonPaths (withLts12Extras self.haskell.packages.stackage.lts-124);
-
 }

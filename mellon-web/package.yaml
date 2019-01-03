@@ -53,7 +53,7 @@ description: ! 'The @mellon-web@ package wraps a @mellon-core@ controller in a R
 
   server such as Nginx.'
 
-tested-with: GHC==8.0.2 GHC==8.2.2 GHC==8.4.3
+tested-with: GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3
 
 flags:
   test-hlint:
@@ -122,7 +122,7 @@ library:
     - TypeOperators
   dependencies:
     - base                >=4.8    && <5
-    - aeson               >=0.11   && <1.4
+    - aeson               >=0.11   && <1.5
     - aeson-pretty        ==0.8.*
     - bytestring          ==0.10.*
     - http-client         >=0.4    && <0.6
@@ -131,15 +131,15 @@ library:
     - lucid               ==2.9.*
     - mellon-core
     - protolude           ==0.2.*
-    - servant             >=0.13   && <0.15
-    - servant-client      >=0.13   && <0.15
-    - servant-client-core >=0.13   && <0.15
+    - servant             >=0.13   && <0.16
+    - servant-client      >=0.13   && <0.16
+    - servant-client-core >=0.13   && <0.16
     - servant-docs        >=0.10   && <0.12
     - servant-lucid       >=0.7    && <0.9
-    - servant-server      >=0.13   && <0.15
+    - servant-server      >=0.13   && <0.16
     - servant-swagger     ==1.1.*
     - servant-swagger-ui  >=0.2    && <0.4
-    - swagger2            >=2.1    && <2.3
+    - swagger2            >=2.1    && <2.4
     - text                ==1.2.*
     - time                >=1.5    && <2
     - transformers        >=0.4.2  && <0.6
@@ -198,12 +198,12 @@ tests:
         cpp-options: -DENABLE_TIMING_SENSITIVE_TESTS
     dependencies:
       - base
-      - QuickCheck           >=2.8   && <2.12
+      - QuickCheck           >=2.8   && <2.13
       - quickcheck-instances ==0.3.*
       - aeson
       - aeson-pretty
       - bytestring
-      - hspec                >=2.2   && <2.6
+      - hspec                >=2.2   && <2.7
       - hspec-wai            >=0.6.6 && <0.10
       - http-client
       - http-types
@@ -211,7 +211,7 @@ tests:
       - lucid
       - mellon-core
       - mellon-web
-      - network              ==2.6.*
+      - network              >=2.6   && <2.9
       - protolude
       - servant
       - servant-client
