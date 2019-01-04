@@ -35,9 +35,6 @@ mellon-%:	nix
 nixpkgs:	nix
 		$(call nix-build-attr,nixpkgs)
 
-lts-%:	nix
-	$(call nix-build-attr,lts-$*)
-
 release:	nix
 		$(call nix-build)
 
@@ -66,8 +63,6 @@ help:
 	@echo "    mellon-gpio - build just mellon-gpio against nixpkgs using nix-build (quick)"
 	@echo "    mellon-web  - build just mellon-web against nixpkgs using nix-build (quick)"
 	@echo "    nixpkgs     - build mellon against nixpkgs using nix-build"
-	@echo "    lts-11      - build mellon against LTS 11 package set using nix-build"
-	@echo "    lts-12      - build mellon against LTS 12 package set using nix-build"
 	@echo "    release     - Run nix-build on all release.nix targets"
 	@echo "    next        - Run nix-build on all next.nix targets"
 	@echo
@@ -114,7 +109,7 @@ clean:
 
 nix-stack = nix-shell -p stack-env zlib libiconv ncurses --run 'stack test --stack-yaml $(1)'
 
-stack-lts:      stack-lts-12
+stack-lts:      stack-lts-13
 
 stack-lts-%:    nix
 		$(call nix-stack, stack-lts-$*.yaml)
