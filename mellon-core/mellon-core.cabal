@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 649ced8bd4be819734316984ae7ae776a91b7cab926f724797948232cf358545
+-- hash: 3a814039f183bb3cfa33c2a4f5e77ca976f5e8ba19511013005bcf257c51b29d
 
 name:                   mellon-core
 version:                0.8.0.7
@@ -122,12 +124,11 @@ license:                BSD3
 license-file:           LICENSE
 tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3
 build-type:             Simple
-cabal-version:          >= 1.10
 extra-source-files:
     .hlint.yaml
     changelog.md
-    package.yaml
     README.md
+    package.yaml
 
 source-repository head
   type: git

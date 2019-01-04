@@ -1,8 +1,10 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.1.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 76b0715ea535ab07e0eefb8ee5bff1cc17d6f959e8d524554512125bcaea2bb1
+-- hash: f6275046d3d79e17978c644a72ad38fec55623ac953ca41ff9b2c4e1c299a72b
 
 name:                   mellon-web
 version:                0.8.0.7
@@ -43,11 +45,10 @@ license:                BSD3
 license-file:           LICENSE
 tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3
 build-type:             Simple
-cabal-version:          >= 1.10
 extra-source-files:
     changelog.md
-    package.yaml
     README.md
+    package.yaml
 data-files:
     swagger.json
 
