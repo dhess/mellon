@@ -3,6 +3,7 @@ self: super:
 let
 
   inherit (self) lib;
+  inherit (self.haskell.lib) properExtend;
 
 
   ## Ignore local files that shouldn't contribute to the Nix hash.
@@ -27,7 +28,7 @@ let
 
   ## Haskell package combinators.
 
-  withLocalMellon = localMellonPaths: hp: (hp.extend (self: super: (
+  withLocalMellon = localMellonPaths: hp: (properExtend hp (self: super: (
     {
       mellon-core = myCleanPackage (super.callPackage localMellonPaths.mellon-core {});
       mellon-gpio = myCleanPackage (super.callPackage localMellonPaths.mellon-gpio {});

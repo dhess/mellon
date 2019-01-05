@@ -4,7 +4,7 @@ let
 
   inherit (self) haskell;
   inherit (self.lib) withLocalMellon;
-  inherit (haskell.lib) doJailbreak dontCheck noHaddocks;
+  inherit (haskell.lib) doJailbreak dontCheck noHaddocks properExtend;
 
   localMellonPathsAllTests = {
     mellon-core = ../pkgs/mellon-core-all-tests.nix;
@@ -21,7 +21,7 @@ let
 in
 {
   haskellPackages =
-    withLocalMellon localMellonPathsAllTests (super.haskellPackages.extend (self: super:
+    withLocalMellon localMellonPathsAllTests (properExtend super.haskellPackages (self: super:
       {
         servant-docs = doJailbreak super.servant-docs;
         insert-ordered-containers = doJailbreak super.insert-ordered-containers;
