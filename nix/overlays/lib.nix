@@ -28,11 +28,15 @@ let
 
   ## Haskell package combinators.
 
-  withLocalMellon = localMellonPaths: hp: (properExtend hp (self: super: (
+  withLocalMellon = hp: (properExtend hp (self: super: (
     {
-      mellon-core = myCleanPackage (super.callPackage localMellonPaths.mellon-core {});
-      mellon-gpio = myCleanPackage (super.callPackage localMellonPaths.mellon-gpio {});
-      mellon-web = myCleanPackage (super.callPackage localMellonPaths.mellon-web {});
+      mellon-core = myCleanPackage (super.callPackage ../pkgs/mellon-core.nix {});
+      mellon-gpio = myCleanPackage (super.callPackage ../pkgs/mellon-gpio.nix {});
+      mellon-web = myCleanPackage (super.callPackage ../pkgs/mellon-web.nix {});
+
+      mellon-core-all-tests = myCleanPackage (super.callPackage ../pkgs/mellon-core-all-tests.nix {});
+      mellon-gpio-all-tests = myCleanPackage (super.callPackage ../pkgs/mellon-gpio-all-tests.nix {});
+      mellon-web-all-tests = myCleanPackage (super.callPackage ../pkgs/mellon-web-all-tests.nix {});
     }
   )));
 

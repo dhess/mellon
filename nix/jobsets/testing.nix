@@ -27,7 +27,7 @@ let
 
 in
 {
-  mellon-core = jobs.haskellPackages.mellon-core.${builtins.currentSystem};
-  mellon-gpio = jobs.haskellPackages.mellon-gpio.${builtins.currentSystem};
-  mellon-web = jobs.haskellPackages.mellon-web.${builtins.currentSystem};
+  mellon-core = jobs.haskellPackages.mellon-core-all-tests.${builtins.currentSystem};
+  mellon-gpio = jobs.haskellPackages.mellon-gpio-all-tests.${builtins.currentSystem};
+  mellon-web = jobs.haskellPackages.mellon-web-all-tests.${builtins.currentSystem};
 }

@@ -24,15 +24,15 @@ let
       meta.description = "mellon packages built against nixpkgs haskellPackages";
       meta.maintainers = pkgs.lib.maintainers.dhess-qx;
       constituents = with jobs; [
-        haskellPackages.mellon-core.x86_64-darwin
-        haskellPackages.mellon-core.x86_64-linux
-        haskellPackages.mellon-core.aarch64-linux
-        haskellPackages.mellon-gpio.x86_64-darwin
-        haskellPackages.mellon-gpio.x86_64-linux
-        haskellPackages.mellon-gpio.aarch64-linux
-        haskellPackages.mellon-web.x86_64-darwin
-        haskellPackages.mellon-web.x86_64-linux
-        haskellPackages.mellon-web.aarch64-linux
+        haskellPackages.mellon-core-all-tests.x86_64-darwin
+        haskellPackages.mellon-core-all-tests.x86_64-linux
+        haskellPackages.mellon-core-all-tests.aarch64-linux
+        haskellPackages.mellon-gpio-all-tests.x86_64-darwin
+        haskellPackages.mellon-gpio-all-tests.x86_64-linux
+        haskellPackages.mellon-gpio-all-tests.aarch64-linux
+        haskellPackages.mellon-web-all-tests.x86_64-darwin
+        haskellPackages.mellon-web-all-tests.x86_64-linux
+        haskellPackages.mellon-web-all-tests.aarch64-linux
       ];
     };
   } // (mapTestOn ({
