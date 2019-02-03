@@ -22,7 +22,7 @@ let
     nixpkgs = pkgs.releaseTools.aggregate {
       name = "nixpkgs";
       meta.description = "mellon packages built against nixpkgs haskellPackages";
-      meta.maintainers = lib.maintainers.dhess-pers;
+      meta.maintainers = pkgs.lib.maintainers.dhess-pers;
       constituents = with jobs; [
         haskellPackages.mellon-core-all-tests.x86_64-darwin
         haskellPackages.mellon-core-all-tests.x86_64-linux
