@@ -18,21 +18,17 @@ with import (fixedNixPkgs + "/pkgs/top-level/release-lib.nix") {
 
 let
 
+  all = pkg: pkgs.lib.testing.enumerateSystems pkg supportedSystems;
+
   jobs = {
     nixpkgs = pkgs.releaseTools.aggregate {
       name = "nixpkgs";
       meta.description = "mellon packages built against nixpkgs haskellPackages";
       meta.maintainers = pkgs.lib.maintainers.dhess-pers;
       constituents = with jobs; [
-        haskellPackages.mellon-core-all-tests.x86_64-darwin
-        haskellPackages.mellon-core-all-tests.x86_64-linux
-        haskellPackages.mellon-core-all-tests.aarch64-linux
-        haskellPackages.mellon-gpio-all-tests.x86_64-darwin
-        haskellPackages.mellon-gpio-all-tests.x86_64-linux
-        haskellPackages.mellon-gpio-all-tests.aarch64-linux
-        haskellPackages.mellon-web-all-tests.x86_64-darwin
-        haskellPackages.mellon-web-all-tests.x86_64-linux
-        haskellPackages.mellon-web-all-tests.aarch64-linux
+        (all haskellPackages.mellon-core-all-tests)
+        (all haskellPackages.mellon-gpio-all-tests)
+        (all haskellPackages.mellon-web-all-tests)
       ];
     };
   } // (mapTestOn ({
@@ -42,4 +38,7 @@ let
 in
 {
   inherit (jobs) nixpkgs;
+  inherit (jobs.haskellPackages) mellon-core-all-tests;
+  inherit (jobs.haskellPackages) mellon-gpio-all-tests;
+  inherit (jobs.haskellPackages) mellon-web-all-tests;
 }
