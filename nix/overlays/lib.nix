@@ -43,12 +43,6 @@ let
 in
 {
   lib = (super.lib or {}) // {
-
     inherit withLocalMellon;
-
-    maintainers = super.lib.maintainers // {
-      dhess-qx = "Drew Hess <src@drewhess.com>";
-    };
-
   };
 }
