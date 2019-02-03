@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3f7e7a96488f9f26cd52a0d8de5f8a2054d31dc0928b3acdd7df35ed51687f6f
+-- hash: 098b08a5defe571a30ac877124cbbeeb42890bb75daa0d28672f7b27a5e94fc2
 
 name:                   mellon-gpio
 version:                0.8.0.7
@@ -17,7 +17,7 @@ homepage:               https://github.com/dhess/mellon#readme
 bug-reports:            https://github.com/dhess/mellon/issues
 author:                 Drew Hess <src@drewhess.com>
 maintainer:             Drew Hess <src@drewhess.com>
-copyright:              Copyright (c) 2018, Drew Hess
+copyright:              Copyright (c) 2019, Drew Hess
 license:                BSD3
 license-file:           LICENSE
 tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3

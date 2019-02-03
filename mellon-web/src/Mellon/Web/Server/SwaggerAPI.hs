@@ -1,7 +1,7 @@
 {-|
 Module      : Mellon.Web.Server.SwaggerAPI
 Description : A Swagger-enhanced REST web service for @mellon-core@ controllers
-Copyright   : (c) 2018, Drew Hess
+Copyright   : (c) 2019, Drew Hess
 License     : BSD3
 Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental

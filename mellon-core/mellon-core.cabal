@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3a814039f183bb3cfa33c2a4f5e77ca976f5e8ba19511013005bcf257c51b29d
+-- hash: 8ee64a6bf5047ba02e7c63e4ce467d27f7145e08af4f1c230b01b6571da943aa
 
 name:                   mellon-core
 version:                0.8.0.7
@@ -119,7 +119,7 @@ homepage:               https://github.com/dhess/mellon#readme
 bug-reports:            https://github.com/dhess/mellon/issues
 author:                 Drew Hess <src@drewhess.com>
 maintainer:             Drew Hess <src@drewhess.com>
-copyright:              Copyright (c) 2018, Drew Hess
+copyright:              Copyright (c) 2019, Drew Hess
 license:                BSD3
 license-file:           LICENSE
 tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3

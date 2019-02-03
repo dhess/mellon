@@ -1,5 +1,7 @@
 Changes:
 
+  - Update copyright year.
+
   - The copyright for this project has been re-assigned to Drew Hess,
     the original author.
 

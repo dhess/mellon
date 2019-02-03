@@ -1,7 +1,7 @@
 {-|
 Module      : Mellon.Device.GPIO
 Description : GPIO-driven @mellon-core@ devices
-Copyright   : (c) 2018, Drew Hess
+Copyright   : (c) 2019, Drew Hess
 License     : BSD3
 Maintainer  : Drew Hess <src@drewhess.com>
 Stability   : experimental
