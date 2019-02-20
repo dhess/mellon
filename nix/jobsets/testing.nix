@@ -1,9 +1,10 @@
-## This builds just mellon-* (plus hlint tests) for the current
-## system. It's useful for development and interactive testing.
+## This builds just mellon (in maintainer mode) for the current system.
+## It's useful for development and interactive testing.
 
 let
 
-  fixedNixPkgs = (import ../lib.nix).fetchNixPkgs;
+  fixedNixpkgs = (import ../lib).fixedNixpkgs;
+  localPkgs = (import ../..) {};
 
 in
 
@@ -11,11 +12,11 @@ in
 , scrubJobs ? true
 , nixpkgsArgs ? {
     config = { allowUnfree = true; allowBroken = true; inHydra = true; };
-    overlays = [ (import ../../.) ];
+    overlays = [ localPkgs.overlays.mellonMaintainer ];
   }
 }:
 
-with import (fixedNixPkgs + "/pkgs/top-level/release-lib.nix") {
+with import (fixedNixpkgs + "/pkgs/top-level/release-lib.nix") {
   inherit supportedSystems scrubJobs nixpkgsArgs;
 };
 
@@ -27,7 +28,7 @@ let
 
 in
 {
-  mellon-core = jobs.haskellPackages.mellon-core-all-tests.${builtins.currentSystem};
-  mellon-gpio = jobs.haskellPackages.mellon-gpio-all-tests.${builtins.currentSystem};
-  mellon-web = jobs.haskellPackages.mellon-web-all-tests.${builtins.currentSystem};
+  mellon-core = jobs.haskellPackages.mellon-core.${builtins.currentSystem};
+  mellon-gpio = jobs.haskellPackages.mellon-gpio.${builtins.currentSystem};
+  mellon-web = jobs.haskellPackages.mellon-web.${builtins.currentSystem};
 }

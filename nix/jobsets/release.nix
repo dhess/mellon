@@ -1,6 +1,13 @@
+## The full set of packages we build/test, both on Hydra and for more
+## extensive interactive development and testing. This file will
+## create Hydra-style jobs for mellon built against a fixed Nixpkgs
+## Haskell package set.
+
 let
 
-  fixedNixPkgs = (import ../lib.nix).fetchNixPkgs;
+  lib = import ../lib;
+  fixedNixpkgs = lib.fixedNixpkgs;
+  localPkgs = (import ../..) {};
 
 in
 
@@ -8,27 +15,27 @@ in
 , scrubJobs ? true
 , nixpkgsArgs ? {
     config = { allowUnfree = true; allowBroken = true; inHydra = true; };
-    overlays = [ (import ../../.) ];
+    overlays = [ localPkgs.overlays.mellonMaintainer ];
   }
 }:
 
-with import (fixedNixPkgs + "/pkgs/top-level/release-lib.nix") {
+with import (fixedNixpkgs + "/pkgs/top-level/release-lib.nix") {
   inherit supportedSystems scrubJobs nixpkgsArgs;
 };
 
 let
 
-  all = pkg: pkgs.lib.testing.enumerateSystems pkg supportedSystems;
+  all = pkg: lib.testing.enumerateSystems pkg supportedSystems;
 
   jobs = {
     nixpkgs = pkgs.releaseTools.aggregate {
       name = "nixpkgs";
-      meta.description = "mellon packages built against nixpkgs haskellPackages";
-      meta.maintainers = pkgs.lib.maintainers.dhess-pers;
+      meta.description = "mellon built against nixpkgs haskellPackages";
+      meta.maintainer = lib.maintainers.dhess-pers;
       constituents = with jobs; [
-        (all haskellPackages.mellon-core-all-tests)
-        (all haskellPackages.mellon-gpio-all-tests)
-        (all haskellPackages.mellon-web-all-tests)
+        (all haskellPackages.mellon-core)
+        (all haskellPackages.mellon-gpio)
+        (all haskellPackages.mellon-web)
       ];
     };
   } // (mapTestOn ({
@@ -38,7 +45,5 @@ let
 in
 {
   inherit (jobs) nixpkgs;
-  inherit (jobs.haskellPackages) mellon-core-all-tests;
-  inherit (jobs.haskellPackages) mellon-gpio-all-tests;
-  inherit (jobs.haskellPackages) mellon-web-all-tests;
+  inherit (jobs.haskellPackages) mellon-core mellon-gpio mellon-web;
 }

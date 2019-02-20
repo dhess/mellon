@@ -30,7 +30,7 @@ configure: nix mellon-core.cabal
 nix: 	mellon-core.cabal
 	@echo "*** Generating mellon-core Nix files"
 	cd ../nix/pkgs && cabal2nix ../../mellon-core > mellon-core.nix
-	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-core > mellon-core-all-tests.nix
+	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-core > mellon-core-maintainer.nix
 
 clean:
 	cabal clean

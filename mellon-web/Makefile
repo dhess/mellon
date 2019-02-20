@@ -30,7 +30,7 @@ configure: nix mellon-web.cabal
 nix: 	mellon-web.cabal
 	@echo "*** Generating mellon-web Nix files"
 	cd ../nix/pkgs && cabal2nix ../../mellon-web > mellon-web.nix
-	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-web > mellon-web-all-tests.nix
+	cd ../nix/pkgs && cabal2nix --flag test-hlint --flag enable-timing-sensitive-tests ../../mellon-web > mellon-web-maintainer.nix
 
 clean:
 	cabal clean

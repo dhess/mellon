@@ -16,7 +16,7 @@ SUBPROJECTS = mellon-core \
 	      mellon-gpio \
 	      mellon-web
 
-NIXPKGS := $(shell nix eval -f nix/fetch-nixpkgs.nix pkgs.path)
+NIXPKGS := $(shell nix eval -f nix/lib/fetch-nixpkgs.nix pkgs.path)
 
 nix-build-testing-attr = nix-build --no-out-link nix/jobsets/testing.nix -I nixpkgs=$(NIXPKGS) -A $(1)
 
@@ -37,10 +37,6 @@ nixpkgs:	nix
 
 release:	nix
 		$(call nix-build)
-
-# Note: does not depend on nixpkgs.
-next:	nix
-	nix-build --no-out-link nix/jobsets/next.nix
 
 test:	build
 	$(MAKE) -C mellon-web test
@@ -64,7 +60,6 @@ help:
 	@echo "    mellon-web  - build just mellon-web against nixpkgs using nix-build (quick)"
 	@echo "    nixpkgs     - build mellon against nixpkgs using nix-build"
 	@echo "    release     - Run nix-build on all release.nix targets"
-	@echo "    next        - Run nix-build on all next.nix targets"
 	@echo
 	@echo "    test        - configure and build the package, then run the tests (cabal)"
 	@echo "    build       - configure and build the package (cabal)"
