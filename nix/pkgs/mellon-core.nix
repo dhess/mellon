@@ -13,7 +13,7 @@ mkDerivation {
     async base doctest hspec mtl protolude QuickCheck
     quickcheck-instances time transformers
   ];
-  preConfigure = "hpack";
+  prePatch = "hpack";
   homepage = "https://github.com/dhess/mellon#readme";
   description = "Control physical access devices";
   license = stdenv.lib.licenses.bsd3;

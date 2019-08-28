@@ -17,3 +17,4 @@ result*
 .dir-locals.el
 .envrc
 .direnv/*
+*/.direnv/*

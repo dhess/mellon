@@ -59,6 +59,8 @@ import Data.Time (UTCTime)
 
 {- $setup
 
+>>> :set -XPackageImports
+>>> import "template-haskell" Language.Haskell.TH.Syntax
 >>> import Test.QuickCheck
 >>> import Test.QuickCheck.Instances
 

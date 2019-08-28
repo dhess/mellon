@@ -6,7 +6,7 @@ mkDerivation {
   src = ../../mellon-gpio;
   libraryHaskellDepends = [ base hpio mellon-core protolude ];
   libraryToolDepends = [ hpack ];
-  preConfigure = "hpack";
+  prePatch = "hpack";
   homepage = "https://github.com/dhess/mellon#readme";
   description = "GPIO support for mellon";
   license = stdenv.lib.licenses.bsd3;

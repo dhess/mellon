@@ -38,7 +38,7 @@ mkDerivation {
     servant-swagger servant-swagger-ui swagger2 text time transformers
     wai wai-extra warp
   ];
-  preConfigure = "hpack";
+  prePatch = "hpack";
   homepage = "https://github.com/dhess/mellon#readme";
   description = "A REST web service for Mellon controllers";
   license = stdenv.lib.licenses.bsd3;

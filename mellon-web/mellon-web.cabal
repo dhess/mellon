@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.1.
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 66477a54151b54753511eb4422ea079fa7f26386ff0e9cbc6e4433b8901dc828
+-- hash: 58ffcbe1d4f4cca6d646d0eb93a5292021269228ccfe5cf05e48b2109257c4b0
 
 name:                   mellon-web
 version:                0.8.0.7
@@ -43,7 +43,7 @@ maintainer:             Drew Hess <src@drewhess.com>
 copyright:              Copyright (c) 2019, Drew Hess
 license:                BSD3
 license-file:           LICENSE
-tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3
+tested-with:            GHC==8.0.2 GHC==8.2.2 GHC==8.4.3 GHC==8.6.3 GHC==8.6.4 GHC==8.6.5
 build-type:             Simple
 extra-source-files:
     changelog.md
@@ -96,21 +96,21 @@ library
     , aeson-pretty ==0.8.*
     , base >=4.8 && <5
     , bytestring ==0.10.*
-    , http-client >=0.4 && <0.6
+    , http-client >=0.4 && <0.7
     , http-types >=0.9 && <0.13
     , lens >=4 && <5
     , lucid ==2.9.*
     , mellon-core
     , protolude ==0.2.*
-    , servant >=0.13 && <0.16
-    , servant-client >=0.13 && <0.16
-    , servant-client-core >=0.13 && <0.16
+    , servant >=0.13 && <0.17
+    , servant-client >=0.13 && <0.17
+    , servant-client-core >=0.13 && <0.17
     , servant-docs >=0.10 && <0.12
-    , servant-lucid >=0.7 && <0.9
-    , servant-server >=0.13 && <0.16
+    , servant-lucid >=0.7 && <0.10
+    , servant-server >=0.13 && <0.17
     , servant-swagger ==1.1.*
     , servant-swagger-ui >=0.2 && <0.4
-    , swagger2 >=2.1 && <2.4
+    , swagger2 >=2.1 && <2.5
     , text ==1.2.*
     , time >=1.5 && <2
     , transformers >=0.4.2 && <0.6
@@ -262,7 +262,7 @@ test-suite hlint
   else
     build-depends:
         base
-      , hlint >=2.0 && <2.2
+      , hlint >=2.0 && <2.3
       , protolude
   default-language: Haskell2010
 
@@ -275,12 +275,12 @@ test-suite spec
   other-extensions: CPP OverloadedStrings ScopedTypeVariables
   ghc-options: -w -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      QuickCheck >=2.8 && <2.13
+      QuickCheck >=2.8 && <2.14
     , aeson
     , aeson-pretty
     , base
     , bytestring
-    , hspec >=2.2 && <2.7
+    , hspec >=2.2 && <2.8
     , hspec-wai >=0.6.6 && <0.10
     , http-client
     , http-types

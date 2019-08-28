@@ -184,10 +184,10 @@ instance ToSchema State where
     utcTimeSchema <- declareSchemaRef (Proxy :: Proxy UTCTime)
     let stateSchema =
           mempty & enum_ ?~ [Aeson.String lockedName, Aeson.String unlockedName]
-                 & type_ .~ SwaggerString
+                 & type_ ?~ SwaggerString
     return $
       NamedSchema (Just "State") $
-        mempty & type_ .~ SwaggerObject
+        mempty & type_ ?~ SwaggerObject
                & properties .~ [(stateName, Inline stateSchema), (untilName, utcTimeSchema)]
                & required .~ [stateName]
                & description ?~ "The controller state; a variant type."

@@ -28,17 +28,15 @@ import qualified Data.Time.LocalTime as Time
 import Mellon.Web.Client (State(..), putState)
 import Network.HTTP.Client (newManager)
 import Network.HTTP.Client.TLS (tlsManagerSettings)
-import Network.HTTP.Types (Status(..))
 import Options.Applicative
 import Servant.Client
   ( BaseUrl
-  , ClientEnv
-  , ServantError(..)
+  , ClientError(..)
   , mkClientEnv
   , parseBaseUrl
   , runClientM
   )
-import Servant.Client.Core (GenResponse(responseBody, responseStatusCode))
+import Servant.Client.Core (ResponseF(responseBody, responseStatusCode))
 import System.Exit (ExitCode(..), exitWith)
 
 data GlobalOptions =
@@ -117,8 +115,8 @@ run (GlobalOptions baseUrl (LocalTime (LocalTimeOptions localStart localEnd))) =
                         Left e ->
                           do putStrLn $ "Mellon service error: " ++ prettyServantError e
                              exitWith $ ExitFailure 1
-    prettyServantError :: ServantError -> String
-    prettyServantError (FailureResponse response) =
+    prettyServantError :: ClientError -> String
+    prettyServantError (FailureResponse _ response) =
       show (responseStatusCode response) ++ " " ++ (toS $ responseBody response)
     prettyServantError (DecodeFailure _ _) =
       "decode failure"
