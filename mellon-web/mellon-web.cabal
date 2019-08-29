@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 58ffcbe1d4f4cca6d646d0eb93a5292021269228ccfe5cf05e48b2109257c4b0
+-- hash: b9e0bbf4e9761227c48d7e319494bc04bd067ba213a94b4a74b7c30b8e03b416
 
 name:                   mellon-web
 version:                0.8.0.7
@@ -102,15 +102,15 @@ library
     , lucid ==2.9.*
     , mellon-core
     , protolude ==0.2.*
-    , servant >=0.13 && <0.17
-    , servant-client >=0.13 && <0.17
-    , servant-client-core >=0.13 && <0.17
+    , servant >=0.16 && <0.17
+    , servant-client >=0.16 && <0.17
+    , servant-client-core >=0.16 && <0.17
     , servant-docs >=0.10 && <0.12
-    , servant-lucid >=0.7 && <0.10
-    , servant-server >=0.13 && <0.17
+    , servant-lucid >=0.9 && <0.10
+    , servant-server >=0.16 && <0.17
     , servant-swagger ==1.1.*
     , servant-swagger-ui >=0.2 && <0.4
-    , swagger2 >=2.1 && <2.5
+    , swagger2 >=2.4 && <2.5
     , text ==1.2.*
     , time >=1.5 && <2
     , transformers >=0.4.2 && <0.6
